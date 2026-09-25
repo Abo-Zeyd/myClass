@@ -5,7 +5,26 @@ type Assignment = {
   submissionDate: string;
 };
 
-const assignments: Assignment[] = [];
+const assignments: Assignment[] = [
+  {
+    id: 1,
+    name: "حل تمارين الرياضيات، صفحة 12",
+    assignedDate: "22 سبتمبر 2026",
+    submissionDate: "27 سبتمبر 2026",
+  },
+  {
+    id: 2,
+    name: "قراءة النص والإجابة عن الأسئلة",
+    assignedDate: "23 سبتمبر 2026",
+    submissionDate: "28 سبتمبر 2026",
+  },
+  {
+    id: 3,
+    name: "كتابة فقرة قصيرة في اللغة العربية",
+    assignedDate: "24 سبتمبر 2026",
+    submissionDate: "29 سبتمبر 2026",
+  },
+];
 
 export default function Home() {
   return (
