@@ -1,0 +1,231 @@
+{
+  "lessons": [
+    {
+      "id": "arabic-01",
+      "title": "تقويم تشخيصي",
+      "items": [
+        {
+          "id": "arabic-01-reading",
+          "title": "القراءة والفهم",
+          "summary": "تساعد القراءة المتأنية على فهم النص واستخراج فكرته العامة وتفاصيله المهمة.",
+          "activities": [
+            "اقرأ نصاً قصيراً بصوت واضح، ثم اذكر فكرته العامة.",
+            "استخرج من النص كلمة تدل على المكان، واشرح معناها من السياق."
+          ],
+          "images": [
+            {
+              "src": "/myClass/images/lessons/reading.svg",
+              "alt": "كتاب مفتوح ونص للقراءة"
+            }
+          ],
+          "videos": [
+            {
+              "url": "https://youtu.be/CZbuZRd53tA?si=BWa4M0Bj3q8nOpFL",
+              "title": "فيديو القراءة والفهم"
+            }
+          ]
+        },
+        {
+          "id": "arabic-01-writing",
+          "title": "التعبير الكتابي",
+          "summary": "تتكون الفقرة من جمل مترابطة، وتبدأ بفكرة واضحة وتنتهي بعلامة ترقيم مناسبة.",
+          "activities": [
+            "اكتب ثلاث جمل تصف فيها كتابك المفضل.",
+            "راجع كتابتك وصحح الأخطاء الإملائية وعلامات الترقيم."
+          ],
+          "images": [
+            {
+              "src": "/myClass/images/lessons/writing.svg",
+              "alt": "دفتر وقلم للكتابة"
+            },
+            {
+              "src": "/myClass/images/lessons/writing.svg",
+              "alt": "دفتر وقلم للكتابة"
+            },
+            {
+              "src": "/myClass/images/lessons/writing.svg",
+              "alt": "دفتر وقلم للكتابة"
+            }
+          ],
+          "videos": [
+            {
+              "url": "https://youtu.be/CZbuZRd53tA?si=BWa4M0Bj3q8nOpFL",
+              "title": "فيديو التعبير الكتابي"
+            },
+            {
+              "url": "https://youtu.be/CZbuZRd53tA?si=BWa4M0Bj3q8nOpFL",
+              "title": "فيديو التعبير الكتابي"
+            },
+            {
+              "url": "https://youtu.be/CZbuZRd53tA?si=BWa4M0Bj3q8nOpFL",
+              "title": "فيديو التعبير الكتابي"
+            },
+            {
+              "url": "https://youtu.be/CZbuZRd53tA?si=BWa4M0Bj3q8nOpFL",
+              "title": "فيديو التعبير الكتابي"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arabic-02",
+      "title": "مع عصاي في المدرسة",
+      "items": [
+        {
+          "id": "item-5a3baa4c",
+          "title": "محتوى جديد",
+          "summary": "سيبسيبسبيسيبس",
+          "activities": [],
+          "images": [],
+          "videos": []
+        }
+      ]
+    },
+    {
+      "id": "arabic-03",
+      "title": "ماسح الزجاج",
+      "items": []
+    },
+    {
+      "id": "arabic-04",
+      "title": "جدّتي",
+      "items": []
+    },
+    {
+      "id": "arabic-05",
+      "title": "تاجماعث",
+      "items": []
+    },
+    {
+      "id": "arabic-06",
+      "title": "المعلم الجديد",
+      "items": []
+    },
+    {
+      "id": "arabic-07",
+      "title": "بين جارين",
+      "items": []
+    },
+    {
+      "id": "arabic-08",
+      "title": "(إدماج، تقويم، ومعالجة) للمقطع 1-2",
+      "items": []
+    },
+    {
+      "id": "arabic-09",
+      "title": "الحنين إلى الوطن",
+      "items": []
+    },
+    {
+      "id": "arabic-10",
+      "title": "الأمير عبد القادر",
+      "items": []
+    },
+    {
+      "id": "arabic-11",
+      "title": "الزائر العزيز",
+      "items": []
+    },
+    {
+      "id": "arabic-12",
+      "title": "التقويم البيداغوجي للفصل الأول",
+      "items": []
+    },
+    {
+      "id": "arabic-13",
+      "title": "رسالة الثعلب",
+      "items": []
+    },
+    {
+      "id": "arabic-14",
+      "title": "البيت البيئي",
+      "items": []
+    },
+    {
+      "id": "arabic-15",
+      "title": "طاقة لا تنفذ",
+      "items": []
+    },
+    {
+      "id": "arabic-16",
+      "title": "(إدماج، تقويم، ومعالجة) للمقطع 3-4",
+      "items": []
+    },
+    {
+      "id": "arabic-17",
+      "title": "قصة زيتونة",
+      "items": []
+    },
+    {
+      "id": "arabic-18",
+      "title": "مرض سامية",
+      "items": []
+    },
+    {
+      "id": "arabic-19",
+      "title": "لمن تهتف الحناجر",
+      "items": []
+    },
+    {
+      "id": "arabic-20",
+      "title": "أنامل من ذهب",
+      "items": []
+    },
+    {
+      "id": "arabic-21",
+      "title": "لباسنا الجميل",
+      "items": []
+    },
+    {
+      "id": "arabic-22",
+      "title": "القاص الطارقي",
+      "items": []
+    },
+    {
+      "id": "arabic-23",
+      "title": "التقويم البيداغوجي للفصل الثاني",
+      "items": []
+    },
+    {
+      "id": "arabic-24",
+      "title": "(إدماج، تقويم، ومعالجة) للمقطع 5-6",
+      "items": []
+    },
+    {
+      "id": "arabic-25",
+      "title": "مركبة الأعماق",
+      "items": []
+    },
+    {
+      "id": "arabic-26",
+      "title": "سالم والحاسوب",
+      "items": []
+    },
+    {
+      "id": "arabic-27",
+      "title": "جولة في بلادي",
+      "items": []
+    },
+    {
+      "id": "arabic-28",
+      "title": "حكايات في حقيبتي",
+      "items": []
+    },
+    {
+      "id": "arabic-29",
+      "title": "(إدماج، تقويم، ومعالجة) للمقطع 7-8",
+      "items": []
+    },
+    {
+      "id": "arabic-30",
+      "title": "التقويم الإشهادي",
+      "items": []
+    },
+    {
+      "id": "arabic-31",
+      "title": "التقويم البيداغوجي للفصل الأخير",
+      "items": []
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "assignments": [
+    {
+      "id": "homework-1",
+      "name": "حل تمارين الرياضيات، صفحة 12",
+      "assignedDate": "2026-09-22",
+      "submissionDate": "2026-09-27",
+      "link": "http://localhost:3000/myClass/lessons#arabic-arabic-01-arabic-01-reading-summary"
+    },
+    {
+      "id": "homework-2",
+      "name": "قراءة النص والإجابة عن الأسئلة",
+      "assignedDate": "2026-09-23",
+      "submissionDate": "2026-09-28",
+      "link": ""
+    }
+  ]
+}

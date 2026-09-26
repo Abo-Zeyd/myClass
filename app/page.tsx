@@ -1,30 +1,22 @@
+import { Hand } from "lucide-react";
+import assignmentsData from "../data/assignments.json";
+
 type Assignment = {
-  id: number;
+  id: string;
   name: string;
   assignedDate: string;
   submissionDate: string;
+  link?: string;
 };
 
-const assignments: Assignment[] = [
-  {
-    id: 1,
-    name: "حل تمارين الرياضيات، صفحة 12",
-    assignedDate: "22 سبتمبر 2026",
-    submissionDate: "27 سبتمبر 2026",
-  },
-  {
-    id: 2,
-    name: "قراءة النص والإجابة عن الأسئلة",
-    assignedDate: "23 سبتمبر 2026",
-    submissionDate: "28 سبتمبر 2026",
-  },
-  {
-    id: 3,
-    name: "كتابة فقرة قصيرة في اللغة العربية",
-    assignedDate: "24 سبتمبر 2026",
-    submissionDate: "29 سبتمبر 2026",
-  },
-];
+const assignments: Assignment[] = assignmentsData.assignments;
+
+function formatDate(date: string) {
+  const value = new Date(`${date}T00:00:00`);
+  return Number.isNaN(value.getTime())
+    ? date
+    : new Intl.DateTimeFormat("ar-DZ", { dateStyle: "long" }).format(value);
+}
 
 export default function Home() {
   return (
@@ -72,14 +64,28 @@ export default function Home() {
             <ul className="divide-y divide-border">
               {assignments.map((assignment) => (
                 <li key={assignment.id} className="grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_160px_160px] sm:items-center sm:gap-6">
-                  <p className="font-semibold text-foreground">{assignment.name}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="font-semibold text-foreground">{assignment.name}</p>
+                    {assignment.link && (
+                      <a
+                        href={assignment.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`فتح رابط الواجب: ${assignment.name}`}
+                        title="فتح الواجب"
+                        className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+                      >
+                        <Hand aria-hidden="true" size={19} />
+                      </a>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     <span className="mb-1 block text-xs font-medium sm:hidden">تاريخ التكليف</span>
-                    {assignment.assignedDate}
+                    {formatDate(assignment.assignedDate)}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     <span className="mb-1 block text-xs font-medium sm:hidden">تاريخ التقديم</span>
-                    {assignment.submissionDate}
+                    {formatDate(assignment.submissionDate)}
                   </p>
                 </li>
               ))}
