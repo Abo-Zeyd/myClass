@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Tajawal } from "next/font/google";
+import { Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 
-// استخدام خط تجوال المتميز للغة العربية
-const tajawal = Tajawal({
+// استخدام خط واضح ومناسب للنصوص العربية
+const notoSansArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500", "700"],
-  variable: "--font-tajawal",
+  variable: "--font-noto-sans-arabic",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className={`${tajawal.variable} h-full antialiased`}>
+    <html lang="ar" dir="rtl" className={`${notoSansArabic.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         {/* الشريط العلوي المشترك لجميع الصفحات */}
         <Navbar />

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Check, CircleAlert, Copy } from "lucide-react";
+import { Check, CircleAlert, Link2, Maximize2, Minimize2 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 
 type LessonImage = {
@@ -55,6 +56,25 @@ function getVideoDetails(videoUrl: string) {
       : { linkUrl: url.href };
   } catch {
     return null;
+  }
+}
+
+function getImageSource(imageUrl: string) {
+  try {
+    const url = new URL(imageUrl);
+    if (url.hostname !== "drive.google.com" && url.hostname !== "www.drive.google.com") {
+      return imageUrl;
+    }
+
+    const fileId =
+      url.pathname.match(/^\/file\/d\/([^/]+)/)?.[1] ??
+      url.searchParams.get("id");
+
+    return fileId
+      ? `https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}=w1600`
+      : imageUrl;
+  } catch {
+    return imageUrl;
   }
 }
 
@@ -187,21 +207,22 @@ export default function LessonItemCard({
                 }
                 title="نسخ رابط الخلاصة"
                 onClick={() => void copySectionLink(summaryAnchorId)}
-                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+                                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
               >
                 {copyStatus?.anchorId === summaryAnchorId
                   ? copyStatus.status === "copied"
                     ? <Check aria-hidden="true" size={18} />
                     : <CircleAlert aria-hidden="true" size={18} />
-                  : <Copy aria-hidden="true" size={18} />}
+                  : <Link2 aria-hidden="true" size={18} />}
               </button>
+
             </div>
             <div
               id={`${summaryAnchorId}-content`}
               hidden={isSummaryCollapsed}
               className="pt-2"
             >
-              <p className="whitespace-pre-line text-sm leading-7 text-muted-foreground">
+              <p className="whitespace-pre-line text-base font-medium leading-8 text-foreground">
                 {item.summary}
               </p>
             </div>
@@ -237,21 +258,22 @@ export default function LessonItemCard({
                 }
                 title="نسخ رابط الأنشطة"
                 onClick={() => void copySectionLink(activitiesAnchorId)}
-                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+                                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
               >
                 {copyStatus?.anchorId === activitiesAnchorId
                   ? copyStatus.status === "copied"
                     ? <Check aria-hidden="true" size={18} />
                     : <CircleAlert aria-hidden="true" size={18} />
-                  : <Copy aria-hidden="true" size={18} />}
+                  : <Link2 aria-hidden="true" size={18} />}
               </button>
+
             </div>
             <div
               id={`${activitiesAnchorId}-content`}
               hidden={areActivitiesCollapsed}
               className="pt-2"
             >
-              <ol className="list-inside list-decimal space-y-1 text-sm leading-7 text-muted-foreground">
+              <ol className="list-inside list-decimal space-y-2 text-base font-medium leading-8 text-foreground">
                 {item.activities.map((activity, index) => (
                   <li key={`${item.id}-activity-${index}`}>{activity}</li>
                 ))}
@@ -270,35 +292,52 @@ export default function LessonItemCard({
               className="lesson-media-strip flex snap-x gap-3 overflow-x-auto overscroll-x-contain pb-2"
             >
               {item.images.map((image, index) => {
-                const imageId = `${item.id}-image-${index}`;
+                const imageId = `${anchorBaseId}-image-${index}`;
                 const isFullscreen = fullscreenMediaId === imageId;
 
                 return (
                   <div
                     key={imageId}
+                    id={imageId}
                     data-media-id={imageId}
-                    className="lesson-image-card w-72 shrink-0 snap-start overflow-hidden rounded-md border border-border bg-background"
+                    className="lesson-image-card w-72 shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-background scroll-mt-24"
                   >
-                    <div className="relative flex h-48 items-center justify-center overflow-hidden">
+                    <div className="relative flex h-48 items-center justify-center overflow-hidden group">
                       <Image
-                        src={image.src}
+                        src={getImageSource(image.src)}
                         alt={image.alt || `صورة توضيحية لدرس ${lessonTitle}`}
                         width={960}
                         height={540}
                         className="h-full w-full object-contain"
                       />
-                      <button
-                        type="button"
-                        aria-label={isFullscreen ? "تصغير الصورة" : "عرض الصورة بملء الشاشة"}
-                        title={isFullscreen ? "تصغير الصورة" : "ملء الشاشة"}
-                        onClick={() => toggleFullscreen(imageId)}
-                        className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-md bg-surface/95 text-xl font-semibold text-foreground shadow-sm hover:bg-surface"
-                      >
-                        {isFullscreen ? "−" : "⛶"}
-                      </button>
+                      <div className="absolute right-2 top-2 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          aria-label={isFullscreen ? "تصغير الصورة" : "عرض الصورة بملء الشاشة"}
+                          title={isFullscreen ? "تصغير الصورة" : "ملء الشاشة"}
+                          onClick={() => toggleFullscreen(imageId)}
+                          className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
+                        >
+                          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="نسخ رابط الصورة"
+                          title="نسخ رابط الصورة"
+                          onClick={() => void copySectionLink(imageId)}
+                          className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
+                        >
+                          {copyStatus?.anchorId === imageId && copyStatus.status === "copied" ? (
+                            <Check size={18} />
+                          ) : (
+                            <Link2 size={18} />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
+
               })}
             </div>
           </section>
@@ -336,15 +375,16 @@ export default function LessonItemCard({
                           allowFullScreen
                           className="size-full"
                         />
-                        <button
+                                                <button
                           type="button"
                           aria-label={isFullscreen ? "تصغير الفيديو" : "عرض الفيديو بملء الشاشة"}
                           title={isFullscreen ? "تصغير الفيديو" : "ملء الشاشة"}
                           onClick={() => toggleFullscreen(videoId)}
-                          className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-md bg-surface/95 text-lg font-semibold text-foreground shadow-sm hover:bg-surface"
+                          className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
                         >
-                          {isFullscreen ? "−" : "⛶"}
+                          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
                         </button>
+
                       </div>
                     ) : (
                       <a

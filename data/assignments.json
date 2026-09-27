@@ -1,18 +1,20 @@
 {
   "assignments": [
     {
-      "id": "homework-1",
-      "name": "حل تمارين الرياضيات، صفحة 12",
-      "assignedDate": "2026-09-22",
-      "submissionDate": "2026-09-27",
-      "link": "http://localhost:3000/myClass/lessons#arabic-arabic-01-arabic-01-reading-summary"
+      "id": "homework-9fa533ba",
+      "name": "حفظ الأيات الباقية من سورة العلق",
+      "assignedDate": "2026-09-28",
+      "submissionDate": "2026-09-30",
+      "link": "https://abo-zeyd.github.io/myClass/lessons#islamic-education-surah-al-alaq-item-1d32e32b-image-1",
+      "completed": false
     },
     {
-      "id": "homework-2",
-      "name": "قراءة النص والإجابة عن الأسئلة",
-      "assignedDate": "2026-09-23",
+      "id": "homework-f884eb26",
+      "name": "حفظ الأت 8 الاولى من سورة العلق",
+      "assignedDate": "2026-09-27",
       "submissionDate": "2026-09-28",
-      "link": ""
+      "link": "https://abo-zeyd.github.io/myClass/lessons#islamic-education-surah-al-alaq-item-1d32e32b-image-0",
+      "completed": false
     }
   ]
 }

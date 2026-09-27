@@ -1,3 +1,35 @@
 {
-  "lessons": []
+  "lessons": [
+    { "id": "geography-01", "title": "تقويم تشخيصي", "items": [] },
+    { "id": "geography-02", "title": "شكل الأرض", "items": [] },
+    { "id": "geography-03", "title": "الخريطة", "items": [] },
+    { "id": "geography-04", "title": "توزيع الماءواليابسة", "items": [] },
+    { "id": "geography-05", "title": "موقع الجزائر في العالم", "items": [] },
+    { "id": "geography-06", "title": "موقع الجزائر في إفريقيا", "items": [] },
+    { "id": "geography-07", "title": "موقع الجزائر في المغرب العربي", "items": [] },
+    { "id": "geography-08", "title": "الانتماء المغاربي", "items": [] },
+    { "id": "geography-09", "title": "الانتماء الإفريقي", "items": [] },
+    { "id": "geography-10", "title": "الانتماء المتوسطي", "items": [] },
+    { "id": "geography-11", "title": "الانتماء العربي", "items": [] },
+    { "id": "geography-12", "title": "التقويم البيداغوجي للفصل الأول", "items": [] },
+    { "id": "geography-13", "title": "أدمج تعلماتي", "items": [] },
+    { "id": "geography-14", "title": "الموارد الطبيعية وتصنيفها", "items": [] },
+    { "id": "geography-15", "title": "الموارد الطبيعية غير المتجددة", "items": [] },
+    { "id": "geography-16", "title": "الموارد الطبيعية المتجددة", "items": [] },
+    { "id": "geography-17", "title": "الموارد المعدنية", "items": [] },
+    { "id": "geography-18", "title": "الموارد الطاقوية و الفلاحية", "items": [] },
+    { "id": "geography-19", "title": "العمل الانتاجي المادي", "items": [] },
+    { "id": "geography-20", "title": "العمل الانتاجي اللامادي", "items": [] },
+    { "id": "geography-21", "title": "أدمج تعلماتي", "items": [] },
+    { "id": "geography-22", "title": "المحميات الطبيعية(دوافع الإنشاء)", "items": [] },
+    { "id": "geography-23", "title": "التقويم البيداغوجي للفصل الثاني", "items": [] },
+    { "id": "geography-24", "title": "توزيع المحميات و أنواعها", "items": [] },
+    { "id": "geography-25", "title": "توزيع المحميات و أنواعها", "items": [] },
+    { "id": "geography-26", "title": "المساهمةفي حمايةالبيئة المحلية", "items": [] },
+    { "id": "geography-27", "title": "أنواع المخاطر الكبرى", "items": [] },
+    { "id": "geography-28", "title": "أنواع المخاطر الكبرى", "items": [] },
+    { "id": "geography-29", "title": "الإجراءات الوقائية", "items": [] },
+    { "id": "geography-30", "title": "أدمج تعلماتي", "items": [] },
+    { "id": "geography-31", "title": "التقويم البيداغوجي للفصل الأخير", "items": [] }
+  ]
 }

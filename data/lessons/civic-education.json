@@ -1,3 +1,35 @@
 {
-  "lessons": []
+  "lessons": [
+    { "id": "civic-education-01", "title": "تقويم تشخيصي", "items": [] },
+    { "id": "civic-education-02", "title": "تراثنا الوطني والمحلّي", "items": [] },
+    { "id": "civic-education-03", "title": "المعالم الأثرية في وطني", "items": [] },
+    { "id": "civic-education-04", "title": "من معالمنا الأثرية", "items": [] },
+    { "id": "civic-education-05", "title": "تراثنا المادي", "items": [] },
+    { "id": "civic-education-06", "title": "تراثنا اللامادي", "items": [] },
+    { "id": "civic-education-07", "title": "من تراثنا اللامادي(التويزة)", "items": [] },
+    { "id": "civic-education-08", "title": "المحميات الطبيعية في الجزائر", "items": [] },
+    { "id": "civic-education-09", "title": "أحافظ على التراث الوطني", "items": [] },
+    { "id": "civic-education-10", "title": "التراث الوطني ومنظمة اليونيسكو", "items": [] },
+    { "id": "civic-education-11", "title": "إنجاز بطاقة فنية لمعلم أثري", "items": [] },
+    { "id": "civic-education-12", "title": "التقويم البيداغوجي للفصل الأول", "items": [] },
+    { "id": "civic-education-13", "title": "أقوّم تعلماتي", "items": [] },
+    { "id": "civic-education-14", "title": "الحوار وأهميته", "items": [] },
+    { "id": "civic-education-15", "title": "آداب الحوار", "items": [] },
+    { "id": "civic-education-16", "title": "إدارة الحوار في القسم", "items": [] },
+    { "id": "civic-education-17", "title": "الحوار بدل العنف", "items": [] },
+    { "id": "civic-education-18", "title": "أساهم في حلّ خلافات", "items": [] },
+    { "id": "civic-education-19", "title": "التمييز العنصري", "items": [] },
+    { "id": "civic-education-20", "title": "أطالع وأستنتج", "items": [] },
+    { "id": "civic-education-21", "title": "أقوّم تعلماتي", "items": [] },
+    { "id": "civic-education-22", "title": "الابتدائية", "items": [] },
+    { "id": "civic-education-23", "title": "التقويم البيداغوجي للفصل الثاني", "items": [] },
+    { "id": "civic-education-24", "title": "المتوسطة", "items": [] },
+    { "id": "civic-education-25", "title": "الثانوية", "items": [] },
+    { "id": "civic-education-26", "title": "الملكية الخاصة", "items": [] },
+    { "id": "civic-education-27", "title": "الملكية العامة", "items": [] },
+    { "id": "civic-education-28", "title": "تنظيف المدرسة", "items": [] },
+    { "id": "civic-education-29", "title": "أمثّل و أعبّر", "items": [] },
+    { "id": "civic-education-30", "title": "أقوم تعلماتي", "items": [] },
+    { "id": "civic-education-31", "title": "التقويم البيداغوجي للفصل الأخير", "items": [] }
+  ]
 }

@@ -9,8 +9,10 @@ import islamicEducationLessons from "../../data/lessons/islamic-education.json";
 import mathematicsLessons from "../../data/lessons/mathematics.json";
 import memorizationLessons from "../../data/lessons/memorization.json";
 import scienceLessons from "../../data/lessons/science.json";
+import { ChevronDown, BookOpen, Layers, Info } from "lucide-react";
 import LessonItemCard, { type LessonItem } from "../components/LessonItemCard";
 import Sidebar, { subjects } from "../components/Sidebar";
+
 
 type Lesson = {
   id: string;
@@ -53,6 +55,7 @@ export default function LessonsPage() {
             const sectionIds = [
               item.summary ? `${anchorBaseId}-summary` : null,
               item.activities?.length ? `${anchorBaseId}-activities` : null,
+              ...(item.images ?? []).map((_, index) => `${anchorBaseId}-image-${index}`),
             ];
 
             if (!sectionIds.includes(anchorId)) continue;
@@ -68,8 +71,12 @@ export default function LessonsPage() {
     }
 
     openSectionFromHash();
+    const initialFrame = window.requestAnimationFrame(openSectionFromHash);
     window.addEventListener("hashchange", openSectionFromHash);
-    return () => window.removeEventListener("hashchange", openSectionFromHash);
+    return () => {
+      window.cancelAnimationFrame(initialFrame);
+      window.removeEventListener("hashchange", openSectionFromHash);
+    };
   }, []);
 
   useEffect(() => {
@@ -102,28 +109,51 @@ export default function LessonsPage() {
           onSelectSubject={selectSubject}
         />
 
-        <main className="min-h-112.5 w-full flex-1 rounded-xl border border-border bg-surface p-6 shadow-sm">
-          <h1 className="mb-5 text-xl font-bold text-foreground">
-            {selectedSubject ? `دروس ${selectedSubject.name}` : "الدروس"}
-          </h1>
+                <main className="min-h-[450px] w-full flex-1 rounded-2xl border border-border bg-surface p-8 shadow-md">
+          <header className="mb-8 border-b border-border pb-6">
+            <h1 className="text-2xl font-black text-foreground flex items-center gap-3">
+              {selectedSubject ? (
+                <>
+                  <span className="p-2 bg-primary/10 rounded-xl text-primary">
+                    <BookOpen size={24} />
+                  </span>
+                  دروس {selectedSubject.name}
+                </>
+              ) : (
+                <>
+                  <span className="p-2 bg-surface-muted rounded-xl text-muted-foreground">
+                    <Layers size={24} />
+                  </span>
+                  استكشاف الدروس
+                </>
+              )}
+            </h1>
+          </header>
 
           {!selectedSubject ? (
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              اختر مادة من القائمة لعرض دروسها.
-            </p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="size-20 rounded-full bg-surface-muted flex items-center justify-center mb-6">
+                <Info size={40} className="text-muted-foreground/30" />
+              </div>
+              <p className="text-lg font-bold text-muted-foreground max-w-xs mx-auto">
+                اختر مادة من القائمة الجانبية لعرض الدروس والملخصات المتاحة
+              </p>
+            </div>
           ) : lessons.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-              لا توجد دروس مضافة لهذه المادة حالياً.
-            </p>
+            <div className="rounded-2xl border-2 border-dashed border-border px-4 py-16 text-center">
+              <p className="text-lg font-bold text-muted-foreground">
+                لا توجد دروس مضافة لهذه المادة حالياً.
+              </p>
+            </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="space-y-4">
               {lessons.map((lesson) => {
                 const isExpanded = expandedLessonId === lesson.id;
                 const hasContent = lesson.items.length > 0;
                 const contentId = `${selectedSubject.id}-${lesson.id}-content`;
 
                 return (
-                  <section key={lesson.id} className="py-2 first:pt-0 last:pb-0">
+                  <section key={lesson.id} className="overflow-hidden rounded-xl border border-border bg-background transition-all hover:shadow-sm">
                     <h2>
                       <button
                         type="button"
@@ -134,17 +164,23 @@ export default function LessonsPage() {
                           setExpandedCardId(null);
                           setNavigationTargetId(null);
                         }}
-                        className="flex w-full items-center justify-between gap-4 rounded-lg px-3 py-4 text-right font-semibold text-foreground transition-colors hover:bg-surface-muted/50"
+                        className={`flex w-full items-center justify-between gap-4 px-5 py-4 text-right font-bold transition-colors ${
+                          isExpanded ? "bg-primary text-white" : "text-foreground hover:bg-surface-muted/50"
+                        }`}
                       >
-                        <span>{lesson.title}</span>
-                        <span
-                          aria-hidden="true"
-                          className="flex size-8 shrink-0 items-center justify-center rounded-md bg-surface-muted text-lg text-primary"
-                        >
-                          {isExpanded ? "−" : "+"}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className={isExpanded ? "text-white/80" : "text-primary/60"}>
+                            <BookOpen size={18} />
+                          </span>
+                          <span>{lesson.title}</span>
+                        </div>
+                        <ChevronDown 
+                          size={20} 
+                          className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : "opacity-50"}`} 
+                        />
                       </button>
                     </h2>
+
 
                     {isExpanded && (
                       <div

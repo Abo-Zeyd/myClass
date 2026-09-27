@@ -1,3 +1,35 @@
 {
-  "lessons": []
+  "lessons": [
+    { "id": "history-01", "title": "تقويم تشخيصي", "items": [] },
+    { "id": "history-02", "title": "التاريخ الميلادي", "items": [] },
+    { "id": "history-03", "title": "التاريخ الهجري", "items": [] },
+    { "id": "history-04", "title": "التاريخ الشخصي", "items": [] },
+    { "id": "history-05", "title": "التاريخ الاجتماعي", "items": [] },
+    { "id": "history-06", "title": "التاريخ الوطني", "items": [] },
+    { "id": "history-07", "title": "مرحلة التاريخ القديم", "items": [] },
+    { "id": "history-08", "title": "مرحلة التاريخ الوسيط", "items": [] },
+    { "id": "history-09", "title": "مرحلة التاريخ الحديث", "items": [] },
+    { "id": "history-10", "title": "مرحلة التاريخ المعاصر", "items": [] },
+    { "id": "history-11", "title": "أقوّم تعلماتي", "items": [] },
+    { "id": "history-12", "title": "التقويم البيداغوجي للفصل الأول", "items": [] },
+    { "id": "history-13", "title": "شبه الجزيرة العربية قبل ظهور الإسلام", "items": [] },
+    { "id": "history-14", "title": "التحولات الذي أحدثها الإسلام", "items": [] },
+    { "id": "history-15", "title": "قيام الدولة الإسلامية", "items": [] },
+    { "id": "history-16", "title": "الفتوحات الإسلامية في المشرق", "items": [] },
+    { "id": "history-17", "title": "الفتح الإسلامي و مراحله(شمال إفريقيا)", "items": [] },
+    { "id": "history-18", "title": "تأثيرات الفتح الإسلامي في بلاد المغرب", "items": [] },
+    { "id": "history-19", "title": "المسجد", "items": [] },
+    { "id": "history-20", "title": "المدينة", "items": [] },
+    { "id": "history-21", "title": "أقوّم تعلماتي", "items": [] },
+    { "id": "history-22", "title": "أوضاع الجزائر قبل العثمانيين", "items": [] },
+    { "id": "history-23", "title": "التقويم البيداغوجي للفصل الثاني", "items": [] },
+    { "id": "history-24", "title": "الأوضاع الداخلية", "items": [] },
+    { "id": "history-25", "title": "الأوضاع الخارجية", "items": [] },
+    { "id": "history-26", "title": "القوة البحريةالجزائرية", "items": [] },
+    { "id": "history-27", "title": "الوجود العثماني في الجزائر", "items": [] },
+    { "id": "history-28", "title": "علاقة الجزائر مع الدولة العثمانية ...", "items": [] },
+    { "id": "history-29", "title": "الأسطول البحري", "items": [] },
+    { "id": "history-30", "title": "رموز أخرى للسيادة", "items": [] },
+    { "id": "history-31", "title": "التقويم البيداغوجي للفصل الأخير", "items": [] }
+  ]
 }

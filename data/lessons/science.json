@@ -1,3 +1,35 @@
 {
-  "lessons": []
+  "lessons": [
+    { "id": "science-01", "title": "تقويم تشخيصي", "items": [] },
+    { "id": "science-02", "title": "مسلك الهواء", "items": [] },
+    { "id": "science-03", "title": "التنفس", "items": [] },
+    { "id": "science-04", "title": "القواعد الصحية للتنفس", "items": [] },
+    { "id": "science-05", "title": "الهضم", "items": [] },
+    { "id": "science-06", "title": "أهمية الهضم", "items": [] },
+    { "id": "science-07", "title": "قواعد الصحية الغذائية", "items": [] },
+    { "id": "science-08", "title": "دور الدم في الجسم", "items": [] },
+    { "id": "science-09", "title": "الإسعافات الأولية", "items": [] },
+    { "id": "science-10", "title": "مكونات البذرة", "items": [] },
+    { "id": "science-11", "title": "شروط الانتاش", "items": [] },
+    { "id": "science-12", "title": "التقويم البيداغوجي للفصل الأول", "items": [] },
+    { "id": "science-13", "title": "مظاهر الانتاش\nأدمج تعلماتي", "items": [] },
+    { "id": "science-14", "title": "ضرورة الأملاح المعدنية", "items": [] },
+    { "id": "science-15", "title": "أشكال الماء في الطبيعة", "items": [] },
+    { "id": "science-16", "title": "دورة الماء في الطبيعة", "items": [] },
+    { "id": "science-17", "title": "مبدأ الأواني المستطرقة", "items": [] },
+    { "id": "science-18", "title": "خزان الماء", "items": [] },
+    { "id": "science-19", "title": "الجهات الأربع", "items": [] },
+    { "id": "science-20", "title": "تعيين الشمال\nأدمج تعلماتي", "items": [] },
+    { "id": "science-21", "title": "الشاقول والأفق", "items": [] },
+    { "id": "science-22", "title": "حجم الماء", "items": [] },
+    { "id": "science-23", "title": "التقويم البيداغوجي للفصل الثاني", "items": [] },
+    { "id": "science-24", "title": "كتلة الماء", "items": [] },
+    { "id": "science-25", "title": "تبخر الماء", "items": [] },
+    { "id": "science-26", "title": "تكاثف بخار الماء", "items": [] },
+    { "id": "science-27", "title": "الهواء مادة مرنة", "items": [] },
+    { "id": "science-28", "title": "للهواء كتلة", "items": [] },
+    { "id": "science-29", "title": "المواد الناقلة والعازلة", "items": [] },
+    { "id": "science-30", "title": "أخطار الكهرباء", "items": [] },
+    { "id": "science-31", "title": "التقويم البيداغوجي للفصل الأخير", "items": [] }
+  ]
 }

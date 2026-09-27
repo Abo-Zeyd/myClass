@@ -1,3 +1,182 @@
 {
-  "lessons": []
+  "lessons": [
+    {
+      "id": "diagnostic-evaluation",
+      "title": "تقويم تشخيصي",
+      "items": []
+    },
+    {
+      "id": "surah-al-alaq",
+      "title": "سورة العلق",
+      "items": [
+        {
+          "id": "item-1d32e32b",
+          "title": "سورةالعلق",
+          "summary": "نُزُولُ القُرْآنِ: القُرْآنُ الكَرِيمُ كَلَامُ اللهِ تَعَالَى أَنْزَلَهُ عَلَى نَبِيِّنَا مُحَمَّدٍ ﷺ لِيُعَلِّمَنَا دِينَ الإِسْلَامِ. وَلَمَّا بَلَغَ عُمْرُهُ أَرْبَعِينَ (40) سَنَةً، وَكَانَ يَتَعَبَّدُ فِي غَارِ حِرَاءٍ، نَزَلَ عَلَيْهِ جِبْرِيلُ عَلَيْهِ السَّلَامُ بِالآيَاتِ الخَمْسِ الأُولَى مِنْ سُورَةِ العَلَقِ.\n الدَّعْوَةُ إِلَى التَّعَلُّمِ: أَمَرَنَا اللهُ تَعَالَى بِالقِرَاءَةِ وَتَعَلُّمِ الكِتَابَةِ؛ فَطَلَبُ العِلْمِ وَاجِبٌ وَسَبَبٌ لِدُخُولِ الجَنَّةِ.\n البَدْءُ بِاسْمِ اللهِ: أَبْدَأُ أَعْمَالِي دَائِمًا بِقَوْلِ: «بِسْمِ اللهِ» لِيُبَارِكَ اللهُ لِي فِيهَا.\n عَدَمُ الغُرُورِ: حَذَّرَنَا اللهُ مِنَ الطُّغْيَانِ وَالتَّكَبُّرِ بِالمَالِ أَوِ العِلْمِ، وَالتَّمَرُّدِ عَلَى أَوَامِرِهِ.\n الإِخْلَاصُ فِي العِبَادَةِ: السُّجُودُ وَالعِبَادَةُ لَا يَكُونَانِ إِلَّا لِلهِ تَعَالَى وَحْدَهُ.",
+          "activities": [],
+          "images": [
+            {
+              "src": "https://lh3.googleusercontent.com/d/1H1UUDZ8TMCPKjXFTlRjhMbmCiu63Tis7=w1600",
+              "alt": ""
+            },
+            {
+              "src": "https://drive.google.com/file/d/1XKpA4AMSMx-LyuSgUs68JVhgXMhy2Qk_/view?usp=drive_link",
+              "alt": ""
+            }
+          ],
+          "videos": [
+            {
+              "url": "https://www.youtube.com/watch?v=fH0j8GMhWSY",
+              "title": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seeking-knowledge",
+      "title": "طلب العلم",
+      "items": []
+    },
+    {
+      "id": "sincerity-ikhlas",
+      "title": "الإخلاص",
+      "items": []
+    },
+    {
+      "id": "faith-in-holy-books",
+      "title": "الإيمان بالكتب السماوية",
+      "items": []
+    },
+    {
+      "id": "zakat",
+      "title": "الزكاة",
+      "items": []
+    },
+    {
+      "id": "ihsan",
+      "title": "الإحسان",
+      "items": []
+    },
+    {
+      "id": "surah-at-tin",
+      "title": "سورة التين",
+      "items": []
+    },
+    {
+      "id": "kindness-to-neighbor",
+      "title": "الإحسان إلى الجار",
+      "items": []
+    },
+    {
+      "id": "qualities-of-servants-of-merciful",
+      "title": "صفات عباد الرحمن",
+      "items": []
+    },
+    {
+      "id": "prophet-daawa-to-tribe",
+      "title": "دعوة الرسول (ص) لقومه",
+      "items": []
+    },
+    {
+      "id": "term-1-evaluation",
+      "title": "التقويم البيداغوجي للفصل الأول",
+      "items": []
+    },
+    {
+      "id": "quraish-position-from-daawa",
+      "title": "موقف قريش من دعوة النبي ص",
+      "items": []
+    },
+    {
+      "id": "integrate-learning-term-1",
+      "title": "أدمج تعلماتي",
+      "items": []
+    },
+    {
+      "id": "surah-ash-sharh",
+      "title": "سورة الشرح",
+      "items": []
+    },
+    {
+      "id": "faith-in-messengers",
+      "title": "الإيمان بالرسل عليهم السلام",
+      "items": []
+    },
+    {
+      "id": "fasting",
+      "title": "الصيام",
+      "items": []
+    },
+    {
+      "id": "surah-ad-duha",
+      "title": "سورة الضحى",
+      "items": []
+    },
+    {
+      "id": "islam-of-abu-bakr",
+      "title": "إسلام أبي بكر الصديق",
+      "items": []
+    },
+    {
+      "id": "hilm-afw-tabassum",
+      "title": "الحلم والعفو والتبسم صدقة",
+      "items": []
+    },
+    {
+      "id": "integrate-learning-term-2",
+      "title": "أدمج تعلماتي",
+      "items": []
+    },
+    {
+      "id": "rejecting-violence",
+      "title": "نبذ العنف",
+      "items": []
+    },
+    {
+      "id": "term-2-evaluation",
+      "title": "التقويم البيداغوجي للفصل الثاني",
+      "items": []
+    },
+    {
+      "id": "islam-of-umar",
+      "title": "إسلام عمر بن الخطاب",
+      "items": []
+    },
+    {
+      "id": "surah-al-layl",
+      "title": "سورة الليل",
+      "items": []
+    },
+    {
+      "id": "prophet-yunus",
+      "title": "نبيّ الله يونس",
+      "items": []
+    },
+    {
+      "id": "avoiding-cheating",
+      "title": "تجنب الغش",
+      "items": []
+    },
+    {
+      "id": "surah-ash-shams",
+      "title": "سورة الشمس",
+      "items": []
+    },
+    {
+      "id": "good-companion",
+      "title": "مثل الجليس الصالح",
+      "items": []
+    },
+    {
+      "id": "prophet-salih",
+      "title": "نبي الله صالح",
+      "items": []
+    },
+    {
+      "id": "final-term-evaluation",
+      "title": "التقويم البيداغوجي للفصل الأخير",
+      "items": []
+    }
+  ]
 }
