@@ -17,7 +17,9 @@
 /.next/
 /.next-admin/
 /out/
-/app/admin/
+/data/*.sqlite-shm
+/data/*.sqlite-wal
+/data/*.sqlite-journal
 
 # production
 /build

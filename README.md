@@ -20,6 +20,17 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase Database
+
+The app reads and writes assignments and lessons in Supabase. To connect a project:
+
+1. Run `supabase/schema.sql` in the Supabase SQL Editor.
+2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` for local development and in the Vercel project's Environment Variables for deployment. Keep the service-role key private; never use a `NEXT_PUBLIC_` variable for it.
+3. Set `ADMIN_PASSWORD` (at least 12 characters) and `ADMIN_SESSION_SECRET` (at least 32 random characters) in the same environments. The password protects `/myClass/admin`; the session secret signs its HTTP-only login cookie.
+4. To copy the current `data/content.sqlite` contents, run `npm run migrate:supabase -- --confirm` only if they have not already been copied. This replaces the target assignments and lessons.
+
+The migration command reads `.env.local` automatically. Vercel deployments use the configured Supabase database as persistent storage.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

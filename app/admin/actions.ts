@@ -1,0 +1,185 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import {
+  clearAdminSession,
+  createAdminSession,
+  hasAdminAuthConfig,
+  isAdminAuthenticated,
+} from "../../lib/admin-auth";
+import { getAssignments, getLessons, replaceAssignments, replaceLessons } from "../../lib/content-db";
+
+type Assignment = {
+  id: string;
+  name: string;
+  assignedDate: string;
+  submissionDate: string;
+  link?: string;
+  completed: boolean;
+};
+
+type LessonItem = {
+  id: string;
+  title: string;
+  summary?: string;
+  activities: string[];
+  images: { src: string; alt: string }[];
+  videos: { url: string; title?: string }[];
+};
+
+type Lesson = {
+  id: string;
+  title: string;
+  items: LessonItem[];
+};
+
+async function assertAdmin() {
+  if (!(await isAdminAuthenticated())) {
+    throw new Error("انتهت جلسة الإدارة. سجّل الدخول مجدداً.");
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function requiredText(value: unknown, label: string, maxLength = 10000) {
+  if (typeof value !== "string" || value.length > maxLength) {
+    throw new Error(`تحقق من حقل ${label}.`);
+  }
+
+  return value.trim();
+}
+
+function isValidWebUrl(value: string, allowHttp = false) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || (allowHttp && url.protocol === "http:");
+  } catch {
+    return false;
+  }
+}
+
+function normalizeAssignments(value: unknown): Assignment[] {
+  if (!Array.isArray(value)) throw new Error("قائمة الواجبات غير صالحة.");
+
+  return value.map((entry) => {
+    if (!isRecord(entry)) throw new Error("بيانات أحد الواجبات غير صالحة.");
+
+    const id = requiredText(entry.id, "معرّف الواجب", 120);
+    const name = requiredText(entry.name, "اسم الواجب", 300);
+    const assignedDate = requiredText(entry.assignedDate, "تاريخ التكليف", 10);
+    const submissionDate = requiredText(entry.submissionDate, "تاريخ التقديم", 10);
+    const link = requiredText(entry.link ?? "", "الرابط", 2000);
+
+    if (!id || !name) throw new Error("يجب إدخال اسم لكل واجب.");
+    if (assignedDate && !/^\d{4}-\d{2}-\d{2}$/.test(assignedDate)) {
+      throw new Error("صيغة تاريخ التكليف غير صحيحة.");
+    }
+    if (submissionDate && !/^\d{4}-\d{2}-\d{2}$/.test(submissionDate)) {
+      throw new Error("صيغة تاريخ التقديم غير صحيحة.");
+    }
+    if (link && !isValidWebUrl(link, true)) {
+      throw new Error("رابط الواجب يجب أن يبدأ بـ http أو https.");
+    }
+
+    return { id, name, assignedDate, submissionDate, link, completed: entry.completed === true };
+  });
+}
+
+function normalizeLessons(value: unknown): Lesson[] {
+  if (!Array.isArray(value)) throw new Error("قائمة الدروس غير صالحة.");
+
+  return value.map((entry) => {
+    if (!isRecord(entry) || !Array.isArray(entry.items)) {
+      throw new Error("بيانات أحد الدروس غير صالحة.");
+    }
+
+    const id = requiredText(entry.id, "معرّف الدرس", 120);
+    const title = requiredText(entry.title, "عنوان الدرس", 300);
+    if (!id || !title) throw new Error("يجب إدخال عنوان لكل درس.");
+
+    const items = entry.items.map((item) => {
+      if (!isRecord(item)) throw new Error("بيانات محتوى الدرس غير صالحة.");
+
+      const itemId = requiredText(item.id, "معرّف المحتوى", 120);
+      const itemTitle = requiredText(item.title, "عنوان المحتوى", 300);
+      if (!itemId || !itemTitle) throw new Error("يجب إدخال عنوان لكل محتوى.");
+
+      const activitiesValue = item.activities ?? [];
+      const imagesValue = item.images ?? [];
+      const videosValue = item.videos ?? [];
+      if (!Array.isArray(activitiesValue) || !Array.isArray(imagesValue) || !Array.isArray(videosValue)) {
+        throw new Error("تحقق من الأنشطة والصور والفيديوهات.");
+      }
+
+      const activities = activitiesValue.map((activity) =>
+        requiredText(activity, "النشاط", 2000),
+      ).filter(Boolean);
+      const images = imagesValue.map((image) => {
+        if (!isRecord(image)) throw new Error("بيانات الصورة غير صالحة.");
+        const src = requiredText(image.src, "مسار الصورة", 2000);
+        const alt = requiredText(image.alt ?? "", "وصف الصورة", 500);
+        const isLocalPath = src.startsWith("/") && !src.startsWith("//") && !src.includes("..");
+        if (!isLocalPath && !isValidWebUrl(src)) {
+          throw new Error("الصورة يجب أن تكون مسارًا محليًا أو رابط https.");
+        }
+        return { src, alt };
+      });
+      const videos = videosValue.map((video) => {
+        if (!isRecord(video)) throw new Error("بيانات الفيديو غير صالحة.");
+        const url = requiredText(video.url, "رابط الفيديو", 2000);
+        const videoTitle = requiredText(video.title ?? "", "عنوان الفيديو", 300);
+        if (!isValidWebUrl(url)) throw new Error("رابط الفيديو يجب أن يبدأ بـ https.");
+        return { url, title: videoTitle };
+      });
+
+      return {
+        id: itemId,
+        title: itemTitle,
+        summary: requiredText(item.summary ?? "", "الخلاصة", 10000),
+        activities,
+        images,
+        videos,
+      };
+    });
+
+    return { id, title, items };
+  });
+}
+
+export async function login(formData: FormData) {
+  if (!hasAdminAuthConfig()) redirect("/admin?error=setup");
+  if (!(await createAdminSession(formData.get("password")))) redirect("/admin?error=invalid");
+  redirect("/admin");
+}
+
+export async function logout() {
+  await clearAdminSession();
+  redirect("/admin");
+}
+
+export async function loadAssignments() {
+  await assertAdmin();
+  return await getAssignments();
+}
+
+export async function saveAssignments(value: unknown) {
+  await assertAdmin();
+  const assignments = normalizeAssignments(value);
+  await replaceAssignments(assignments);
+  revalidatePath("/");
+}
+
+export async function loadLessons(subjectId: string) {
+  await assertAdmin();
+  return await getLessons(subjectId);
+}
+
+export async function saveLessons(subjectId: string, value: unknown) {
+  await assertAdmin();
+  const lessons = normalizeLessons(value);
+  await replaceLessons(subjectId, lessons);
+  revalidatePath("/lessons");
+}

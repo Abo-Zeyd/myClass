@@ -1,7 +1,6 @@
 import { ClipboardList, Calendar, ExternalLink, ArrowRightCircle, Sparkles } from "lucide-react";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { getAssignmentStatus } from "./assignment-status";
+import { getAssignments } from "../lib/content-db";
 
 type Assignment = {
   id: string;
@@ -19,9 +18,10 @@ function formatDate(date: string) {
     : new Intl.DateTimeFormat("ar-DZ", { dateStyle: "long" }).format(value);
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-  const assignmentsFile = await readFile(join(process.cwd(), "data", "assignments.json"), "utf8");
-  const assignments: Assignment[] = (JSON.parse(assignmentsFile) as { assignments: Assignment[] }).assignments;
+  const assignments: Assignment[] = await getAssignments();
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans" dir="rtl">
