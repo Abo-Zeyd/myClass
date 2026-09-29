@@ -18,10 +18,16 @@ function formatDate(date: string) {
     : new Intl.DateTimeFormat("ar-DZ", { dateStyle: "long" }).format(value);
 }
 
+function getCurrentTime() {
+  return Date.now();
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const assignments: Assignment[] = await getAssignments();
+  const today = new Date(getCurrentTime()).toISOString().slice(0, 10);
+  const todayAt = Date.parse(`${today}T00:00:00Z`);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans" dir="rtl">
@@ -83,6 +89,9 @@ export default async function Home() {
             <ul className="divide-y divide-border/60">
               {assignments.map((assignment) => {
                 const status = getAssignmentStatus(assignment.completed === true, assignment.submissionDate);
+                const assignedAt = Date.parse(`${assignment.assignedDate}T00:00:00Z`);
+                const assignmentAge = todayAt - assignedAt;
+                const isNewAssignment = assignmentAge >= 0 && assignmentAge <= 24 * 60 * 60 * 1000;
 
                 return (
                 <li key={assignment.id} className="grid grid-cols-1 gap-4 px-6 py-5 transition-colors hover:bg-surface-muted/5 sm:grid-cols-[minmax(0,1fr)_180px_180px] sm:items-center sm:gap-6">
@@ -92,6 +101,11 @@ export default async function Home() {
                       {status === "completed" ? "منتهي" : status === "overdue" ? "لم يتم - متأخر" : "مطلوب"}
                     </span>
                     <p className="min-w-0 flex-1 font-bold text-foreground text-lg leading-tight">{assignment.name}</p>
+                    {isNewAssignment && (
+                      <span className="new-assignment-badge shrink-0 rounded-full border border-primary/20 px-2.5 py-1 text-xs font-bold text-foreground shadow-sm shadow-secondary/30">
+                        جديد
+                      </span>
+                    )}
                     {assignment.link && (
                       <a
                         href={assignment.link}

@@ -34,6 +34,17 @@ body {
   line-height: 1.6;
 }
 
+.new-assignment-badge {
+  background-color: #f9c74f;
+  animation: new-assignment-color 4s ease-in-out infinite alternate;
+}
+
+@keyframes new-assignment-color {
+  to {
+    background-color: #f4a261;
+  }
+}
+
 .admin-dashboard {
   font-family: var(--font-noto-sans-arabic), sans-serif;
 }
