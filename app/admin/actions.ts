@@ -26,6 +26,7 @@ type LessonItem = {
   activities: string[];
   images: { src: string; alt: string }[];
   videos: { url: string; title?: string }[];
+  pdfs: { url: string; title?: string }[];
 };
 
 type Lesson = {
@@ -110,7 +111,8 @@ function normalizeLessons(value: unknown): Lesson[] {
       const activitiesValue = item.activities ?? [];
       const imagesValue = item.images ?? [];
       const videosValue = item.videos ?? [];
-      if (!Array.isArray(activitiesValue) || !Array.isArray(imagesValue) || !Array.isArray(videosValue)) {
+      const pdfsValue = item.pdfs ?? [];
+      if (!Array.isArray(activitiesValue) || !Array.isArray(imagesValue) || !Array.isArray(videosValue) || !Array.isArray(pdfsValue)) {
         throw new Error("تحقق من الأنشطة والصور والفيديوهات.");
       }
 
@@ -134,6 +136,14 @@ function normalizeLessons(value: unknown): Lesson[] {
         if (!isValidWebUrl(url)) throw new Error("رابط الفيديو يجب أن يبدأ بـ https.");
         return { url, title: videoTitle };
       });
+      const pdfs = pdfsValue.flatMap((pdf) => {
+        if (!isRecord(pdf)) throw new Error("بيانات ملف PDF غير صالحة.");
+        const url = requiredText(pdf.url, "رابط PDF", 2000);
+        if (!url) return [];
+        const pdfTitle = requiredText(pdf.title ?? "", "عنوان PDF", 300);
+        if (!isValidWebUrl(url)) throw new Error("رابط PDF يجب أن يبدأ بـ https.");
+        return [{ url, title: pdfTitle }];
+      });
 
       return {
         id: itemId,
@@ -142,6 +152,7 @@ function normalizeLessons(value: unknown): Lesson[] {
         activities,
         images,
         videos,
+        pdfs,
       };
     });
 

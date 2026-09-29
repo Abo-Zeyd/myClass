@@ -65,6 +65,17 @@ create table if not exists public.lesson_videos (
     references public.lesson_items (subject_id, lesson_id, id) on delete cascade
 );
 
+create table if not exists public.lesson_pdfs (
+  subject_id text not null,
+  lesson_id text not null,
+  item_id text not null,
+  position integer not null,
+  url text not null,
+  title text not null default '',
+  foreign key (subject_id, lesson_id, item_id)
+    references public.lesson_items (subject_id, lesson_id, id) on delete cascade
+);
+
 alter table public.metadata enable row level security;
 alter table public.assignments enable row level security;
 alter table public.lessons enable row level security;
@@ -72,13 +83,14 @@ alter table public.lesson_items enable row level security;
 alter table public.lesson_activities enable row level security;
 alter table public.lesson_images enable row level security;
 alter table public.lesson_videos enable row level security;
+alter table public.lesson_pdfs enable row level security;
 
 revoke all on table public.metadata, public.assignments, public.lessons,
   public.lesson_items, public.lesson_activities, public.lesson_images,
-  public.lesson_videos from anon, authenticated;
+  public.lesson_videos, public.lesson_pdfs from anon, authenticated;
 grant all on table public.metadata, public.assignments, public.lessons,
   public.lesson_items, public.lesson_activities, public.lesson_images,
-  public.lesson_videos to service_role;
+  public.lesson_videos, public.lesson_pdfs to service_role;
 
 create or replace function public.replace_assignments(p_assignments jsonb)
 returns void
@@ -118,6 +130,7 @@ begin
   delete from public.lesson_activities where subject_id = p_subject_id;
   delete from public.lesson_images where subject_id = p_subject_id;
   delete from public.lesson_videos where subject_id = p_subject_id;
+  delete from public.lesson_pdfs where subject_id = p_subject_id;
   delete from public.lesson_items where subject_id = p_subject_id;
   delete from public.lessons where subject_id = p_subject_id;
 
@@ -165,6 +178,12 @@ begin
       select p_subject_id, lesson_row.entry->>'id', item_row.entry->>'id',
         (payload.ordinality - 1)::integer, payload.entry->>'url', coalesce(payload.entry->>'title', '')
       from jsonb_array_elements(coalesce(item_row.entry->'videos', '[]'::jsonb))
+        with ordinality as payload(entry, ordinality);
+
+      insert into public.lesson_pdfs (subject_id, lesson_id, item_id, position, url, title)
+      select p_subject_id, lesson_row.entry->>'id', item_row.entry->>'id',
+        (payload.ordinality - 1)::integer, payload.entry->>'url', coalesce(payload.entry->>'title', '')
+      from jsonb_array_elements(coalesce(item_row.entry->'pdfs', '[]'::jsonb))
         with ordinality as payload(entry, ordinality);
     end loop;
   end loop;

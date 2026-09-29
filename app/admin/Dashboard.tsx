@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   ClipboardList,
+  FileText,
   ImagePlus,
   LogOut,
   Plus,
@@ -32,6 +33,7 @@ type LessonItem = {
   activities: string[];
   images: { src: string; alt: string }[];
   videos: { url: string; title?: string }[];
+  pdfs: { url: string; title?: string }[];
 };
 
 type Lesson = {
@@ -190,6 +192,7 @@ export default function Dashboard() {
       activities: [],
       images: [],
       videos: [],
+      pdfs: [],
     };
     setLessons((current) => current.map((lesson) =>
       lesson.id === selectedLessonId ? { ...lesson, items: [...lesson.items, item] } : lesson,
@@ -517,6 +520,32 @@ export default function Dashboard() {
                                             <input className={inputClassName} value={video.title ?? ""} onChange={(event) => updateSelectedItem((current) => ({ ...current, videos: current.videos.map((entry, currentIndex) => currentIndex === index ? { ...entry, title: event.target.value } : entry) }))} />
                                           </label>
                                           <button type="button" aria-label="حذف الفيديو" title="حذف الفيديو" onClick={() => updateSelectedItem((current) => ({ ...current, videos: current.videos.filter((_, currentIndex) => currentIndex !== index) }))} className={dangerButton}>
+                                            <Trash2 size={18} aria-hidden="true" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </section>
+
+                                  <section className="space-y-3 rounded-md border border-border bg-surface p-4 sm:p-5">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <h3 className="inline-flex items-center gap-2 text-lg font-semibold"><FileText size={19} aria-hidden="true" /> ملفات PDF</h3>
+                                      <button type="button" aria-label="إضافة ملف PDF" title="إضافة ملف PDF" onClick={() => updateSelectedItem((current) => ({ ...current, pdfs: [...current.pdfs, { url: "", title: "" }] }))} className={controlButton}>
+                                        <Plus size={19} aria-hidden="true" />
+                                      </button>
+                                    </div>
+                                    <div className="divide-y divide-border rounded-md border border-border bg-background px-4">
+                                      {item.pdfs.map((pdf, index) => (
+                                        <div key={`${item.id}-pdf-${index}`} className="grid gap-4 py-4 sm:grid-cols-[minmax(14rem,2fr)_minmax(12rem,1fr)_auto] sm:items-end">
+                                          <label className={labelClassName}>
+                                            رابط ملف PDF
+                                            <input type="url" className={inputClassName} value={pdf.url} placeholder="https://..." onChange={(event) => updateSelectedItem((current) => ({ ...current, pdfs: current.pdfs.map((entry, currentIndex) => currentIndex === index ? { ...entry, url: event.target.value } : entry) }))} />
+                                          </label>
+                                          <label className={labelClassName}>
+                                            اسم الملف
+                                            <input className={inputClassName} value={pdf.title ?? ""} onChange={(event) => updateSelectedItem((current) => ({ ...current, pdfs: current.pdfs.map((entry, currentIndex) => currentIndex === index ? { ...entry, title: event.target.value } : entry) }))} />
+                                          </label>
+                                          <button type="button" aria-label="حذف ملف PDF" title="حذف ملف PDF" onClick={() => updateSelectedItem((current) => ({ ...current, pdfs: current.pdfs.filter((_, currentIndex) => currentIndex !== index) }))} className={dangerButton}>
                                             <Trash2 size={18} aria-hidden="true" />
                                           </button>
                                         </div>

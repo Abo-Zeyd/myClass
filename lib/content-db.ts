@@ -18,6 +18,7 @@ export type LessonItem = {
   activities: string[];
   images: { src: string; alt: string }[];
   videos: { url: string; title?: string }[];
+  pdfs: { url: string; title?: string }[];
 };
 
 export type Lesson = {
@@ -81,6 +82,14 @@ type VideoRow = {
   title: string;
 };
 
+type PdfRow = {
+  subject_id: string;
+  lesson_id: string;
+  item_id: string;
+  url: string;
+  title: string;
+};
+
 let client: SupabaseClient | undefined;
 
 function getDatabase() {
@@ -101,6 +110,13 @@ function getDatabase() {
 function throwIfError(error: { message: string } | null) {
   if (error) throw new Error(`تعذر الوصول إلى Supabase: ${error.message}`);
 }
+
+function isMissingPdfTable(error: { code?: string; message: string } | null) {
+  return error?.code === "PGRST205" ||
+    error?.message.includes("Could not find the table 'public.lesson_pdfs' in the schema cache") === true;
+}
+
+const pdfSchemaSetupMessage = "جدول ملفات PDF غير جاهز في Supabase. شغّل تحديث supabase/schema.sql، ثم أعد تحميل مخطط PostgREST إذا استمر الخطأ.";
 
 function lessonKey(subjectId: string, lessonId: string) {
   return JSON.stringify([subjectId, lessonId]);
@@ -123,12 +139,13 @@ function groupRows<Row>(rows: Row[], keyFor: (row: Row) => string) {
 
 async function loadLessons(subjectIds: string[]) {
   const database = getDatabase();
-  const [lessonsResult, itemsResult, activitiesResult, imagesResult, videosResult] = await Promise.all([
+  const [lessonsResult, itemsResult, activitiesResult, imagesResult, videosResult, pdfsResult] = await Promise.all([
     database.from("lessons").select("subject_id, id, title").in("subject_id", subjectIds).order("position"),
     database.from("lesson_items").select("subject_id, lesson_id, id, title, summary").in("subject_id", subjectIds).order("position"),
     database.from("lesson_activities").select("subject_id, lesson_id, item_id, text").in("subject_id", subjectIds).order("position"),
     database.from("lesson_images").select("subject_id, lesson_id, item_id, src, alt").in("subject_id", subjectIds).order("position"),
     database.from("lesson_videos").select("subject_id, lesson_id, item_id, url, title").in("subject_id", subjectIds).order("position"),
+    database.from("lesson_pdfs").select("subject_id, lesson_id, item_id, url, title").in("subject_id", subjectIds).order("position"),
   ]);
 
   throwIfError(lessonsResult.error);
@@ -136,16 +153,21 @@ async function loadLessons(subjectIds: string[]) {
   throwIfError(activitiesResult.error);
   throwIfError(imagesResult.error);
   throwIfError(videosResult.error);
+  if (pdfsResult.error && !isMissingPdfTable(pdfsResult.error)) {
+    throwIfError(pdfsResult.error);
+  }
 
   const lessonRows = (lessonsResult.data ?? []) as LessonRow[];
   const itemRows = (itemsResult.data ?? []) as LessonItemRow[];
   const activityRows = (activitiesResult.data ?? []) as ActivityRow[];
   const imageRows = (imagesResult.data ?? []) as ImageRow[];
   const videoRows = (videosResult.data ?? []) as VideoRow[];
+  const pdfRows = (pdfsResult.error ? [] : pdfsResult.data ?? []) as PdfRow[];
   const itemsByLesson = groupRows(itemRows, (row) => lessonKey(row.subject_id, row.lesson_id));
   const activitiesByItem = groupRows(activityRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
   const imagesByItem = groupRows(imageRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
   const videosByItem = groupRows(videoRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
+  const pdfsByItem = groupRows(pdfRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
   const lessonsBySubject = Object.fromEntries(
     subjectIds.map((subjectId) => [subjectId, { lessons: [] as Lesson[] }]),
   );
@@ -160,6 +182,7 @@ async function loadLessons(subjectIds: string[]) {
         activities: (activitiesByItem.get(key) ?? []).map(({ text }) => text),
         images: (imagesByItem.get(key) ?? []).map(({ src, alt }) => ({ src, alt })),
         videos: (videosByItem.get(key) ?? []).map(({ url, title }) => ({ url, title: title || undefined })),
+        pdfs: (pdfsByItem.get(key) ?? []).map(({ url, title }) => ({ url, title: title || undefined })),
       };
     });
     lessonsBySubject[lesson.subject_id]?.lessons.push({ id: lesson.id, title: lesson.title, items });
@@ -204,6 +227,15 @@ export async function getAllLessons(): Promise<Record<string, { lessons: Lesson[
 
 export async function replaceLessons(subjectId: string, lessons: Lesson[]): Promise<void> {
   if (!(subjectId in subjectFiles)) throw new Error("المادة المحددة غير معروفة.");
+
+  if (lessons.some((lesson) => lesson.items.some((item) => item.pdfs.length > 0))) {
+    const { error: pdfTableError } = await getDatabase()
+      .from("lesson_pdfs")
+      .select("item_id")
+      .limit(0);
+    if (isMissingPdfTable(pdfTableError)) throw new Error(pdfSchemaSetupMessage);
+    throwIfError(pdfTableError);
+  }
 
   const { error } = await getDatabase().rpc("replace_lessons", {
     p_subject_id: subjectId,

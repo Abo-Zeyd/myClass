@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Check, CircleAlert, Link2, Maximize2, Minimize2 } from "lucide-react";
+import { Check, CircleAlert, Download, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
 
 import { useEffect, useState } from "react";
 
@@ -13,6 +13,11 @@ type LessonVideo = {
   title?: string;
 };
 
+type LessonPdf = {
+  url: string;
+  title?: string;
+};
+
 export type LessonItem =
   {
     id: string;
@@ -21,6 +26,7 @@ export type LessonItem =
     activities?: string[];
     images?: LessonImage[];
     videos?: LessonVideo[];
+    pdfs?: LessonPdf[];
   };
 
 type LessonItemCardProps = {
@@ -75,6 +81,28 @@ function getImageSource(imageUrl: string) {
       : imageUrl;
   } catch {
     return imageUrl;
+  }
+}
+
+function getPdfUrls(pdfUrl: string) {
+  try {
+    const url = new URL(pdfUrl);
+    if (url.hostname !== "drive.google.com" && url.hostname !== "www.drive.google.com") {
+      return { previewUrl: pdfUrl, downloadUrl: pdfUrl };
+    }
+
+    const fileId =
+      url.pathname.match(/^\/file\/d\/([^/]+)/)?.[1] ??
+      url.searchParams.get("id");
+
+    return fileId
+      ? {
+          previewUrl: `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`,
+        }
+      : { previewUrl: pdfUrl, downloadUrl: pdfUrl };
+  } catch {
+    return { previewUrl: pdfUrl, downloadUrl: pdfUrl };
   }
 }
 
@@ -402,6 +430,45 @@ export default function LessonItemCard({
                       </p>
                     )}
                   </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {item.pdfs && item.pdfs.length > 0 && (
+          <section className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">ملفات PDF</h4>
+            <div className="space-y-4">
+              {item.pdfs.map((pdf, index) => {
+                const urls = getPdfUrls(pdf.url);
+                return (
+                  <article
+                    key={`${item.id}-pdf-${index}`}
+                    className="overflow-hidden rounded-md border border-border bg-background"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+                      <h5 className="inline-flex min-w-0 items-center gap-2 font-semibold text-foreground">
+                        <FileText size={18} className="shrink-0 text-primary" aria-hidden="true" />
+                        <span className="break-words">{pdf.title || `ملف PDF ${index + 1}`}</span>
+                      </h5>
+                      <a
+                        href={urls.downloadUrl}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                      >
+                        <Download size={17} aria-hidden="true" />
+                        تنزيل
+                      </a>
+                    </div>
+                    <iframe
+                      src={urls.previewUrl}
+                      title={pdf.title || `ملف PDF ${index + 1} - ${lessonTitle}`}
+                      className="h-[min(70vh,48rem)] min-h-96 w-full bg-white"
+                    />
+                  </article>
                 );
               })}
             </div>
