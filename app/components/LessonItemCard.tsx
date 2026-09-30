@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Check, CircleAlert, Download, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
+import { getGoogleDriveImageUrl } from "../../lib/google-drive";
 
 import { useEffect, useState } from "react";
 
@@ -62,25 +63,6 @@ function getVideoDetails(videoUrl: string) {
       : { linkUrl: url.href };
   } catch {
     return null;
-  }
-}
-
-function getImageSource(imageUrl: string) {
-  try {
-    const url = new URL(imageUrl);
-    if (url.hostname !== "drive.google.com" && url.hostname !== "www.drive.google.com") {
-      return imageUrl;
-    }
-
-    const fileId =
-      url.pathname.match(/^\/file\/d\/([^/]+)/)?.[1] ??
-      url.searchParams.get("id");
-
-    return fileId
-      ? `https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}=w1600`
-      : imageUrl;
-  } catch {
-    return imageUrl;
   }
 }
 
@@ -332,13 +314,13 @@ export default function LessonItemCard({
                   >
                     <div className="relative flex h-48 items-center justify-center overflow-hidden group">
                       <Image
-                        src={getImageSource(image.src)}
+                        src={getGoogleDriveImageUrl(image.src)}
                         alt={image.alt || `صورة توضيحية لدرس ${lessonTitle}`}
                         width={960}
                         height={540}
                         className="h-full w-full object-contain"
                       />
-                      <div className="absolute right-2 top-2 flex flex-col gap-2">
+                                            <div className="absolute right-2 top-2 flex flex-col gap-2 z-10 fullscreen-controls">
                         <button
                           type="button"
                           aria-label={isFullscreen ? "تصغير الصورة" : "عرض الصورة بملء الشاشة"}
@@ -362,6 +344,7 @@ export default function LessonItemCard({
                           )}
                         </button>
                       </div>
+
                     </div>
                   </div>
                 );
@@ -394,8 +377,8 @@ export default function LessonItemCard({
                     data-media-id={videoId}
                     className="lesson-video-card w-80 shrink-0 snap-start overflow-hidden rounded-md border border-border bg-background"
                   >
-                    {video.embedUrl ? (
-                      <div className="relative aspect-video">
+                                        {video.embedUrl ? (
+                      <div className="relative aspect-video group">
                         <iframe
                           src={video.embedUrl}
                           title={videoTitle}
@@ -403,17 +386,19 @@ export default function LessonItemCard({
                           allowFullScreen
                           className="size-full"
                         />
-                                                <button
-                          type="button"
-                          aria-label={isFullscreen ? "تصغير الفيديو" : "عرض الفيديو بملء الشاشة"}
-                          title={isFullscreen ? "تصغير الفيديو" : "ملء الشاشة"}
-                          onClick={() => toggleFullscreen(videoId)}
-                          className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
-                        >
-                          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                        </button>
-
+                        <div className="absolute right-2 top-2 z-10 flex flex-col gap-2 fullscreen-controls opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button
+                            type="button"
+                            aria-label={isFullscreen ? "تصغير الفيديو" : "عرض الفيديو بملء الشاشة"}
+                            title={isFullscreen ? "تصغير الفيديو" : "ملء الشاشة"}
+                            onClick={() => toggleFullscreen(videoId)}
+                            className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
+                          >
+                            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                          </button>
+                        </div>
                       </div>
+
                     ) : (
                       <a
                         href={video.linkUrl}
@@ -442,26 +427,49 @@ export default function LessonItemCard({
             <div className="space-y-4">
               {item.pdfs.map((pdf, index) => {
                 const urls = getPdfUrls(pdf.url);
+                const pdfId = `${anchorBaseId}-pdf-${index}`;
                 return (
                   <article
                     key={`${item.id}-pdf-${index}`}
-                    className="overflow-hidden rounded-md border border-border bg-background"
+                    id={pdfId}
+                    className="scroll-mt-24 overflow-hidden rounded-md border border-border bg-background"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
                       <h5 className="inline-flex min-w-0 items-center gap-2 font-semibold text-foreground">
                         <FileText size={18} className="shrink-0 text-primary" aria-hidden="true" />
-                        <span className="break-words">{pdf.title || `ملف PDF ${index + 1}`}</span>
+                        <span className="wrap-break-word">{pdf.title || `ملف PDF ${index + 1}`}</span>
                       </h5>
-                      <a
-                        href={urls.downloadUrl}
-                        download
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                      >
-                        <Download size={17} aria-hidden="true" />
-                        تنزيل
-                      </a>
+                      <div className="inline-flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          aria-label={
+                            copyStatus?.anchorId === pdfId && copyStatus.status === "copied"
+                              ? "تم نسخ رابط ملف PDF"
+                              : copyStatus?.anchorId === pdfId
+                                ? "تعذر نسخ رابط ملف PDF"
+                                : "نسخ رابط ملف PDF"
+                          }
+                          title="نسخ رابط ملف PDF"
+                          onClick={() => void copySectionLink(pdfId)}
+                          className="flex size-10 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+                        >
+                          {copyStatus?.anchorId === pdfId
+                            ? copyStatus.status === "copied"
+                              ? <Check aria-hidden="true" size={18} />
+                              : <CircleAlert aria-hidden="true" size={18} />
+                            : <Link2 aria-hidden="true" size={18} />}
+                        </button>
+                        <a
+                          href={urls.downloadUrl}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                        >
+                          <Download size={17} aria-hidden="true" />
+                          تنزيل
+                        </a>
+                      </div>
                     </div>
                     <iframe
                       src={urls.previewUrl}

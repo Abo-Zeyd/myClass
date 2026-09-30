@@ -11,6 +11,26 @@ export type Assignment = {
   completed: boolean;
 };
 
+export type SupportingActivity = {
+  id: string;
+  name: string;
+  link?: string;
+  completed: boolean;
+};
+
+export type Announcement = {
+  id: string;
+  message: string;
+  active: boolean;
+};
+
+export type HomepageSlide = {
+  id: string;
+  title: string;
+  url: string;
+  active: boolean;
+};
+
 export type LessonItem = {
   id: string;
   title: string;
@@ -211,6 +231,68 @@ export async function getAssignments(): Promise<Assignment[]> {
 export async function replaceAssignments(assignments: Assignment[]): Promise<void> {
   const { error } = await getDatabase().rpc("replace_assignments", {
     p_assignments: assignments,
+  });
+  throwIfError(error);
+}
+
+export async function getSupportingActivities(): Promise<SupportingActivity[]> {
+  const { data, error } = await getDatabase()
+    .from("supporting_activities")
+    .select("id, name, link, completed")
+    .order("position");
+  throwIfError(error);
+  return (data ?? []).map((activity) => ({
+    id: activity.id,
+    name: activity.name,
+    link: activity.link || undefined,
+    completed: activity.completed === true,
+  }));
+}
+
+export async function replaceSupportingActivities(activities: SupportingActivity[]): Promise<void> {
+  const { error } = await getDatabase().rpc("replace_supporting_activities", {
+    p_activities: activities,
+  });
+  throwIfError(error);
+}
+
+export async function getAnnouncements(): Promise<Announcement[]> {
+  const { data, error } = await getDatabase()
+    .from("announcements")
+    .select("id, message, active")
+    .order("position");
+  throwIfError(error);
+  return (data ?? []).map((announcement) => ({
+    id: announcement.id,
+    message: announcement.message,
+    active: announcement.active === true,
+  }));
+}
+
+export async function replaceAnnouncements(announcements: Announcement[]): Promise<void> {
+  const { error } = await getDatabase().rpc("replace_announcements", {
+    p_announcements: announcements,
+  });
+  throwIfError(error);
+}
+
+export async function getHomepageSlides(): Promise<HomepageSlide[]> {
+  const { data, error } = await getDatabase()
+    .from("homepage_slides")
+    .select("id, title, url, active")
+    .order("position");
+  throwIfError(error);
+  return (data ?? []).map((slide) => ({
+    id: slide.id,
+    title: slide.title,
+    url: slide.url,
+    active: slide.active === true,
+  }));
+}
+
+export async function replaceHomepageSlides(slides: HomepageSlide[]): Promise<void> {
+  const { error } = await getDatabase().rpc("replace_homepage_slides", {
+    p_slides: slides,
   });
   throwIfError(error);
 }

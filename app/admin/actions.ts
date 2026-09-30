@@ -8,7 +8,22 @@ import {
   hasAdminAuthConfig,
   isAdminAuthenticated,
 } from "../../lib/admin-auth";
-import { getAssignments, getLessons, replaceAssignments, replaceLessons } from "../../lib/content-db";
+import {
+  getAssignments,
+  getAnnouncements,
+  getHomepageSlides,
+  getLessons,
+  getSupportingActivities,
+  replaceAssignments,
+  replaceAnnouncements,
+  replaceHomepageSlides,
+  replaceLessons,
+  replaceSupportingActivities,
+  type Announcement,
+  type HomepageSlide,
+  type SupportingActivity,
+} from "../../lib/content-db";
+import { getGoogleDriveFileId } from "../../lib/google-drive";
 
 type Assignment = {
   id: string;
@@ -86,6 +101,52 @@ function normalizeAssignments(value: unknown): Assignment[] {
     }
 
     return { id, name, assignedDate, submissionDate, link, completed: entry.completed === true };
+  });
+}
+
+function normalizeSupportingActivities(value: unknown): SupportingActivity[] {
+  if (!Array.isArray(value)) throw new Error("قائمة الأنشطة الداعمة غير صالحة.");
+
+  return value.map((entry) => {
+    if (!isRecord(entry)) throw new Error("بيانات أحد الأنشطة غير صالحة.");
+
+    const id = requiredText(entry.id, "معرّف النشاط", 120);
+    const name = requiredText(entry.name, "اسم النشاط", 300);
+    const link = requiredText(entry.link ?? "", "الرابط", 2000);
+    if (!id || !name) throw new Error("يجب إدخال اسم لكل نشاط.");
+    if (link && !isValidWebUrl(link, true)) {
+      throw new Error("رابط النشاط يجب أن يبدأ بـ http أو https.");
+    }
+
+    return { id, name, link, completed: entry.completed === true };
+  });
+}
+
+function normalizeAnnouncements(value: unknown): Announcement[] {
+  if (!Array.isArray(value)) throw new Error("قائمة التنبيهات غير صالحة.");
+
+  return value.map((entry) => {
+    if (!isRecord(entry)) throw new Error("بيانات أحد التنبيهات غير صالحة.");
+    const id = requiredText(entry.id, "معرّف التنبيه", 120);
+    const message = requiredText(entry.message, "نص التنبيه", 1000);
+    if (!id || !message) throw new Error("يجب كتابة نص لكل تنبيه.");
+    return { id, message, active: entry.active === true };
+  });
+}
+
+function normalizeHomepageSlides(value: unknown): HomepageSlide[] {
+  if (!Array.isArray(value)) throw new Error("قائمة صور الصفحة الرئيسية غير صالحة.");
+
+  return value.map((entry) => {
+    if (!isRecord(entry)) throw new Error("بيانات إحدى الصور غير صالحة.");
+    const id = requiredText(entry.id, "معرّف الصورة", 120);
+    const title = requiredText(entry.title, "عنوان الصورة", 300);
+    const url = requiredText(entry.url, "رابط Google Drive", 2000);
+    if (!id || !title || !url) throw new Error("أدخل عنواناً ورابطاً لكل صورة.");
+    if (!isValidWebUrl(url) || !getGoogleDriveFileId(url)) {
+      throw new Error("أدخل رابط مشاركة صالحاً لملف صورة على Google Drive.");
+    }
+    return { id, title, url, active: entry.active === true };
   });
 }
 
@@ -180,6 +241,42 @@ export async function saveAssignments(value: unknown) {
   await assertAdmin();
   const assignments = normalizeAssignments(value);
   await replaceAssignments(assignments);
+  revalidatePath("/");
+}
+
+export async function loadSupportingActivities() {
+  await assertAdmin();
+  return await getSupportingActivities();
+}
+
+export async function saveSupportingActivities(value: unknown) {
+  await assertAdmin();
+  const activities = normalizeSupportingActivities(value);
+  await replaceSupportingActivities(activities);
+  revalidatePath("/");
+}
+
+export async function loadAnnouncements() {
+  await assertAdmin();
+  return await getAnnouncements();
+}
+
+export async function saveAnnouncements(value: unknown) {
+  await assertAdmin();
+  const announcements = normalizeAnnouncements(value);
+  await replaceAnnouncements(announcements);
+  revalidatePath("/");
+}
+
+export async function loadHomepageSlides() {
+  await assertAdmin();
+  return await getHomepageSlides();
+}
+
+export async function saveHomepageSlides(value: unknown) {
+  await assertAdmin();
+  const slides = normalizeHomepageSlides(value);
+  await replaceHomepageSlides(slides);
   revalidatePath("/");
 }
 

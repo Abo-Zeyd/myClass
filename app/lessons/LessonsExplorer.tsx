@@ -41,6 +41,7 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
               item.summary ? `${anchorBaseId}-summary` : null,
               item.activities?.length ? `${anchorBaseId}-activities` : null,
               ...(item.images ?? []).map((_, index) => `${anchorBaseId}-image-${index}`),
+              ...(item.pdfs ?? []).map((_, index) => `${anchorBaseId}-pdf-${index}`),
             ];
 
             if (!sectionIds.includes(anchorId)) continue;

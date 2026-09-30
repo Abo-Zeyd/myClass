@@ -22,9 +22,9 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Supabase Database
 
-The app reads and writes assignments and lessons in Supabase. To connect a project:
+The app reads and writes assignments, lessons, supporting activities, announcements, and homepage slides in Supabase. To connect a project:
 
-1. Run `supabase/schema.sql` in the Supabase SQL Editor.
+1. For a new Supabase project, run `supabase/schema.sql` in the SQL Editor. For an existing project, run `supabase/migrations/20260930_homepage_sections.sql` once before deploying the updated app. The migration creates the new tables and functions and copies existing supporting activities from `metadata` into their dedicated table.
 2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` for local development and in the Vercel project's Environment Variables for deployment. Keep the service-role key private; never use a `NEXT_PUBLIC_` variable for it.
 3. Set `ADMIN_PASSWORD` (at least 12 characters) and `ADMIN_SESSION_SECRET` (at least 32 random characters) in the same environments. The password protects `/myClass/admin`; the session secret signs its HTTP-only login cookie.
 4. To copy the current `data/content.sqlite` contents, run `npm run migrate:supabase -- --confirm` only if they have not already been copied. This replaces the target assignments and lessons.

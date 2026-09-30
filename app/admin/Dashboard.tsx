@@ -8,6 +8,7 @@ import {
   FileText,
   ImagePlus,
   LogOut,
+  Megaphone,
   Plus,
   Save,
   Trash2,
@@ -15,7 +16,16 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAssignmentStatus } from "../assignment-status";
-import { loadAssignments, loadLessons, logout, saveAssignments, saveLessons } from "./actions";
+import {
+  loadAssignments,
+  loadLessons,
+  loadSupportingActivities,
+  logout,
+  saveAssignments,
+  saveLessons,
+  saveSupportingActivities,
+} from "./actions";
+import HomepageContentManager from "./HomepageContentManager";
 
 type Assignment = {
   id: string;
@@ -24,6 +34,13 @@ type Assignment = {
   submissionDate: string;
   link?: string;
   completed?: boolean;
+};
+
+type SupportingActivity = {
+  id: string;
+  name: string;
+  link?: string;
+  completed: boolean;
 };
 
 type LessonItem = {
@@ -61,9 +78,11 @@ function newId(prefix: string) {
 }
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<"assignments" | "lessons">("assignments");
+  const [activeTab, setActiveTab] = useState<"assignments" | "supportingActivities" | "homepageContent" | "lessons">("assignments");
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null);
+  const [supportingActivities, setSupportingActivities] = useState<SupportingActivity[]>([]);
+  const [expandedActivityId, setExpandedActivityId] = useState<string | null>(null);
   const [subjectId, setSubjectId] = useState("arabic");
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -76,10 +95,11 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
 
-    Promise.all([loadAssignments(), loadLessons("arabic")])
-      .then(([loadedAssignments, loadedLessons]) => {
+    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic")])
+      .then(([loadedAssignments, loadedActivities, loadedLessons]) => {
         if (!active) return;
         setAssignments(loadedAssignments);
+        setSupportingActivities(loadedActivities);
         setLessons(loadedLessons);
       })
       .catch((error: unknown) => {
@@ -103,6 +123,12 @@ export default function Dashboard() {
   function updateAssignmentCompletion(id: string, completed: boolean) {
     setAssignments((current) => current.map((assignment) =>
       assignment.id === id ? { ...assignment, completed } : assignment,
+    ));
+  }
+
+  function updateSupportingActivity(id: string, field: keyof SupportingActivity, value: string | boolean) {
+    setSupportingActivities((current) => current.map((activity) =>
+      activity.id === id ? { ...activity, [field]: value } : activity,
     ));
   }
 
@@ -150,6 +176,19 @@ export default function Dashboard() {
     }
   }
 
+  async function persistSupportingActivities() {
+    setBusy(true);
+    setNotice(null);
+    try {
+      await saveSupportingActivities(supportingActivities);
+      setNotice({ type: "success", text: "تم حفظ الأنشطة الداعمة." });
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر حفظ الأنشطة الداعمة." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function persistLessons() {
     setBusy(true);
     setNotice(null);
@@ -174,6 +213,17 @@ export default function Dashboard() {
     };
     setAssignments((current) => [assignment, ...current]);
     setExpandedAssignmentId(assignment.id);
+  }
+
+  function addSupportingActivity() {
+    const activity = {
+      id: newId("support"),
+      name: "",
+      link: "",
+      completed: false,
+    };
+    setSupportingActivities((current) => [activity, ...current]);
+    setExpandedActivityId(activity.id);
   }
 
   function addLesson() {
@@ -222,7 +272,25 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="mb-8 inline-flex gap-2 rounded-lg border border-border bg-surface-muted/60 p-2" role="tablist" aria-label="أقسام لوحة التحكم">
+      <div className="mb-8 inline-flex max-w-full flex-wrap gap-2 rounded-lg border border-border bg-surface-muted/60 p-2" role="tablist" aria-label="أقسام لوحة التحكم">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "homepageContent"}
+          onClick={() => setActiveTab("homepageContent")}
+          className={`inline-flex min-h-12 items-center gap-2 rounded-md px-6 text-base font-bold transition-colors ${activeTab === "homepageContent" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+        >
+          <Megaphone size={17} aria-hidden="true" /> التنبيهات والصور
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "supportingActivities"}
+          onClick={() => setActiveTab("supportingActivities")}
+          className={`inline-flex min-h-12 items-center gap-2 rounded-md px-6 text-base font-bold transition-colors ${activeTab === "supportingActivities" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+        >
+          <Check size={17} aria-hidden="true" /> الأنشطة الداعمة
+        </button>
         <button
           type="button"
           role="tab"
@@ -339,6 +407,86 @@ export default function Dashboard() {
             {assignments.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">لا توجد واجبات.</p>}
           </div>
         </section>
+      ) : activeTab === "supportingActivities" ? (
+        <section role="tabpanel" aria-label="إدارة الأنشطة الداعمة">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-xl font-bold leading-snug">الأنشطة الداعمة</h2>
+            <div className="flex gap-3">
+              <button type="button" onClick={addSupportingActivity} aria-label="إضافة نشاط داعم" title="إضافة نشاط داعم" className={controlButton}>
+                <Plus size={19} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={() => void persistSupportingActivities()} aria-label="حفظ الأنشطة الداعمة" title="حفظ الأنشطة الداعمة" disabled={busy} className={primaryButton}>
+                <Save size={19} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {supportingActivities.map((activity) => {
+              const isExpanded = expandedActivityId === activity.id;
+              const detailsId = `${activity.id}-details`;
+
+              return (
+                <article key={activity.id} className="overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-shadow hover:shadow-md">
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={detailsId}
+                    onClick={() => setExpandedActivityId(isExpanded ? null : activity.id)}
+                    className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-4 text-right text-lg font-semibold text-foreground transition-colors hover:bg-surface-muted/40"
+                  >
+                    <span className="min-w-0 flex-1 truncate">{activity.name || "نشاط جديد"}</span>
+                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${activity.completed ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-900"}`}>
+                      {activity.completed ? "تم الإنجاز" : "للتدرب"}
+                    </span>
+                    <ChevronDown className={`size-5 shrink-0 text-primary transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
+                  </button>
+                  <div id={detailsId} hidden={!isExpanded} className="grid gap-5 border-t border-border bg-surface-muted/25 p-5 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_minmax(14rem,2fr)_auto] lg:items-end">
+                    <label className={labelClassName}>
+                      اسم النشاط
+                      <input className={inputClassName} value={activity.name} onChange={(event) => updateSupportingActivity(activity.id, "name", event.target.value)} />
+                    </label>
+                    <label className={labelClassName}>
+                      رابط النشاط
+                      <input type="url" className={inputClassName} value={activity.link ?? ""} placeholder="https://..." onChange={(event) => updateSupportingActivity(activity.id, "link", event.target.value)} />
+                    </label>
+                    <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
+                      <input type="checkbox" className="size-5 accent-green-700" checked={activity.completed} onChange={(event) => updateSupportingActivity(activity.id, "completed", event.target.checked)} />
+                      تم الإنجاز
+                    </label>
+                    <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
+                      <button
+                        type="button"
+                        aria-label={`حفظ النشاط ${activity.name || "الجديد"}`}
+                        title="حفظ النشاط"
+                        onClick={() => void persistSupportingActivities()}
+                        disabled={busy}
+                        className={primaryButton}
+                      >
+                        <Save size={19} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`حذف النشاط ${activity.name || "الجديد"}`}
+                        title="حذف النشاط"
+                        onClick={() => {
+                          setSupportingActivities((current) => current.filter((entry) => entry.id !== activity.id));
+                          setExpandedActivityId(null);
+                        }}
+                        className={dangerButton}
+                      >
+                        <Trash2 size={18} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+            {supportingActivities.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">لا توجد أنشطة داعمة.</p>}
+          </div>
+        </section>
+      ) : activeTab === "homepageContent" ? (
+        <HomepageContentManager />
       ) : (
         <section role="tabpanel" aria-label="إدارة الدروس">
           <div className="mb-6 grid gap-4 border-b border-border pb-6 sm:grid-cols-[minmax(14rem,1fr)_auto_auto] sm:items-end">
