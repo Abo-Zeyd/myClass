@@ -3,6 +3,7 @@ import {
   getAnnouncements,
   getAssignments,
   getHomepageSlides,
+  getLatestMindMaps,
   getLatestVideos,
   getSupportingActivities,
 } from '../lib/content-db';
@@ -10,6 +11,7 @@ import { getAssignmentStatus } from './assignment-status';
 import AnnouncementTicker from './components/AnnouncementTicker';
 import HomepageComments from './components/HomepageComments';
 import HomepageSlider from './components/HomepageSlider';
+import LatestMindMapsSlider from './components/LatestMindMapsSlider';
 import LatestVideosSlider from './components/LatestVideosSlider';
 
 function formatDate(date: string) {
@@ -26,14 +28,21 @@ function getCurrentTime() {
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [allAssignments, supportingActivities, announcements, homepageSlides, latestVideos] =
-    await Promise.all([
-      getAssignments(),
-      getSupportingActivities(),
-      getAnnouncements(),
-      getHomepageSlides(),
-      getLatestVideos(),
-    ]);
+  const [
+    allAssignments,
+    supportingActivities,
+    announcements,
+    homepageSlides,
+    latestVideos,
+    latestMindMaps,
+  ] = await Promise.all([
+    getAssignments(),
+    getSupportingActivities(),
+    getAnnouncements(),
+    getHomepageSlides(),
+    getLatestVideos(),
+    getLatestMindMaps(),
+  ]);
 
   // ترتيب الواجبات بحسب التاريخ (من الأحدث إلى الأقدم)
   const assignments = [...allAssignments].sort((a, b) => {
@@ -271,6 +280,8 @@ export default async function Home() {
         <HomepageSlider slides={homepageSlides.filter((slide) => slide.active)} />
 
         {latestVideos.length > 0 && <LatestVideosSlider videos={latestVideos} />}
+
+        {latestMindMaps.length > 0 && <LatestMindMapsSlider maps={latestMindMaps} />}
 
         <HomepageComments />
       </main>

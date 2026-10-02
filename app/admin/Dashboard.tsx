@@ -903,10 +903,52 @@ export default function Dashboard() {
                                             مسار الصورة أو رابطها
                                             <input className={inputClassName} value={image.src} placeholder="/myClass/images/... أو https://..." onChange={(event) => updateSelectedItem((current) => ({ ...current, images: current.images.map((entry, currentIndex) => currentIndex === index ? { ...entry, src: event.target.value } : entry) }))} />
                                           </label>
-                                          <label className={labelClassName}>
-                                            وصف الصورة
-                                            <input className={inputClassName} value={image.alt} onChange={(event) => updateSelectedItem((current) => ({ ...current, images: current.images.map((entry, currentIndex) => currentIndex === index ? { ...entry, alt: event.target.value } : entry) }))} />
-                                          </label>
+                                          <div className={labelClassName}>
+                                            <label htmlFor={`${item.id}-image-category-${index}`}>
+                                              التصنيف (اختياري)
+                                            </label>
+                                            <select
+                                              id={`${item.id}-image-category-${index}`}
+                                              className={inputClassName}
+                                              value={image.alt === "خريطة ذهنية" ? "mind-map" : ""}
+                                              onChange={(event) => {
+                                                const value = event.target.value;
+                                                updateSelectedItem((current) => ({
+                                                  ...current,
+                                                  images: current.images.map((entry, currentIndex) =>
+                                                    currentIndex === index
+                                                      ? {
+                                                          ...entry,
+                                                          alt: value === "mind-map" ? "خريطة ذهنية" : "",
+                                                        }
+                                                      : entry
+                                                  ),
+                                                }));
+                                              }}
+                                            >
+                                              <option value="">بدون تصنيف</option>
+                                              <option value="mind-map">خريطة ذهنية</option>
+                                            </select>
+                                            <label htmlFor={`${item.id}-image-description-${index}`}>
+                                              أو اكتب وصفاً مخصصاً
+                                            </label>
+                                            <input
+                                              id={`${item.id}-image-description-${index}`}
+                                              className={inputClassName}
+                                              value={image.alt}
+                                              placeholder="وصف الصورة"
+                                              onChange={(event) =>
+                                                updateSelectedItem((current) => ({
+                                                  ...current,
+                                                  images: current.images.map((entry, currentIndex) =>
+                                                    currentIndex === index
+                                                      ? { ...entry, alt: event.target.value }
+                                                      : entry
+                                                  ),
+                                                }))
+                                              }
+                                            />
+                                          </div>
                                           <button type="button" aria-label="حذف الصورة" title="حذف الصورة" onClick={() => updateSelectedItem((current) => ({ ...current, images: current.images.filter((_, currentIndex) => currentIndex !== index) }))} className={dangerButton}>
                                             <Trash2 size={18} aria-hidden="true" />
                                           </button>

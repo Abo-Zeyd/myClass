@@ -127,6 +127,10 @@ type DatedVideoRow = VideoRow & {
   created_at: string;
 };
 
+type DatedImageRow = ImageRow & {
+  created_at: string;
+};
+
 type PdfRow = {
   subject_id: string;
   lesson_id: string;
@@ -442,6 +446,76 @@ export async function getLatestVideos(): Promise<HomepageVideo[]> {
         id: JSON.stringify([video.subject_id, video.lesson_id, video.item_id, video.url]),
         title: video.title || itemTitle || lessonTitle,
         url: video.url,
+        lessonTitle: [lessonTitle, itemTitle].filter(Boolean).join(' • '),
+      };
+    });
+}
+
+export type HomepageMindMap = {
+  id: string;
+  title: string;
+  src: string;
+  lessonTitle: string;
+};
+
+export async function getLatestMindMaps(): Promise<HomepageMindMap[]> {
+  const database = getDatabase();
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const [allLessons, recentImagesResult, latestImagesResult] = await Promise.all([
+    getAllLessons(),
+    database
+      .from('lesson_images')
+      .select('subject_id, lesson_id, item_id, src, alt, created_at')
+      .ilike('alt', '%خريطة ذهنية%')
+      .gte('created_at', weekAgo)
+      .order('created_at', { ascending: false }),
+    database
+      .from('lesson_images')
+      .select('subject_id, lesson_id, item_id, src, alt, created_at')
+      .ilike('alt', '%خريطة ذهنية%')
+      .order('created_at', { ascending: false })
+      .limit(3),
+  ]);
+  throwIfError(recentImagesResult.error);
+  throwIfError(latestImagesResult.error);
+
+  const lessonsByItem = new Map(
+    Object.entries(allLessons).flatMap(([subjectId, { lessons }]) =>
+      lessons.flatMap((lesson) =>
+        lesson.items.map(
+          (item) =>
+            [
+              JSON.stringify([subjectId, lesson.id, item.id]),
+              { lessonTitle: lesson.title, itemTitle: item.title },
+            ] as const
+        )
+      )
+    )
+  );
+  const imageRows = [
+    ...((recentImagesResult.data ?? []) as DatedImageRow[]),
+    ...((latestImagesResult.data ?? []) as DatedImageRow[]),
+  ];
+  const uniqueImages = new Map(
+    imageRows.map((image) => [
+      JSON.stringify([image.subject_id, image.lesson_id, image.item_id, image.src]),
+      image,
+    ])
+  );
+
+  return [...uniqueImages.values()]
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+    .map((image) => {
+      const lessonAndItem = lessonsByItem.get(
+        JSON.stringify([image.subject_id, image.lesson_id, image.item_id])
+      );
+      const lessonTitle = lessonAndItem?.lessonTitle ?? '';
+      const itemTitle = lessonAndItem?.itemTitle ?? '';
+
+      return {
+        id: JSON.stringify([image.subject_id, image.lesson_id, image.item_id, image.src]),
+        title: itemTitle || lessonTitle || image.alt,
+        src: image.src,
         lessonTitle: [lessonTitle, itemTitle].filter(Boolean).join(' • '),
       };
     });

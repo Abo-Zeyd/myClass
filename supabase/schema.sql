@@ -73,9 +73,24 @@ create table if not exists public.lesson_images (
   position integer not null,
   src text not null,
   alt text not null default '',
+  created_at timestamptz not null default now(),
   foreign key (subject_id, lesson_id, item_id)
     references public.lesson_items (subject_id, lesson_id, id) on delete cascade
 );
+
+alter table public.lesson_images
+  add column if not exists created_at timestamptz;
+
+update public.lesson_images
+set created_at = now() - interval '30 days'
+where created_at is null;
+
+alter table public.lesson_images
+  alter column created_at set default now(),
+  alter column created_at set not null;
+
+create index if not exists lesson_images_created_at_idx
+  on public.lesson_images (created_at desc);
 
 create table if not exists public.lesson_videos (
   subject_id text not null,
@@ -231,8 +246,20 @@ as $$
 declare
   lesson_row record;
   item_row record;
+  image_created_at jsonb;
   video_created_at jsonb;
 begin
+  select coalesce(
+    jsonb_object_agg(
+      jsonb_build_array(lesson_id, item_id, src)::text,
+      to_jsonb(created_at)
+    ),
+    '{}'::jsonb
+  )
+  into image_created_at
+  from public.lesson_images
+  where subject_id = p_subject_id;
+
   select coalesce(
     jsonb_object_agg(
       jsonb_build_array(lesson_id, item_id, url)::text,
@@ -285,9 +312,23 @@ begin
       from jsonb_array_elements_text(coalesce(item_row.entry->'activities', '[]'::jsonb))
         with ordinality as payload(activity, ordinality);
 
-      insert into public.lesson_images (subject_id, lesson_id, item_id, position, src, alt)
+      insert into public.lesson_images (
+        subject_id, lesson_id, item_id, position, src, alt, created_at
+      )
       select p_subject_id, lesson_row.entry->>'id', item_row.entry->>'id',
-        (payload.ordinality - 1)::integer, payload.entry->>'src', coalesce(payload.entry->>'alt', '')
+        (payload.ordinality - 1)::integer,
+        payload.entry->>'src',
+        coalesce(payload.entry->>'alt', ''),
+        coalesce(
+          (
+            image_created_at ->> jsonb_build_array(
+              lesson_row.entry->>'id',
+              item_row.entry->>'id',
+              payload.entry->>'src'
+            )::text
+          )::timestamptz,
+          now()
+        )
       from jsonb_array_elements(coalesce(item_row.entry->'images', '[]'::jsonb))
         with ordinality as payload(entry, ordinality);
 
