@@ -1,10 +1,13 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, FileVideo, Maximize2, Minimize2 } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export type LatestVideoSlide = {
   id: string;
+  subjectId: string;
+  lessonId: string;
   title: string;
   url: string;
   lessonTitle: string;
@@ -158,7 +161,14 @@ export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlid
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-6">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-foreground">{slide.title}</h3>
+          <h3 className="truncate font-semibold text-foreground">
+            <Link
+              href={`/lessons?subject=${encodeURIComponent(slide.subjectId)}&lesson=${encodeURIComponent(slide.lessonId)}`}
+              className="transition-colors hover:text-primary hover:underline"
+            >
+              {slide.title}
+            </Link>
+          </h3>
           <p className="text-xs text-muted-foreground">{slide.lessonTitle}</p>
         </div>
         <button

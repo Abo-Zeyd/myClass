@@ -385,6 +385,8 @@ export async function getAllLessons(): Promise<Record<string, { lessons: Lesson[
 
 export type HomepageVideo = {
   id: string;
+  subjectId: string;
+  lessonId: string;
   title: string;
   url: string;
   lessonTitle: string;
@@ -444,6 +446,8 @@ export async function getLatestVideos(): Promise<HomepageVideo[]> {
 
       return {
         id: JSON.stringify([video.subject_id, video.lesson_id, video.item_id, video.url]),
+        subjectId: video.subject_id,
+        lessonId: video.lesson_id,
         title: video.title || itemTitle || lessonTitle,
         url: video.url,
         lessonTitle: [lessonTitle, itemTitle].filter(Boolean).join(' • '),
@@ -453,6 +457,8 @@ export async function getLatestVideos(): Promise<HomepageVideo[]> {
 
 export type HomepageMindMap = {
   id: string;
+  subjectId: string;
+  lessonId: string;
   title: string;
   src: string;
   lessonTitle: string;
@@ -514,6 +520,8 @@ export async function getLatestMindMaps(): Promise<HomepageMindMap[]> {
 
       return {
         id: JSON.stringify([image.subject_id, image.lesson_id, image.item_id, image.src]),
+        subjectId: image.subject_id,
+        lessonId: image.lesson_id,
         title: itemTitle || lessonTitle || image.alt,
         src: image.src,
         lessonTitle: [lessonTitle, itemTitle].filter(Boolean).join(' • '),

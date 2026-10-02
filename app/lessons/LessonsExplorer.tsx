@@ -30,6 +30,27 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
 
   useEffect(() => {
     function openSectionFromHash() {
+      const params = new URLSearchParams(window.location.search);
+      const requestedSubjectId = params.get("subject");
+      const requestedLessonId = params.get("lesson");
+
+      if (requestedSubjectId && requestedLessonId) {
+        const subject = subjects.find((candidate) => candidate.id === requestedSubjectId);
+        const lesson = subject
+          ? lessonsBySubject[subject.id]?.lessons.find(
+              (candidate) => candidate.id === requestedLessonId,
+            )
+          : null;
+
+        if (subject && lesson) {
+          const targetId = `lesson-${subject.id}-${lesson.id}`;
+          setSelectedSubjectId(subject.id);
+          setExpandedLessonId(lesson.id);
+          setNavigationTargetId(targetId);
+          return;
+        }
+      }
+
       const anchorId = window.location.hash.slice(1);
       if (!anchorId) return;
 
@@ -139,7 +160,7 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
                 const contentId = `${selectedSubject.id}-${lesson.id}-content`;
 
                 return (
-                  <section key={lesson.id} className="overflow-hidden rounded-xl border border-border bg-background transition-all hover:shadow-sm">
+                  <section id={`lesson-${selectedSubject.id}-${lesson.id}`} key={lesson.id} className="overflow-hidden rounded-xl border border-border bg-background transition-all hover:shadow-sm">
                     <h2>
                       <button
                         type="button"
