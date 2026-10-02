@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { Check, CircleAlert, Download, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
+import { Check, CircleAlert, ChevronLeft, ChevronRight, Download, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
 import { getGoogleDriveImageUrl } from "../../lib/google-drive";
+import LessonComments from "./LessonComments";
 
 import { useEffect, useState } from "react";
 
@@ -33,6 +34,8 @@ export type LessonItem =
 type LessonItemCardProps = {
   item: LessonItem;
   lessonTitle: string;
+  subjectId: string;
+  lessonId: string;
   contentId: string;
   anchorBaseId: string;
   navigationTargetId: string | null;
@@ -91,6 +94,8 @@ function getPdfUrls(pdfUrl: string) {
 export default function LessonItemCard({
   item,
   lessonTitle,
+  subjectId,
+  lessonId,
   contentId,
   anchorBaseId,
   navigationTargetId,
@@ -105,6 +110,8 @@ export default function LessonItemCard({
     anchorId: string;
     status: "copied" | "failed";
   } | null>(null);
+  const [imageSliderIndex, setImageSliderIndex] = useState(0);
+  const [videoSliderIndex, setVideoSliderIndex] = useState(0);
   const summaryAnchorId = `${anchorBaseId}-summary`;
   const activitiesAnchorId = `${anchorBaseId}-activities`;
   const isSummaryCollapsed =
@@ -160,7 +167,7 @@ export default function LessonItemCard({
   }
 
   return (
-    <article className="overflow-hidden rounded-lg border border-border bg-surface">
+    <article className="overflow-hidden rounded-lg border border-border bg-surface transition-shadow hover:shadow-sm">
       {isCollapsible ? (
         <h3>
           <button
@@ -186,12 +193,12 @@ export default function LessonItemCard({
       <div
         id={contentId}
         hidden={isCollapsible && !isExpanded}
-        className="space-y-4 p-4 pt-2"
+        className="min-w-0 space-y-4 p-4 pt-2"
       >
         {item.summary && (
           <section
             id={summaryAnchorId}
-            className="scroll-mt-6 rounded-md border border-border bg-background px-4 py-3"
+            className="scroll-mt-6 rounded-md border border-border bg-background px-4 py-3 min-w-0"
           >
             <div className="flex items-center justify-between gap-3">
               <button
@@ -242,7 +249,7 @@ export default function LessonItemCard({
         {item.activities && item.activities.length > 0 && (
           <section
             id={activitiesAnchorId}
-            className="scroll-mt-6 rounded-md border border-border bg-background px-4 py-3"
+            className="scroll-mt-6 rounded-md border border-border bg-background px-4 py-3 min-w-0"
           >
             <div className="flex items-center justify-between gap-3">
               <button
@@ -293,136 +300,187 @@ export default function LessonItemCard({
         )}
 
         {item.images && item.images.length > 0 && (
-          <section>
+          <section className="min-w-0">
             <h4 className="mb-2 text-sm font-semibold text-foreground">الصور</h4>
-            <div
-              role="region"
-              aria-label="شريط الصور"
-              tabIndex={0}
-              className="lesson-media-strip flex snap-x gap-3 overflow-x-auto overscroll-x-contain pb-2"
-            >
-              {item.images.map((image, index) => {
-                const imageId = `${anchorBaseId}-image-${index}`;
-                const isFullscreen = fullscreenMediaId === imageId;
+            <div className="relative mb-2 flex items-center justify-between rounded-md border border-border bg-background px-2 py-1">
+              <button
+                type="button"
+                disabled={item.images.length < 2}
+                onClick={() => setImageSliderIndex((prev) => (prev - 1 + item.images!.length) % item.images!.length)}
+                aria-label="الصورة السابقة"
+                title="الصورة السابقة"
+                className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronRight size={20} />
+              </button>
+              <span className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tabular-nums text-foreground" aria-live="polite">
+                {imageSliderIndex + 1} / {item.images.length}
+              </span>
+              <button
+                type="button"
+                disabled={item.images.length < 2}
+                onClick={() => setImageSliderIndex((prev) => (prev + 1) % item.images!.length)}
+                aria-label="الصورة التالية"
+                title="الصورة التالية"
+                className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            </div>
+            <div className="relative" role="region" aria-label="سلايدر الصور">
+              <div className="overflow-hidden rounded-xl border border-border bg-background">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{ transform: `translateX(${imageSliderIndex * 100}%)` }}
+                >
+                  {item.images.map((image, index) => {
+                    const imageId = `${anchorBaseId}-image-${index}`;
+                    const isFullscreen = fullscreenMediaId === imageId;
 
-                return (
-                  <div
-                    key={imageId}
-                    id={imageId}
-                    data-media-id={imageId}
-                    className="lesson-image-card w-72 shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-background scroll-mt-24"
-                  >
-                    <div className="relative flex h-48 items-center justify-center overflow-hidden group">
-                      <Image
-                        src={getGoogleDriveImageUrl(image.src)}
-                        alt={image.alt || `صورة توضيحية لدرس ${lessonTitle}`}
-                        width={960}
-                        height={540}
-                        className="h-full w-full object-contain"
-                      />
-                                            <div className="absolute right-2 top-2 flex flex-col gap-2 z-10 fullscreen-controls">
-                        <button
-                          type="button"
-                          aria-label={isFullscreen ? "تصغير الصورة" : "عرض الصورة بملء الشاشة"}
-                          title={isFullscreen ? "تصغير الصورة" : "ملء الشاشة"}
-                          onClick={() => toggleFullscreen(imageId)}
-                          className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
-                        >
-                          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="نسخ رابط الصورة"
-                          title="نسخ رابط الصورة"
-                          onClick={() => void copySectionLink(imageId)}
-                          className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
-                        >
-                          {copyStatus?.anchorId === imageId && copyStatus.status === "copied" ? (
-                            <Check size={18} />
-                          ) : (
-                            <Link2 size={18} />
-                          )}
-                        </button>
+                    return (
+                      <div
+                        key={imageId}
+                        id={imageId}
+                        data-media-id={imageId}
+                        className="lesson-image-card w-full shrink-0 scroll-mt-24"
+                      >
+                        <div className="relative flex h-48 items-center justify-center overflow-hidden group">
+                          <Image
+                            src={getGoogleDriveImageUrl(image.src)}
+                            alt={image.alt || `صورة توضيحية لدرس ${lessonTitle}`}
+                            width={960}
+                            height={540}
+                            className="h-full w-full object-contain"
+                          />
+                          <div className="absolute right-2 top-2 flex flex-col gap-2 z-10 fullscreen-controls">
+                            <button
+                              type="button"
+                              aria-label={isFullscreen ? "تصغير الصورة" : "عرض الصورة بملء الشاشة"}
+                              title={isFullscreen ? "تصغير الصورة" : "ملء الشاشة"}
+                              onClick={() => toggleFullscreen(imageId)}
+                              className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
+                            >
+                              {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="نسخ رابط الصورة"
+                              title="نسخ رابط الصورة"
+                              onClick={() => void copySectionLink(imageId)}
+                              className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
+                            >
+                              {copyStatus?.anchorId === imageId && copyStatus.status === "copied" ? (
+                                <Check size={18} />
+                              ) : (
+                                <Link2 size={18} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
                       </div>
-
-                    </div>
-                  </div>
-                );
-
-              })}
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         {item.videos && item.videos.length > 0 && (
-          <section>
+          <section className="min-w-0">
             <h4 className="mb-2 text-sm font-semibold text-foreground">الفيديوهات</h4>
-            <div
-              role="region"
-              aria-label="شريط الفيديوهات"
-              tabIndex={0}
-              className="lesson-media-strip flex snap-x gap-3 overflow-x-auto overscroll-x-contain pb-2"
-            >
-              {item.videos.map((videoItem, index) => {
-                const video = getVideoDetails(videoItem.url);
-                const videoTitle = videoItem.title || `${item.title} - ${lessonTitle}`;
-                const videoId = `${item.id}-video-${index}`;
-                const isFullscreen = fullscreenMediaId === videoId;
+            <div className="relative mb-2 flex items-center justify-between rounded-md border border-border bg-background px-2 py-1">
+              <button
+                type="button"
+                disabled={item.videos.length < 2}
+                onClick={() => setVideoSliderIndex((prev) => (prev - 1 + item.videos!.length) % item.videos!.length)}
+                aria-label="الفيديو السابق"
+                title="الفيديو السابق"
+                className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronRight size={20} />
+              </button>
+              <span className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tabular-nums text-foreground" aria-live="polite">
+                {videoSliderIndex + 1} / {item.videos.length}
+              </span>
+              <button
+                type="button"
+                disabled={item.videos.length < 2}
+                onClick={() => setVideoSliderIndex((prev) => (prev + 1) % item.videos!.length)}
+                aria-label="الفيديو التالي"
+                title="الفيديو التالي"
+                className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            </div>
+            <div className="relative" role="region" aria-label="سلايدر الفيديوهات">
+              <div className="overflow-hidden rounded-md border border-border bg-background">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{ transform: `translateX(${videoSliderIndex * 100}%)` }}
+                >
+                  {item.videos.map((videoItem, index) => {
+                    const video = getVideoDetails(videoItem.url);
+                    const videoTitle = videoItem.title || `${item.title} - ${lessonTitle}`;
+                    const videoId = `${item.id}-video-${index}`;
+                    const isFullscreen = fullscreenMediaId === videoId;
 
-                if (!video) return null;
+                    if (!video) return null;
 
-                return (
-                  <div
-                    key={videoId}
-                    data-media-id={videoId}
-                    className="lesson-video-card w-80 shrink-0 snap-start overflow-hidden rounded-md border border-border bg-background"
-                  >
-                                        {video.embedUrl ? (
-                      <div className="relative aspect-video group">
-                        <iframe
-                          src={video.embedUrl}
-                          title={videoTitle}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          className="size-full"
-                        />
-                        <div className="absolute right-2 top-2 z-10 flex flex-col gap-2 fullscreen-controls opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button
-                            type="button"
-                            aria-label={isFullscreen ? "تصغير الفيديو" : "عرض الفيديو بملء الشاشة"}
-                            title={isFullscreen ? "تصغير الفيديو" : "ملء الشاشة"}
-                            onClick={() => toggleFullscreen(videoId)}
-                            className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
-                          >
-                            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                          </button>
-                        </div>
-                      </div>
-
-                    ) : (
-                      <a
-                        href={video.linkUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex px-4 py-3 text-sm font-semibold text-primary underline"
+                    return (
+                      <div
+                        key={videoId}
+                        data-media-id={videoId}
+                        className="lesson-video-card w-full shrink-0"
                       >
-                        مشاهدة الفيديو: {videoItem.title || "فتح الرابط"}
-                      </a>
-                    )}
-                    {videoItem.title && (
-                      <p className="px-3 py-2 text-sm font-medium text-foreground">
-                        {videoItem.title}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
+                        {video.embedUrl ? (
+                          <div className="relative aspect-video group">
+                            <iframe
+                              src={video.embedUrl}
+                              title={videoTitle}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                              className="size-full"
+                            />
+                            <div className="absolute right-2 top-2 z-10 flex flex-col gap-2 fullscreen-controls opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <button
+                                type="button"
+                                aria-label={isFullscreen ? "تصغير الفيديو" : "عرض الفيديو بملء الشاشة"}
+                                title={isFullscreen ? "تصغير الفيديو" : "ملء الشاشة"}
+                                onClick={() => toggleFullscreen(videoId)}
+                                className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
+                              >
+                                {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <a
+                            href={video.linkUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex px-4 py-3 text-sm font-semibold text-primary underline"
+                          >
+                            مشاهدة الفيديو: {videoItem.title || "فتح الرابط"}
+                          </a>
+                        )}
+                        {videoItem.title && (
+                          <p className="px-3 py-2 text-sm font-medium text-foreground">
+                            {videoItem.title}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         {item.pdfs && item.pdfs.length > 0 && (
-          <section className="space-y-3">
+          <section className="space-y-3 min-w-0">
             <h4 className="text-sm font-semibold text-foreground">ملفات PDF</h4>
             <div className="space-y-4">
               {item.pdfs.map((pdf, index) => {
@@ -482,6 +540,8 @@ export default function LessonItemCard({
             </div>
           </section>
         )}
+
+        <LessonComments subjectId={subjectId} lessonId={lessonId} itemId={item.id} />
       </div>
     </article>
   );

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+.next/
+.next-admin/
+out/
+build/
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env*
+!.env.example
+
+# Generated
+next-env.d.ts
+
+# Data
+data/*.sqlite
+data/lessons/*.json
+
+# Scripts
+scripts/*.mjs
+
+# Public assets
+public/
+*.ico

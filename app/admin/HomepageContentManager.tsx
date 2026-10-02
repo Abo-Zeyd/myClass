@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BellRing, ImagePlus, Plus, Save, Trash2 } from "lucide-react";
+import { BellRing, ChevronDown, ImagePlus, Plus, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getGoogleDriveFileId, getGoogleDriveImageUrl } from "../../lib/google-drive";
 import type { Announcement, HomepageSlide } from "../../lib/content-db";
@@ -25,6 +25,9 @@ function newId(prefix: string) {
 export default function HomepageContentManager() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [slides, setSlides] = useState<HomepageSlide[]>([]);
+  const [expandedPanel, setExpandedPanel] = useState<"announcements" | "slides" | null>(null);
+  const [expandedAnnouncementId, setExpandedAnnouncementId] = useState<string | null>(null);
+  const [expandedSlideId, setExpandedSlideId] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
   const [notice, setNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -75,8 +78,20 @@ export default function HomepageContentManager() {
     }
   }
 
+  function addAnnouncement() {
+    const announcement = { id: newId("notice"), message: "", active: true };
+    setAnnouncements((current) => [announcement, ...current]);
+    setExpandedAnnouncementId(announcement.id);
+  }
+
+  function addSlide() {
+    const slide = { id: newId("slide"), title: "صورة جديدة", url: "", active: true };
+    setSlides((current) => [slide, ...current]);
+    setExpandedSlideId(slide.id);
+  }
+
   return (
-    <section role="tabpanel" aria-label="إدارة التنبيهات وصور الصفحة الرئيسية" className="space-y-10">
+    <section role="tabpanel" aria-label="إدارة التنبيهات وصور الصفحة الرئيسية" className="space-y-4">
       {busy && <p className="text-sm text-muted-foreground">جارٍ العمل...</p>}
       {notice && (
         <p role="status" className={`rounded-md border px-5 py-4 text-base ${notice.type === "success" ? "border-green-700/25 bg-green-50 text-green-900" : "border-red-700/25 bg-red-50 text-red-900"}`}>
@@ -84,91 +99,185 @@ export default function HomepageContentManager() {
         </p>
       )}
 
-      <section aria-labelledby="announcements-admin-title" className="border-b border-border pb-8">
-        <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 id="announcements-admin-title" className="inline-flex items-center gap-2 text-xl font-bold"><BellRing size={20} aria-hidden="true" /> شريط التنبيهات</h2>
-            <p className="mt-1 text-sm text-muted-foreground">تظهر التنبيهات المفعّلة فوق الواجبات المنزلية.</p>
-          </div>
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setAnnouncements((current) => [{ id: newId("notice"), message: "", active: true }, ...current])} aria-label="إضافة تنبيه" title="إضافة تنبيه" disabled={busy} className={controlButton}>
-              <Plus size={19} aria-hidden="true" />
-            </button>
-            <button type="button" onClick={() => void persistAnnouncements()} aria-label="حفظ التنبيهات" title="حفظ التنبيهات" disabled={busy} className={primaryButton}>
-              <Save size={19} aria-hidden="true" />
-            </button>
-          </div>
-        </header>
-
-        <div className="divide-y divide-border">
-          {announcements.map((announcement) => (
-            <div key={announcement.id} className="grid gap-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
-              <label className={labelClassName}>
-                نص التنبيه
-                <textarea rows={2} maxLength={1000} className={inputClassName} value={announcement.message} onChange={(event) => setAnnouncements((current) => current.map((entry) => entry.id === announcement.id ? { ...entry, message: event.target.value } : entry))} />
-              </label>
-              <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
-                <input type="checkbox" className="size-5 accent-green-700" checked={announcement.active} onChange={(event) => setAnnouncements((current) => current.map((entry) => entry.id === announcement.id ? { ...entry, active: event.target.checked } : entry))} />
-                نشر
-              </label>
-              <button type="button" onClick={() => setAnnouncements((current) => current.filter((entry) => entry.id !== announcement.id))} aria-label="حذف التنبيه" title="حذف التنبيه" disabled={busy} className={dangerButton}>
-                <Trash2 size={18} aria-hidden="true" />
+      <section className="overflow-hidden rounded-lg border border-border bg-surface">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            aria-expanded={expandedPanel === "announcements"}
+            aria-controls="announcements-admin-panel"
+            onClick={() => setExpandedPanel((current) => current === "announcements" ? null : "announcements")}
+            className="flex min-h-16 min-w-0 flex-1 items-center justify-between gap-4 px-4 py-3 text-right transition-colors hover:bg-surface-muted/40"
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <BellRing size={20} className="shrink-0 text-primary" aria-hidden="true" />
+              <span className="min-w-0">
+                <span id="announcements-admin-title" className="block text-lg font-bold">شريط التنبيهات</span>
+                <span className="mt-0.5 block text-sm font-normal text-muted-foreground">تظهر التنبيهات المفعّلة فوق الواجبات المنزلية.</span>
+              </span>
+            </span>
+            <ChevronDown className={`size-5 shrink-0 text-primary transition-transform ${expandedPanel === "announcements" ? "rotate-180" : ""}`} aria-hidden="true" />
+          </button>
+          {expandedPanel === "announcements" && (
+            <div className="flex gap-2 px-4">
+              <button type="button" onClick={addAnnouncement} aria-label="إضافة تنبيه" title="إضافة تنبيه" disabled={busy} className={controlButton}>
+                <Plus size={19} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={() => void persistAnnouncements()} aria-label="حفظ التنبيهات" title="حفظ التنبيهات" disabled={busy} className={primaryButton}>
+                <Save size={19} aria-hidden="true" />
               </button>
             </div>
-          ))}
+          )}
+        </header>
+
+        <div id="announcements-admin-panel" hidden={expandedPanel !== "announcements"} className="border-t border-border px-4">
+        <div className="divide-y divide-border">
+          {announcements.map((announcement) => {
+            const isExpanded = expandedAnnouncementId === announcement.id;
+            const detailsId = `${announcement.id}-admin-content`;
+            return (
+              <article key={announcement.id} className="py-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={detailsId}
+                    onClick={() => setExpandedAnnouncementId(isExpanded ? null : announcement.id)}
+                    className="flex min-h-12 min-w-0 flex-1 items-center justify-between gap-3 rounded-md px-3 text-right transition-colors hover:bg-surface-muted/35"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
+                      {announcement.message.trim() || "تنبيه جديد"}
+                    </span>
+                    <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-semibold ${announcement.active ? "bg-green-100 text-green-800" : "bg-surface-muted text-muted-foreground"}`}>
+                      {announcement.active ? "منشور" : "متوقف"}
+                    </span>
+                    <ChevronDown className={`size-4 shrink-0 text-primary transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAnnouncements((current) => current.filter((entry) => entry.id !== announcement.id));
+                      setExpandedAnnouncementId((current) => current === announcement.id ? null : current);
+                    }}
+                    aria-label="حذف التنبيه"
+                    title="حذف التنبيه"
+                    disabled={busy}
+                    className={dangerButton}
+                  >
+                    <Trash2 size={18} aria-hidden="true" />
+                  </button>
+                </div>
+                <div id={detailsId} hidden={!isExpanded} className="grid gap-4 px-3 pb-3 pt-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                  <label className={labelClassName}>
+                    نص التنبيه
+                    <textarea rows={2} maxLength={1000} className={inputClassName} value={announcement.message} onChange={(event) => setAnnouncements((current) => current.map((entry) => entry.id === announcement.id ? { ...entry, message: event.target.value } : entry))} />
+                  </label>
+                  <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
+                    <input type="checkbox" className="size-5 accent-green-700" checked={announcement.active} onChange={(event) => setAnnouncements((current) => current.map((entry) => entry.id === announcement.id ? { ...entry, active: event.target.checked } : entry))} />
+                    نشر
+                  </label>
+                </div>
+              </article>
+            );
+          })}
           {announcements.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">لا توجد تنبيهات. أضف تنبيهاً ليظهر الشريط في الصفحة الرئيسية.</p>}
+        </div>
         </div>
       </section>
 
-      <section aria-labelledby="homepage-slides-admin-title">
-        <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 id="homepage-slides-admin-title" className="inline-flex items-center gap-2 text-xl font-bold"><ImagePlus size={20} aria-hidden="true" /> صور منشورات القسم</h2>
-            <p className="mt-1 text-sm text-muted-foreground">أضف رابط مشاركة لصورة من Google Drive، واجعل الملف متاحاً لمن لديه الرابط.</p>
-          </div>
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setSlides((current) => [{ id: newId("slide"), title: "صورة جديدة", url: "", active: true }, ...current])} aria-label="إضافة صورة" title="إضافة صورة" disabled={busy} className={controlButton}>
-              <Plus size={19} aria-hidden="true" />
-            </button>
-            <button type="button" onClick={() => void persistSlides()} aria-label="حفظ صور السلايدر" title="حفظ الصور" disabled={busy} className={primaryButton}>
-              <Save size={19} aria-hidden="true" />
-            </button>
-          </div>
+      <section className="overflow-hidden rounded-lg border border-border bg-surface">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            aria-expanded={expandedPanel === "slides"}
+            aria-controls="homepage-slides-admin-panel"
+            onClick={() => setExpandedPanel((current) => current === "slides" ? null : "slides")}
+            className="flex min-h-16 min-w-0 flex-1 items-center justify-between gap-4 px-4 py-3 text-right transition-colors hover:bg-surface-muted/40"
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <ImagePlus size={20} className="shrink-0 text-primary" aria-hidden="true" />
+              <span className="min-w-0">
+                <span id="homepage-slides-admin-title" className="block text-lg font-bold">صور منشورات القسم</span>
+                <span className="mt-0.5 block text-sm font-normal text-muted-foreground">أضف رابط مشاركة لصورة من Google Drive، واجعل الملف متاحاً لمن لديه الرابط.</span>
+              </span>
+            </span>
+            <ChevronDown className={`size-5 shrink-0 text-primary transition-transform ${expandedPanel === "slides" ? "rotate-180" : ""}`} aria-hidden="true" />
+          </button>
+          {expandedPanel === "slides" && (
+            <div className="flex gap-2 px-4">
+              <button type="button" onClick={addSlide} aria-label="إضافة صورة" title="إضافة صورة" disabled={busy} className={controlButton}>
+                <Plus size={19} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={() => void persistSlides()} aria-label="حفظ صور السلايدر" title="حفظ الصور" disabled={busy} className={primaryButton}>
+                <Save size={19} aria-hidden="true" />
+              </button>
+            </div>
+          )}
         </header>
 
+        <div id="homepage-slides-admin-panel" hidden={expandedPanel !== "slides"} className="border-t border-border px-4">
         <div className="divide-y divide-border">
           {slides.map((slide) => {
+            const isExpanded = expandedSlideId === slide.id;
+            const detailsId = `${slide.id}-admin-content`;
             const fileId = getGoogleDriveFileId(slide.url);
             return (
-              <div key={slide.id} className="grid gap-4 py-5 sm:grid-cols-[6rem_minmax(0,1fr)_auto_auto] sm:items-end">
-                <div className="relative flex size-24 items-center justify-center overflow-hidden rounded-md border border-border bg-surface-muted/30 sm:size-20">
-                  {fileId ? (
-                    <Image src={getGoogleDriveImageUrl(slide.url)} alt={slide.title} fill unoptimized sizes="96px" className="object-contain" />
-                  ) : (
-                    <ImagePlus size={25} className="text-muted-foreground/50" aria-hidden="true" />
-                  )}
+              <article key={slide.id} className="py-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={detailsId}
+                    onClick={() => setExpandedSlideId(isExpanded ? null : slide.id)}
+                    className="flex min-h-12 min-w-0 flex-1 items-center justify-between gap-3 rounded-md px-3 text-right transition-colors hover:bg-surface-muted/35"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{slide.title || "صورة جديدة"}</span>
+                    <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-semibold ${slide.active ? "bg-green-100 text-green-800" : "bg-surface-muted text-muted-foreground"}`}>
+                      {slide.active ? "منشور" : "متوقف"}
+                    </span>
+                    <ChevronDown className={`size-4 shrink-0 text-primary transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSlides((current) => current.filter((entry) => entry.id !== slide.id));
+                      setExpandedSlideId((current) => current === slide.id ? null : current);
+                    }}
+                    aria-label={`حذف الصورة ${slide.title}`}
+                    title="حذف الصورة"
+                    disabled={busy}
+                    className={dangerButton}
+                  >
+                    <Trash2 size={18} aria-hidden="true" />
+                  </button>
                 </div>
-                <div className="grid gap-4">
-                  <label className={labelClassName}>
-                    عنوان الصورة
-                    <input className={inputClassName} maxLength={300} value={slide.title} onChange={(event) => setSlides((current) => current.map((entry) => entry.id === slide.id ? { ...entry, title: event.target.value } : entry))} />
-                  </label>
-                  <label className={labelClassName}>
-                    رابط مشاركة Google Drive
-                    <input type="url" className={inputClassName} value={slide.url} placeholder="https://drive.google.com/file/d/.../view" onChange={(event) => setSlides((current) => current.map((entry) => entry.id === slide.id ? { ...entry, url: event.target.value } : entry))} />
+                <div id={detailsId} hidden={!isExpanded} className="grid gap-4 px-3 pb-4 pt-2 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:items-end">
+                  <div className="relative flex size-24 items-center justify-center overflow-hidden rounded-md border border-border bg-surface-muted/30 sm:size-20">
+                    {fileId ? (
+                      <Image src={getGoogleDriveImageUrl(slide.url)} alt={slide.title} fill unoptimized sizes="96px" className="object-contain" />
+                    ) : (
+                      <ImagePlus size={25} className="text-muted-foreground/50" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="grid gap-4">
+                    <label className={labelClassName}>
+                      عنوان الصورة
+                      <input className={inputClassName} maxLength={300} value={slide.title} onChange={(event) => setSlides((current) => current.map((entry) => entry.id === slide.id ? { ...entry, title: event.target.value } : entry))} />
+                    </label>
+                    <label className={labelClassName}>
+                      رابط مشاركة Google Drive
+                      <input type="url" className={inputClassName} value={slide.url} placeholder="https://drive.google.com/file/d/.../view" onChange={(event) => setSlides((current) => current.map((entry) => entry.id === slide.id ? { ...entry, url: event.target.value } : entry))} />
+                    </label>
+                  </div>
+                  <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
+                    <input type="checkbox" className="size-5 accent-green-700" checked={slide.active} onChange={(event) => setSlides((current) => current.map((entry) => entry.id === slide.id ? { ...entry, active: event.target.checked } : entry))} />
+                    نشر
                   </label>
                 </div>
-                <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
-                  <input type="checkbox" className="size-5 accent-green-700" checked={slide.active} onChange={(event) => setSlides((current) => current.map((entry) => entry.id === slide.id ? { ...entry, active: event.target.checked } : entry))} />
-                  نشر
-                </label>
-                <button type="button" onClick={() => setSlides((current) => current.filter((entry) => entry.id !== slide.id))} aria-label={`حذف الصورة ${slide.title}`} title="حذف الصورة" disabled={busy} className={dangerButton}>
-                  <Trash2 size={18} aria-hidden="true" />
-                </button>
-              </div>
+              </article>
             );
           })}
           {slides.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">لا توجد صور. أضف صورة مثل التوزيع الزمني لعرضها في السلايدر.</p>}
+        </div>
         </div>
       </section>
     </section>

@@ -1,6 +1,7 @@
 import { ClipboardList, Calendar, ExternalLink, ArrowRightCircle, Sparkles } from "lucide-react";
 import { getAssignmentStatus } from "./assignment-status";
 import AnnouncementTicker from "./components/AnnouncementTicker";
+import HomepageComments from "./components/HomepageComments";
 import HomepageSlider from "./components/HomepageSlider";
 import {
   getAnnouncements,
@@ -43,7 +44,7 @@ export default async function Home() {
     <div className="min-h-screen bg-background text-foreground font-sans" dir="rtl">
       
 
-      <main className="max-w-5xl mx-auto px-6 py-16 flex flex-col gap-16 animate-in fade-in duration-700">
+      <main className="max-w-5xl mx-auto px-4 py-8 sm:px-6 sm:py-16 flex flex-col gap-8 sm:gap-16 animate-in fade-in duration-700">
         {/* بطاقة الترحيب */}
         <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary to-accent p-10 sm:p-16 text-white shadow-2xl transition-all hover:shadow-primary/10 group">
           <div className="absolute inset-0 bg-pattern pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity" />
@@ -216,6 +217,8 @@ export default async function Home() {
         </section>
 
         <HomepageSlider slides={homepageSlides.filter((slide) => slide.active)} />
+
+        <HomepageComments />
       </main>
 
       {/* التذييل / الفوتر */}

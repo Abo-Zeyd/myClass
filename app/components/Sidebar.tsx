@@ -29,7 +29,7 @@ type SidebarProps = {
 
 export default function Sidebar({ selectedSubjectId, onSelectSubject }: SidebarProps) {
   return (
-    <aside className="w-full md:w-72 bg-surface border border-border rounded-2xl p-5 shadow-md shrink-0">
+    <aside className="w-full md:w-72 bg-surface border border-border rounded-2xl p-4 shadow-md shrink-0 sm:p-5">
       <h3 className="font-extrabold text-lg mb-5 text-foreground flex items-center gap-2">
         <span className="w-1.5 h-6 bg-primary rounded-full"></span>
         مواد السنة الرابعة

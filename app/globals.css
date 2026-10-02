@@ -1,7 +1,11 @@
 @import "tailwindcss";
 @source "./admin";
 
+/* ==========================================================================
+   CSS Variables - Design Tokens
+   ========================================================================== */
 :root {
+  /* Colors */
   --background: #fff9ed;
   --foreground: #432818;
   --surface: #fffdf8;
@@ -11,8 +15,15 @@
   --secondary: #bb9457;
   --accent: #99582a;
   --muted-foreground: #765f4e;
+
+  /* Fonts */
+  --font-arabic: var(--font-noto-sans-arabic), system-ui, -apple-system, sans-serif;
+  --font-geist-mono: "Geist Mono", monospace;
 }
 
+/* ==========================================================================
+   Tailwind v4 Theme Mapping
+   ========================================================================== */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -23,10 +34,13 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
-  --font-sans: var(--font-tajawal);
+  --font-sans: var(--font-arabic);
   --font-mono: var(--font-geist-mono);
 }
 
+/* ==========================================================================
+   Global Styles & Reset
+   ========================================================================== */
 ::selection {
   background-color: var(--primary);
   color: white;
@@ -35,18 +49,66 @@
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-tajawal), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-arabic);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* تخصيص شريط التمرير للموقع */
+/* ==========================================================================
+   Focus Styles - Accessibility
+   ========================================================================== */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==========================================================================
+   Link Styles
+   ========================================================================== */
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* ==========================================================================
+   Reduced Motion - Accessibility
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Scrollbar Styles
+   ========================================================================== */
+/* Default scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -63,25 +125,13 @@ body {
   background: var(--secondary);
 }
 
-.bg-pattern {
-  background-image: radial-gradient(var(--border) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.new-assignment-badge {
-  background-color: #f9c74f;
-  animation: new-assignment-color 4s ease-in-out infinite alternate;
-}
-
+/* Thin scrollbar for content lists */
 .content-list-scroll {
   scrollbar-color: var(--primary) var(--surface-muted);
   scrollbar-width: thin;
 }
 
-.assignment-list-scroll {
-  max-height: 70rem;
-}
-
+/* Homepage slider scrollbar */
 .homepage-slide-scrollport {
   scrollbar-color: var(--primary) var(--surface-muted);
   scrollbar-width: auto;
@@ -102,42 +152,7 @@ body {
   background: var(--primary);
 }
 
-@media (min-width: 640px) {
-  .assignment-list-scroll {
-    max-height: 42rem;
-  }
-}
-
-@media (min-width: 900px) {
-  .assignment-list-scroll {
-    max-height: 28rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .assignment-list-scroll {
-    max-height: 22rem;
-  }
-}
-
-@keyframes new-assignment-color {
-  to {
-    background-color: #f4a261;
-  }
-}
-
-.admin-dashboard {
-  font-family: var(--font-tajawal), sans-serif;
-}
-
-.admin-dashboard input,
-.admin-dashboard textarea,
-.admin-dashboard select {
-  font-family: inherit;
-  font-weight: 400;
-  line-height: 1.75;
-}
-
+/* Lesson media strip scrollbar */
 .lesson-media-strip {
   scrollbar-color: var(--primary) var(--surface-muted);
   scrollbar-width: auto;
@@ -158,6 +173,68 @@ body {
   background: var(--primary);
 }
 
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+.bg-pattern {
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.new-assignment-badge {
+  background-color: #f9c74f;
+  animation: new-assignment-color 4s ease-in-out infinite alternate;
+}
+
+@keyframes new-assignment-color {
+  to {
+    background-color: #f4a261;
+  }
+}
+
+/* ==========================================================================
+   Assignment List Responsive Heights
+   ========================================================================== */
+.assignment-list-scroll {
+  max-height: 70rem;
+}
+
+@media (min-width: 640px) {
+  .assignment-list-scroll {
+    max-height: 42rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .assignment-list-scroll {
+    max-height: 28rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .assignment-list-scroll {
+    max-height: 22rem;
+  }
+}
+
+/* ==========================================================================
+   Admin Dashboard Styles
+   ========================================================================== */
+.admin-dashboard {
+  font-family: var(--font-arabic);
+}
+
+.admin-dashboard input,
+.admin-dashboard textarea,
+.admin-dashboard select {
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 1.75;
+}
+
+/* ==========================================================================
+   Fullscreen Media Styles
+   ========================================================================== */
 .lesson-image-card:fullscreen,
 .lesson-video-card:fullscreen {
   display: flex;
@@ -183,7 +260,7 @@ body {
   justify-content: center;
 }
 
-/* ضمان بقاء الأزرار فوق المحتوى في وضع ملء الشاشة */
+/* Fullscreen controls positioning */
 .lesson-image-card:fullscreen .fullscreen-controls,
 .lesson-video-card:fullscreen .fullscreen-controls {
   position: absolute;
@@ -208,4 +285,71 @@ body {
 .lesson-video-card:fullscreen .fullscreen-controls button:hover {
   background-color: rgba(255, 255, 255, 0.25);
   transform: scale(1.1);
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+@media print {
+  .no-print,
+  nav,
+  aside,
+  .fullscreen-controls {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    opacity: 0.7;
+  }
+}
+
+/* ==========================================================================
+   Smooth Transitions for Interactive Elements
+   ========================================================================== */
+button,
+a,
+input,
+textarea,
+select {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+/* ==========================================================================
+   Content Visibility for Performance
+   ========================================================================== */
+.content-list-scroll,
+.assignment-list-scroll,
+.lesson-media-strip {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }

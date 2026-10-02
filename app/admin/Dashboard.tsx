@@ -9,6 +9,7 @@ import {
   ImagePlus,
   LogOut,
   Megaphone,
+  MessageSquare,
   Plus,
   Save,
   Trash2,
@@ -18,14 +19,21 @@ import { useEffect, useState } from "react";
 import { getAssignmentStatus } from "../assignment-status";
 import {
   loadAssignments,
+  loadHomepageCommentsForAdmin,
+  loadLessonCommentsForAdmin,
   loadLessons,
   loadSupportingActivities,
   logout,
+  removeHomepageComment,
+  removeLessonComment,
   saveAssignments,
+  saveHomepageComment,
+  saveLessonComment,
   saveLessons,
   saveSupportingActivities,
 } from "./actions";
 import HomepageContentManager from "./HomepageContentManager";
+import type { HomepageComment, ManagedLessonComment } from "../../lib/content-db";
 
 type Assignment = {
   id: string;
@@ -77,9 +85,41 @@ function newId(prefix: string) {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
+function groupLessonComments(comments: ManagedLessonComment[]) {
+  const groups = new Map<string, {
+    subjectId: string;
+    subjectTitle: string;
+    lessonId: string;
+    lessonTitle: string;
+    itemId: string;
+    itemTitle: string;
+    comments: ManagedLessonComment[];
+  }>();
+
+  for (const comment of comments) {
+    const key = JSON.stringify([comment.subjectId, comment.lessonId, comment.itemId]);
+    const group = groups.get(key) ?? {
+      subjectId: comment.subjectId,
+      subjectTitle: comment.subjectTitle,
+      lessonId: comment.lessonId,
+      lessonTitle: comment.lessonTitle,
+      itemId: comment.itemId,
+      itemTitle: comment.itemTitle,
+      comments: [],
+    };
+    group.comments.push(comment);
+    groups.set(key, group);
+  }
+
+  return [...groups.values()];
+}
+
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<"assignments" | "supportingActivities" | "homepageContent" | "lessons">("assignments");
+  const [activeTab, setActiveTab] = useState<"assignments" | "supportingActivities" | "homepageContent" | "homepageComments" | "lessonComments" | "lessons">("assignments");
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [homepageComments, setHomepageComments] = useState<HomepageComment[]>([]);
+  const [lessonComments, setLessonComments] = useState<ManagedLessonComment[]>([]);
+  const [lessonCommentSubject, setLessonCommentSubject] = useState("all");
   const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null);
   const [supportingActivities, setSupportingActivities] = useState<SupportingActivity[]>([]);
   const [expandedActivityId, setExpandedActivityId] = useState<string | null>(null);
@@ -95,12 +135,14 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
 
-    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic")])
-      .then(([loadedAssignments, loadedActivities, loadedLessons]) => {
+    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic"), loadHomepageCommentsForAdmin(), loadLessonCommentsForAdmin()])
+      .then(([loadedAssignments, loadedActivities, loadedLessons, loadedComments, loadedLessonComments]) => {
         if (!active) return;
         setAssignments(loadedAssignments);
         setSupportingActivities(loadedActivities);
         setLessons(loadedLessons);
+        setHomepageComments(loadedComments);
+        setLessonComments(loadedLessonComments);
       })
       .catch((error: unknown) => {
         if (active) setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر تحميل البيانات." });
@@ -189,6 +231,62 @@ export default function Dashboard() {
     }
   }
 
+  async function persistHomepageComment(comment: HomepageComment) {
+    setBusy(true);
+    setNotice(null);
+    try {
+      await saveHomepageComment(comment.id, comment.displayName, comment.body);
+      setNotice({ type: "success", text: "تم حفظ التعديل على التعليق." });
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر حفظ التعليق." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteHomepageComment(id: string) {
+    if (!window.confirm("هل تريد حذف هذا التعليق نهائياً؟")) return;
+    setBusy(true);
+    setNotice(null);
+    try {
+      await removeHomepageComment(id);
+      setHomepageComments((current) => current.filter((comment) => comment.id !== id));
+      setNotice({ type: "success", text: "تم حذف التعليق." });
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر حذف التعليق." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function persistLessonComment(comment: ManagedLessonComment) {
+    setBusy(true);
+    setNotice(null);
+    try {
+      await saveLessonComment(comment.id, comment.displayName, comment.body);
+      setNotice({ type: "success", text: "تم حفظ التعديل على تعليق الدرس." });
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر حفظ التعليق." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteLessonCommentById(id: string) {
+    if (!window.confirm("هل تريد حذف تعليق الدرس نهائياً؟")) return;
+    setBusy(true);
+    setNotice(null);
+    try {
+      await removeLessonComment(id);
+      setLessonComments((current) => current.filter((comment) => comment.id !== id));
+      setNotice({ type: "success", text: "تم حذف تعليق الدرس." });
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر حذف التعليق." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function persistLessons() {
     setBusy(true);
     setNotice(null);
@@ -272,13 +370,14 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="mb-8 inline-flex max-w-full flex-wrap gap-2 rounded-lg border border-border bg-surface-muted/60 p-2" role="tablist" aria-label="أقسام لوحة التحكم">
+      <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
+      <nav className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-surface-muted/60 p-2 lg:sticky lg:top-4 lg:flex lg:flex-col lg:self-start" role="tablist" aria-label="أقسام لوحة التحكم">
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === "homepageContent"}
           onClick={() => setActiveTab("homepageContent")}
-          className={`inline-flex min-h-12 items-center gap-2 rounded-md px-6 text-base font-bold transition-colors ${activeTab === "homepageContent" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+          className={`flex min-h-12 w-full items-center justify-start gap-3 rounded-md px-4 text-sm font-bold transition-colors ${activeTab === "homepageContent" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
         >
           <Megaphone size={17} aria-hidden="true" /> التنبيهات والصور
         </button>
@@ -287,7 +386,7 @@ export default function Dashboard() {
           role="tab"
           aria-selected={activeTab === "supportingActivities"}
           onClick={() => setActiveTab("supportingActivities")}
-          className={`inline-flex min-h-12 items-center gap-2 rounded-md px-6 text-base font-bold transition-colors ${activeTab === "supportingActivities" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+          className={`flex min-h-12 w-full items-center justify-start gap-3 rounded-md px-4 text-sm font-bold transition-colors ${activeTab === "supportingActivities" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
         >
           <Check size={17} aria-hidden="true" /> الأنشطة الداعمة
         </button>
@@ -296,7 +395,7 @@ export default function Dashboard() {
           role="tab"
           aria-selected={activeTab === "assignments"}
           onClick={() => setActiveTab("assignments")}
-          className={`inline-flex min-h-12 items-center gap-2 rounded-md px-6 text-base font-bold transition-colors ${activeTab === "assignments" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+          className={`flex min-h-12 w-full items-center justify-start gap-3 rounded-md px-4 text-sm font-bold transition-colors ${activeTab === "assignments" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
         >
           <ClipboardList size={17} aria-hidden="true" /> الواجبات
         </button>
@@ -305,12 +404,31 @@ export default function Dashboard() {
           role="tab"
           aria-selected={activeTab === "lessons"}
           onClick={() => setActiveTab("lessons")}
-          className={`inline-flex min-h-12 items-center gap-2 rounded-md px-6 text-base font-bold transition-colors ${activeTab === "lessons" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+          className={`flex min-h-12 w-full items-center justify-start gap-3 rounded-md px-4 text-sm font-bold transition-colors ${activeTab === "lessons" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
         >
           <BookOpen size={17} aria-hidden="true" /> الدروس
         </button>
-      </div>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "homepageComments"}
+          onClick={() => setActiveTab("homepageComments")}
+          className={`flex min-h-12 w-full items-center justify-start gap-3 rounded-md px-4 text-sm font-bold transition-colors ${activeTab === "homepageComments" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+        >
+          <MessageSquare size={17} aria-hidden="true" /> تعليقات الصفحة الرئيسية
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "lessonComments"}
+          onClick={() => setActiveTab("lessonComments")}
+          className={`flex min-h-12 w-full items-center justify-start gap-3 rounded-md px-4 text-sm font-bold transition-colors ${activeTab === "lessonComments" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+        >
+          <MessageSquare size={17} aria-hidden="true" /> تعليقات الدروس
+        </button>
+      </nav>
 
+      <div className="min-w-0">
       {notice && (
         <p
           role="status"
@@ -487,6 +605,154 @@ export default function Dashboard() {
         </section>
       ) : activeTab === "homepageContent" ? (
         <HomepageContentManager />
+      ) : activeTab === "homepageComments" ? (
+        <section role="tabpanel" aria-label="إدارة تعليقات الصفحة الرئيسية">
+          <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
+            <h2 className="inline-flex items-center gap-2 text-xl font-bold leading-snug">
+              <MessageSquare size={20} aria-hidden="true" /> تعليقات الصفحة الرئيسية
+            </h2>
+            <span className="text-sm text-muted-foreground">{homepageComments.length} تعليق</span>
+          </header>
+          <div className="max-h-168 divide-y divide-border overflow-y-auto overscroll-contain border-y border-border">
+            {homepageComments.map((comment) => (
+              <article key={comment.id} className="grid gap-4 py-5 sm:grid-cols-[minmax(12rem,1fr)_minmax(16rem,2fr)_auto] sm:items-end">
+                <label className={labelClassName}>
+                  الاسم
+                  <input
+                    className={inputClassName}
+                    maxLength={60}
+                    value={comment.displayName}
+                    onChange={(event) => setHomepageComments((current) => current.map((entry) => entry.id === comment.id ? { ...entry, displayName: event.target.value } : entry))}
+                  />
+                </label>
+                <label className={labelClassName}>
+                  التعليق
+                  <textarea
+                    rows={2}
+                    maxLength={1000}
+                    className={inputClassName}
+                    value={comment.body}
+                    onChange={(event) => setHomepageComments((current) => current.map((entry) => entry.id === comment.id ? { ...entry, body: event.target.value } : entry))}
+                  />
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label={`حفظ تعليق ${comment.displayName}`}
+                    title="حفظ التعديل"
+                    disabled={busy}
+                    onClick={() => void persistHomepageComment(comment)}
+                    className={primaryButton}
+                  >
+                    <Save size={19} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`حذف تعليق ${comment.displayName}`}
+                    title="حذف التعليق"
+                    disabled={busy}
+                    onClick={() => void deleteHomepageComment(comment.id)}
+                    className={dangerButton}
+                  >
+                    <Trash2 size={18} aria-hidden="true" />
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground sm:col-span-3">
+                  {new Intl.DateTimeFormat("ar-DZ", { dateStyle: "medium", timeStyle: "short" }).format(new Date(comment.createdAt))}
+                </p>
+              </article>
+            ))}
+            {homepageComments.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">لا توجد تعليقات حتى الآن.</p>}
+          </div>
+        </section>
+      ) : activeTab === "lessonComments" ? (
+        <section role="tabpanel" aria-label="إدارة تعليقات الدروس">
+          <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="inline-flex items-center gap-2 text-xl font-bold leading-snug">
+                <MessageSquare size={20} aria-hidden="true" /> تعليقات الدروس
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">مرتبة حسب المادة ثم الدرس ومحتواه.</p>
+            </div>
+            <label className={labelClassName}>
+              المادة
+              <select
+                className={inputClassName}
+                value={lessonCommentSubject}
+                onChange={(event) => setLessonCommentSubject(event.target.value)}
+              >
+                <option value="all">كل المواد</option>
+                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
+              </select>
+            </label>
+          </header>
+
+          <div className="max-h-168 space-y-3 overflow-y-auto overscroll-contain">
+            {groupLessonComments(lessonComments.filter((comment) => lessonCommentSubject === "all" || comment.subjectId === lessonCommentSubject)).map((group) => (
+              <details key={`${group.subjectId}-${group.lessonId}-${group.itemId}`} className="overflow-hidden rounded-md border border-border bg-surface">
+                <summary className="cursor-pointer list-none px-4 py-3 transition-colors hover:bg-surface-muted/40">
+                  <span className="block text-sm font-semibold text-foreground">{group.subjectTitle} / {group.lessonTitle}</span>
+                  <span className="mt-1 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span>{group.itemTitle}</span>
+                    <span>{group.comments.length} تعليق</span>
+                  </span>
+                </summary>
+                <div className="divide-y divide-border border-t border-border px-4">
+                  {group.comments.map((comment) => (
+                    <article key={comment.id} className="grid gap-4 py-4 sm:grid-cols-[minmax(10rem,1fr)_minmax(14rem,2fr)_auto] sm:items-end">
+                      <label className={labelClassName}>
+                        الاسم
+                        <input
+                          className={inputClassName}
+                          maxLength={60}
+                          value={comment.displayName}
+                          onChange={(event) => setLessonComments((current) => current.map((entry) => entry.id === comment.id ? { ...entry, displayName: event.target.value } : entry))}
+                        />
+                      </label>
+                      <label className={labelClassName}>
+                        التعليق
+                        <textarea
+                          rows={2}
+                          maxLength={1000}
+                          className={inputClassName}
+                          value={comment.body}
+                          onChange={(event) => setLessonComments((current) => current.map((entry) => entry.id === comment.id ? { ...entry, body: event.target.value } : entry))}
+                        />
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          aria-label={`حفظ تعليق ${comment.displayName}`}
+                          title="حفظ التعديل"
+                          disabled={busy}
+                          onClick={() => void persistLessonComment(comment)}
+                          className={primaryButton}
+                        >
+                          <Save size={19} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`حذف تعليق ${comment.displayName}`}
+                          title="حذف التعليق"
+                          disabled={busy}
+                          onClick={() => void deleteLessonCommentById(comment.id)}
+                          className={dangerButton}
+                        >
+                          <Trash2 size={18} aria-hidden="true" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground sm:col-span-3">
+                        {new Intl.DateTimeFormat("ar-DZ", { dateStyle: "medium", timeStyle: "short" }).format(new Date(comment.createdAt))}
+                        {comment.status !== "approved" && <span className="mr-2">· {comment.status === "pending" ? "قيد المراجعة" : "مرفوض"}</span>}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </details>
+            ))}
+            {lessonComments.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">لا توجد تعليقات دروس حتى الآن.</p>}
+          </div>
+        </section>
       ) : (
         <section role="tabpanel" aria-label="إدارة الدروس">
           <div className="mb-6 grid gap-4 border-b border-border pb-6 sm:grid-cols-[minmax(14rem,1fr)_auto_auto] sm:items-end">
@@ -722,6 +988,8 @@ export default function Dashboard() {
       {!busy && notice?.type === "success" && (
         <p className="sr-only" aria-live="polite"><Check aria-hidden="true" /> {notice.text}</p>
       )}
+      </div>
+      </div>
     </main>
   );
 }

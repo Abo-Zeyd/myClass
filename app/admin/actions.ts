@@ -12,11 +12,17 @@ import {
   getAssignments,
   getAnnouncements,
   getHomepageSlides,
+  getHomepageCommentsForAdmin,
+  getLessonCommentsForAdmin,
   getLessons,
   getSupportingActivities,
   replaceAssignments,
   replaceAnnouncements,
   replaceHomepageSlides,
+  updateHomepageComment as updateHomepageCommentRecord,
+  deleteHomepageComment as deleteHomepageCommentRecord,
+  updateLessonComment as updateLessonCommentRecord,
+  deleteLessonComment as deleteLessonCommentRecord,
   replaceLessons,
   replaceSupportingActivities,
   type Announcement,
@@ -278,6 +284,62 @@ export async function saveHomepageSlides(value: unknown) {
   const slides = normalizeHomepageSlides(value);
   await replaceHomepageSlides(slides);
   revalidatePath("/");
+}
+
+export async function loadHomepageCommentsForAdmin() {
+  await assertAdmin();
+  return await getHomepageCommentsForAdmin();
+}
+
+export async function saveHomepageComment(id: unknown, displayNameValue: unknown, bodyValue: unknown) {
+  await assertAdmin();
+  const commentId = requiredText(id, "معرّف التعليق", 36);
+  const displayName = requiredText(displayNameValue, "الاسم", 60);
+  const body = requiredText(bodyValue, "التعليق", 1000);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
+    throw new Error("معرّف التعليق غير صالح.");
+  }
+  if (!displayName || !body) throw new Error("الاسم والتعليق مطلوبان.");
+  await updateHomepageCommentRecord(commentId, displayName, body);
+  revalidatePath("/");
+}
+
+export async function removeHomepageComment(id: unknown) {
+  await assertAdmin();
+  const commentId = requiredText(id, "معرّف التعليق", 36);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
+    throw new Error("معرّف التعليق غير صالح.");
+  }
+  await deleteHomepageCommentRecord(commentId);
+  revalidatePath("/");
+}
+
+export async function loadLessonCommentsForAdmin() {
+  await assertAdmin();
+  return await getLessonCommentsForAdmin();
+}
+
+export async function saveLessonComment(id: unknown, displayNameValue: unknown, bodyValue: unknown) {
+  await assertAdmin();
+  const commentId = requiredText(id, "معرّف التعليق", 36);
+  const displayName = requiredText(displayNameValue, "الاسم", 60);
+  const body = requiredText(bodyValue, "التعليق", 1000);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
+    throw new Error("معرّف التعليق غير صالح.");
+  }
+  if (!displayName || !body) throw new Error("الاسم والتعليق مطلوبان.");
+  await updateLessonCommentRecord(commentId, displayName, body);
+  revalidatePath("/lessons");
+}
+
+export async function removeLessonComment(id: unknown) {
+  await assertAdmin();
+  const commentId = requiredText(id, "معرّف التعليق", 36);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
+    throw new Error("معرّف التعليق غير صالح.");
+  }
+  await deleteLessonCommentRecord(commentId);
+  revalidatePath("/lessons");
 }
 
 export async function loadLessons(subjectId: string) {

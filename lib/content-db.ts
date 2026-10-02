@@ -47,6 +47,27 @@ export type Lesson = {
   items: LessonItem[];
 };
 
+export type LessonComment = {
+  id: string;
+  displayName: string;
+  body: string;
+  createdAt: string;
+};
+
+export type ManagedLessonComment = LessonComment & {
+  subjectId: string;
+  subjectTitle: string;
+  lessonId: string;
+  lessonTitle: string;
+  itemId: string;
+  itemTitle: string;
+  status: "pending" | "approved" | "rejected";
+};
+
+export type HomepageComment = LessonComment & {
+  status: "pending" | "approved" | "rejected";
+};
+
 export const subjectFiles: Record<string, string> = {
   "islamic-education": "islamic-education.json",
   arabic: "arabic.json",
@@ -323,5 +344,211 @@ export async function replaceLessons(subjectId: string, lessons: Lesson[]): Prom
     p_subject_id: subjectId,
     p_lessons: lessons,
   });
+  throwIfError(error);
+}
+
+export async function lessonItemExists(subjectId: string, lessonId: string, itemId: string): Promise<boolean> {
+  const { data, error } = await getDatabase()
+    .from("lesson_items")
+    .select("id")
+    .eq("subject_id", subjectId)
+    .eq("lesson_id", lessonId)
+    .eq("id", itemId)
+    .maybeSingle();
+  throwIfError(error);
+  return data !== null;
+}
+
+export async function getLessonComments(
+  subjectId: string,
+  lessonId: string,
+  itemId: string,
+): Promise<LessonComment[]> {
+  const { data, error } = await getDatabase()
+    .from("lesson_comments")
+    .select("id, display_name, body, created_at")
+    .eq("subject_id", subjectId)
+    .eq("lesson_id", lessonId)
+    .eq("item_id", itemId)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  throwIfError(error);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    displayName: row.display_name,
+    body: row.body,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function insertLessonComment(
+  subjectId: string,
+  lessonId: string,
+  itemId: string,
+  displayName: string,
+  body: string,
+): Promise<LessonComment> {
+  const { data, error } = await getDatabase()
+    .from("lesson_comments")
+    .insert({
+      subject_id: subjectId,
+      lesson_id: lessonId,
+      item_id: itemId,
+      display_name: displayName,
+      body,
+    })
+    .select("id, display_name, body, created_at")
+    .single();
+  throwIfError(error);
+  if (!data) throw new Error("تعذر حفظ التعليق.");
+
+  return {
+    id: data.id,
+    displayName: data.display_name,
+    body: data.body,
+    createdAt: data.created_at,
+  };
+}
+
+export async function getLessonCommentsForAdmin(): Promise<ManagedLessonComment[]> {
+  const database = getDatabase();
+  const [commentsResult, lessonsResult, itemsResult] = await Promise.all([
+    database
+      .from("lesson_comments")
+      .select("id, subject_id, lesson_id, item_id, display_name, body, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    database.from("lessons").select("subject_id, id, title"),
+    database.from("lesson_items").select("subject_id, lesson_id, id, title"),
+  ]);
+  throwIfError(commentsResult.error);
+  throwIfError(lessonsResult.error);
+  throwIfError(itemsResult.error);
+
+  const subjectTitles: Record<string, string> = {
+    "islamic-education": "التربية الإسلامية",
+    arabic: "اللغة العربية",
+    mathematics: "الرياضيات",
+    history: "التاريخ",
+    geography: "الجغرافيا",
+    "civic-education": "التربية المدنية",
+    science: "التربية العلمية",
+    memorization: "المحفوظات",
+  };
+  const lessonTitles = new Map(
+    (lessonsResult.data ?? []).map((lesson) => [lessonKey(lesson.subject_id, lesson.id), lesson.title]),
+  );
+  const itemTitles = new Map(
+    (itemsResult.data ?? []).map((item) => [
+      itemKey(item.subject_id, item.lesson_id, item.id),
+      item.title,
+    ]),
+  );
+
+  return (commentsResult.data ?? []).map((comment) => ({
+    id: comment.id,
+    displayName: comment.display_name,
+    body: comment.body,
+    createdAt: comment.created_at,
+    subjectId: comment.subject_id,
+    subjectTitle: subjectTitles[comment.subject_id] ?? comment.subject_id,
+    lessonId: comment.lesson_id,
+    lessonTitle: lessonTitles.get(lessonKey(comment.subject_id, comment.lesson_id)) ?? comment.lesson_id,
+    itemId: comment.item_id,
+    itemTitle: itemTitles.get(itemKey(comment.subject_id, comment.lesson_id, comment.item_id)) ?? comment.item_id,
+    status: comment.status as ManagedLessonComment["status"],
+  }));
+}
+
+export async function updateLessonComment(
+  id: string,
+  displayName: string,
+  body: string,
+): Promise<void> {
+  const { error } = await getDatabase()
+    .from("lesson_comments")
+    .update({ display_name: displayName, body })
+    .eq("id", id);
+  throwIfError(error);
+}
+
+export async function deleteLessonComment(id: string): Promise<void> {
+  const { error } = await getDatabase()
+    .from("lesson_comments")
+    .delete()
+    .eq("id", id);
+  throwIfError(error);
+}
+
+function mapHomepageComment(row: {
+  id: string;
+  display_name: string;
+  body: string;
+  status: HomepageComment["status"];
+  created_at: string;
+}): HomepageComment {
+  return {
+    id: row.id,
+    displayName: row.display_name,
+    body: row.body,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getHomepageComments(): Promise<HomepageComment[]> {
+  const { data, error } = await getDatabase()
+    .from("homepage_comments")
+    .select("id, display_name, body, status, created_at")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  throwIfError(error);
+  return (data ?? []).map(mapHomepageComment);
+}
+
+export async function getHomepageCommentsForAdmin(): Promise<HomepageComment[]> {
+  const { data, error } = await getDatabase()
+    .from("homepage_comments")
+    .select("id, display_name, body, status, created_at")
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  throwIfError(error);
+  return (data ?? []).map(mapHomepageComment);
+}
+
+export async function insertHomepageComment(
+  displayName: string,
+  body: string,
+): Promise<HomepageComment> {
+  const { data, error } = await getDatabase()
+    .from("homepage_comments")
+    .insert({ display_name: displayName, body })
+    .select("id, display_name, body, status, created_at")
+    .single();
+  throwIfError(error);
+  if (!data) throw new Error("تعذر حفظ التعليق.");
+  return mapHomepageComment(data);
+}
+
+export async function updateHomepageComment(
+  id: string,
+  displayName: string,
+  body: string,
+): Promise<void> {
+  const { error } = await getDatabase()
+    .from("homepage_comments")
+    .update({ display_name: displayName, body })
+    .eq("id", id);
+  throwIfError(error);
+}
+
+export async function deleteHomepageComment(id: string): Promise<void> {
+  const { error } = await getDatabase()
+    .from("homepage_comments")
+    .delete()
+    .eq("id", id);
   throwIfError(error);
 }

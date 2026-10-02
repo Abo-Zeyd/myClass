@@ -95,7 +95,7 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
           onSelectSubject={selectSubject}
         />
 
-                <main className="min-h-112.5 w-full flex-1 rounded-2xl border border-border bg-surface p-8 shadow-md">
+        <main className="min-h-[45rem] w-full flex-1 rounded-2xl border border-border bg-surface p-4 shadow-md sm:p-8">
           <header className="mb-8 border-b border-border pb-6">
             <h1 className="text-2xl font-black text-foreground flex items-center gap-3">
               {selectedSubject ? (
@@ -178,6 +178,8 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
                             key={item.id}
                             item={item}
                             lessonTitle={lesson.title}
+                            subjectId={selectedSubject.id}
+                            lessonId={lesson.id}
                             contentId={`${selectedSubject.id}-${lesson.id}-${item.id}-content`}
                             anchorBaseId={`${selectedSubject.id}-${lesson.id}-${item.id}`}
                             navigationTargetId={navigationTargetId}
