@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getGoogleDriveImageUrl } from '../../lib/google-drive';
 
 export type LatestMindMapSlide = {
@@ -13,25 +13,21 @@ export type LatestMindMapSlide = {
 };
 
 export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlide[] }) {
+  const sectionRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [fullscreenError, setFullscreenError] = useState('');
 
   useEffect(() => {
-    if (!isExpanded) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setIsExpanded(false);
+    function handleFullscreenChange() {
+      setIsExpanded(document.fullscreenElement === sectionRef.current);
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [isExpanded]);
+  }, []);
 
   if (maps.length === 0) return null;
 
@@ -42,10 +38,28 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
     setActiveIndex((nextIndex + maps.length) % maps.length);
   }
 
+  async function toggleFullscreen() {
+    const section = sectionRef.current;
+    if (!section) {
+      setFullscreenError('تعذر العثور على قسم الخرائط الذهنية.');
+      return;
+    }
+
+    setFullscreenError('');
+    try {
+      if (document.fullscreenElement === section) {
+        await document.exitFullscreen();
+      } else {
+        await section.requestFullscreen();
+      }
+    } catch {
+      setFullscreenError('تعذر فتح وضع ملء الشاشة. تحقق من دعم المتصفح أو أذونات الصفحة.');
+    }
+  }
+
   return (
     <section
-      role={isExpanded ? 'dialog' : undefined}
-      aria-modal={isExpanded || undefined}
+      ref={sectionRef}
       aria-labelledby="latest-mind-maps-title"
       className={
         isExpanded
@@ -118,9 +132,9 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
         </div>
         <button
           type="button"
-          onClick={() => setIsExpanded((expanded) => !expanded)}
-          aria-label={isExpanded ? 'تصغير الخريطة' : 'عرض الخريطة بملء الصفحة'}
-          title={isExpanded ? 'تصغير' : 'ملء الصفحة'}
+          onClick={() => void toggleFullscreen()}
+          aria-label={isExpanded ? 'الخروج من ملء الشاشة' : 'عرض الخريطة بملء الشاشة'}
+          title={isExpanded ? 'الخروج من ملء الشاشة' : 'ملء الشاشة'}
           className="flex size-10 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
         >
           {isExpanded ? (
@@ -129,6 +143,11 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
             <Maximize2 size={19} aria-hidden="true" />
           )}
         </button>
+        {fullscreenError && (
+          <p role="alert" className="w-full text-sm text-red-600">
+            {fullscreenError}
+          </p>
+        )}
       </footer>
     </section>
   );
