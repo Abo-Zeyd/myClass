@@ -31,6 +31,7 @@ export default function HomepageSlider({ slides }: { slides: HomepageSlide[] }) 
   }
 
   const slide = slides[activeIndex % slides.length];
+  if (!slide) return null;
 
   function showSlide(nextIndex: number) {
     setActiveIndex((nextIndex + slides.length) % slides.length);

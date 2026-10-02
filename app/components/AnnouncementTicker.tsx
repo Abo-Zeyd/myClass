@@ -25,6 +25,7 @@ export default function AnnouncementTicker({ announcements }: { announcements: A
   if (announcements.length === 0) return null;
 
   const announcement = announcements[activeIndex % announcements.length];
+  if (!announcement) return null;
 
   function showPrevious() {
     setActiveIndex((current) => (current - 1 + announcements.length) % announcements.length);

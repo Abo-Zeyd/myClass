@@ -219,11 +219,11 @@ async function loadLessons(subjectIds: string[]) {
       return {
         id: item.id,
         title: item.title,
-        summary: item.summary || undefined,
+        ...(item.summary ? { summary: item.summary } : {}),
         activities: (activitiesByItem.get(key) ?? []).map(({ text }) => text),
         images: (imagesByItem.get(key) ?? []).map(({ src, alt }) => ({ src, alt })),
-        videos: (videosByItem.get(key) ?? []).map(({ url, title }) => ({ url, title: title || undefined })),
-        pdfs: (pdfsByItem.get(key) ?? []).map(({ url, title }) => ({ url, title: title || undefined })),
+        videos: (videosByItem.get(key) ?? []).map(({ url, title }) => ({ url, ...(title ? { title } : {}) })),
+        pdfs: (pdfsByItem.get(key) ?? []).map(({ url, title }) => ({ url, ...(title ? { title } : {}) })),
       };
     });
     lessonsBySubject[lesson.subject_id]?.lessons.push({ id: lesson.id, title: lesson.title, items });
@@ -244,7 +244,7 @@ export async function getAssignments(): Promise<Assignment[]> {
     name: assignment.name,
     assignedDate: assignment.assigned_date,
     submissionDate: assignment.submission_date,
-    link: assignment.link || undefined,
+    ...(assignment.link ? { link: assignment.link } : {}),
     completed: assignment.completed === true || assignment.completed === 1,
   }));
 }
@@ -321,7 +321,7 @@ export async function replaceHomepageSlides(slides: HomepageSlide[]): Promise<vo
 export async function getLessons(subjectId: string): Promise<Lesson[]> {
   if (!(subjectId in subjectFiles)) throw new Error("المادة المحددة غير معروفة.");
   const result = await loadLessons([subjectId]);
-  return result[subjectId].lessons;
+  return result[subjectId]?.lessons ?? [];
 }
 
 export async function getAllLessons(): Promise<Record<string, { lessons: Lesson[] }>> {
