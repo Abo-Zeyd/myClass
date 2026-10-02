@@ -18,6 +18,7 @@
 
   /* Fonts */
   --font-arabic: var(--font-noto-sans-arabic), system-ui, -apple-system, sans-serif;
+  --font-arabic-naskh: var(--font-noto-naskh-arabic), serif;
   --font-geist-mono: "Geist Mono", monospace;
 }
 
@@ -35,6 +36,7 @@
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --font-sans: var(--font-arabic);
+  --font-naskh: var(--font-arabic-naskh);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -86,6 +88,11 @@ a {
 
 a:hover {
   color: var(--accent);
+}
+
+.pdf-download-link,
+.pdf-download-link:hover {
+  color: white;
 }
 
 /* ==========================================================================

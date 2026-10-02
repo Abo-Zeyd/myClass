@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_Arabic } from "next/font/google";
+import { Noto_Naskh_Arabic, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 
@@ -8,6 +8,11 @@ const notoSansArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500", "700"],
   variable: "--font-noto-sans-arabic",
+});
+const notoNaskhArabic = Noto_Naskh_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
+  variable: "--font-noto-naskh-arabic",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className={`${notoSansArabic.variable} h-full antialiased`}>
+    <html lang="ar" dir="rtl" className={`${notoSansArabic.variable} ${notoNaskhArabic.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         {/* الشريط العلوي المشترك لجميع الصفحات */}
         <Navbar />

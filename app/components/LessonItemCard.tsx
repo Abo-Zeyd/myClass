@@ -239,7 +239,7 @@ export default function LessonItemCard({
               hidden={isSummaryCollapsed}
               className="pt-2"
             >
-              <p className="whitespace-pre-line text-base font-medium leading-8 text-foreground">
+              <p className="whitespace-pre-line rounded-md border border-secondary/60 bg-surface px-4 py-3 font-naskh text-lg font-medium leading-9 text-foreground shadow-sm">
                 {item.summary}
               </p>
             </div>
@@ -522,7 +522,7 @@ export default function LessonItemCard({
                           download
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                          className="pdf-download-link inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                         >
                           <Download size={17} aria-hidden="true" />
                           تنزيل
