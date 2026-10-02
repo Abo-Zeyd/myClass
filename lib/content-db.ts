@@ -1,6 +1,6 @@
-import "server-only";
+import 'server-only';
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 export type Assignment = {
   id: string;
@@ -61,25 +61,25 @@ export type ManagedLessonComment = LessonComment & {
   lessonTitle: string;
   itemId: string;
   itemTitle: string;
-  status: "pending" | "approved" | "rejected";
+  status: 'pending' | 'approved' | 'rejected';
 };
 
 export type HomepageComment = LessonComment & {
-  status: "pending" | "approved" | "rejected";
+  status: 'pending' | 'approved' | 'rejected';
 };
 
 export const subjectFiles: Record<string, string> = {
-  "islamic-education": "islamic-education.json",
-  arabic: "arabic.json",
-  mathematics: "mathematics.json",
-  history: "history.json",
-  geography: "geography.json",
-  "civic-education": "civic-education.json",
-  science: "science.json",
-  memorization: "memorization.json",
+  'islamic-education': 'islamic-education.json',
+  arabic: 'arabic.json',
+  mathematics: 'mathematics.json',
+  history: 'history.json',
+  geography: 'geography.json',
+  'civic-education': 'civic-education.json',
+  science: 'science.json',
+  memorization: 'memorization.json',
 };
 
-type AssignmentRow = Omit<Assignment, "assignedDate" | "submissionDate" | "link" | "completed"> & {
+type AssignmentRow = Omit<Assignment, 'assignedDate' | 'submissionDate' | 'link' | 'completed'> & {
   assigned_date: string;
   submission_date: string;
   link: string;
@@ -123,6 +123,10 @@ type VideoRow = {
   title: string;
 };
 
+type DatedVideoRow = VideoRow & {
+  created_at: string;
+};
+
 type PdfRow = {
   subject_id: string;
   lesson_id: string;
@@ -139,7 +143,7 @@ function getDatabase() {
   const url = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceRoleKey) {
-    throw new Error("أضف SUPABASE_URL وSUPABASE_SERVICE_ROLE_KEY إلى متغيرات البيئة.");
+    throw new Error('أضف SUPABASE_URL وSUPABASE_SERVICE_ROLE_KEY إلى متغيرات البيئة.');
   }
 
   client = createClient(url, serviceRoleKey, {
@@ -153,11 +157,15 @@ function throwIfError(error: { message: string } | null) {
 }
 
 function isMissingPdfTable(error: { code?: string; message: string } | null) {
-  return error?.code === "PGRST205" ||
-    error?.message.includes("Could not find the table 'public.lesson_pdfs' in the schema cache") === true;
+  return (
+    error?.code === 'PGRST205' ||
+    error?.message.includes("Could not find the table 'public.lesson_pdfs' in the schema cache") ===
+      true
+  );
 }
 
-const pdfSchemaSetupMessage = "جدول ملفات PDF غير جاهز في Supabase. شغّل تحديث supabase/schema.sql، ثم أعد تحميل مخطط PostgREST إذا استمر الخطأ.";
+const pdfSchemaSetupMessage =
+  'جدول ملفات PDF غير جاهز في Supabase. شغّل تحديث supabase/schema.sql، ثم أعد تحميل مخطط PostgREST إذا استمر الخطأ.';
 
 function lessonKey(subjectId: string, lessonId: string) {
   return JSON.stringify([subjectId, lessonId]);
@@ -180,14 +188,39 @@ function groupRows<Row>(rows: Row[], keyFor: (row: Row) => string) {
 
 async function loadLessons(subjectIds: string[]) {
   const database = getDatabase();
-  const [lessonsResult, itemsResult, activitiesResult, imagesResult, videosResult, pdfsResult] = await Promise.all([
-    database.from("lessons").select("subject_id, id, title").in("subject_id", subjectIds).order("position"),
-    database.from("lesson_items").select("subject_id, lesson_id, id, title, summary").in("subject_id", subjectIds).order("position"),
-    database.from("lesson_activities").select("subject_id, lesson_id, item_id, text").in("subject_id", subjectIds).order("position"),
-    database.from("lesson_images").select("subject_id, lesson_id, item_id, src, alt").in("subject_id", subjectIds).order("position"),
-    database.from("lesson_videos").select("subject_id, lesson_id, item_id, url, title").in("subject_id", subjectIds).order("position"),
-    database.from("lesson_pdfs").select("subject_id, lesson_id, item_id, url, title").in("subject_id", subjectIds).order("position"),
-  ]);
+  const [lessonsResult, itemsResult, activitiesResult, imagesResult, videosResult, pdfsResult] =
+    await Promise.all([
+      database
+        .from('lessons')
+        .select('subject_id, id, title')
+        .in('subject_id', subjectIds)
+        .order('position'),
+      database
+        .from('lesson_items')
+        .select('subject_id, lesson_id, id, title, summary')
+        .in('subject_id', subjectIds)
+        .order('position'),
+      database
+        .from('lesson_activities')
+        .select('subject_id, lesson_id, item_id, text')
+        .in('subject_id', subjectIds)
+        .order('position'),
+      database
+        .from('lesson_images')
+        .select('subject_id, lesson_id, item_id, src, alt')
+        .in('subject_id', subjectIds)
+        .order('position'),
+      database
+        .from('lesson_videos')
+        .select('subject_id, lesson_id, item_id, url, title')
+        .in('subject_id', subjectIds)
+        .order('position'),
+      database
+        .from('lesson_pdfs')
+        .select('subject_id, lesson_id, item_id, url, title')
+        .in('subject_id', subjectIds)
+        .order('position'),
+    ]);
 
   throwIfError(lessonsResult.error);
   throwIfError(itemsResult.error);
@@ -203,14 +236,22 @@ async function loadLessons(subjectIds: string[]) {
   const activityRows = (activitiesResult.data ?? []) as ActivityRow[];
   const imageRows = (imagesResult.data ?? []) as ImageRow[];
   const videoRows = (videosResult.data ?? []) as VideoRow[];
-  const pdfRows = (pdfsResult.error ? [] : pdfsResult.data ?? []) as PdfRow[];
+  const pdfRows = (pdfsResult.error ? [] : (pdfsResult.data ?? [])) as PdfRow[];
   const itemsByLesson = groupRows(itemRows, (row) => lessonKey(row.subject_id, row.lesson_id));
-  const activitiesByItem = groupRows(activityRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
-  const imagesByItem = groupRows(imageRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
-  const videosByItem = groupRows(videoRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
-  const pdfsByItem = groupRows(pdfRows, (row) => itemKey(row.subject_id, row.lesson_id, row.item_id));
+  const activitiesByItem = groupRows(activityRows, (row) =>
+    itemKey(row.subject_id, row.lesson_id, row.item_id)
+  );
+  const imagesByItem = groupRows(imageRows, (row) =>
+    itemKey(row.subject_id, row.lesson_id, row.item_id)
+  );
+  const videosByItem = groupRows(videoRows, (row) =>
+    itemKey(row.subject_id, row.lesson_id, row.item_id)
+  );
+  const pdfsByItem = groupRows(pdfRows, (row) =>
+    itemKey(row.subject_id, row.lesson_id, row.item_id)
+  );
   const lessonsBySubject = Object.fromEntries(
-    subjectIds.map((subjectId) => [subjectId, { lessons: [] as Lesson[] }]),
+    subjectIds.map((subjectId) => [subjectId, { lessons: [] as Lesson[] }])
   );
 
   for (const lesson of lessonRows) {
@@ -222,11 +263,21 @@ async function loadLessons(subjectIds: string[]) {
         ...(item.summary ? { summary: item.summary } : {}),
         activities: (activitiesByItem.get(key) ?? []).map(({ text }) => text),
         images: (imagesByItem.get(key) ?? []).map(({ src, alt }) => ({ src, alt })),
-        videos: (videosByItem.get(key) ?? []).map(({ url, title }) => ({ url, ...(title ? { title } : {}) })),
-        pdfs: (pdfsByItem.get(key) ?? []).map(({ url, title }) => ({ url, ...(title ? { title } : {}) })),
+        videos: (videosByItem.get(key) ?? []).map(({ url, title }) => ({
+          url,
+          ...(title ? { title } : {}),
+        })),
+        pdfs: (pdfsByItem.get(key) ?? []).map(({ url, title }) => ({
+          url,
+          ...(title ? { title } : {}),
+        })),
       };
     });
-    lessonsBySubject[lesson.subject_id]?.lessons.push({ id: lesson.id, title: lesson.title, items });
+    lessonsBySubject[lesson.subject_id]?.lessons.push({
+      id: lesson.id,
+      title: lesson.title,
+      items,
+    });
   }
 
   return lessonsBySubject;
@@ -234,9 +285,9 @@ async function loadLessons(subjectIds: string[]) {
 
 export async function getAssignments(): Promise<Assignment[]> {
   const { data, error } = await getDatabase()
-    .from("assignments")
-    .select("id, name, assigned_date, submission_date, link, completed")
-    .order("position");
+    .from('assignments')
+    .select('id, name, assigned_date, submission_date, link, completed')
+    .order('position');
   throwIfError(error);
 
   return ((data ?? []) as AssignmentRow[]).map((assignment) => ({
@@ -250,7 +301,7 @@ export async function getAssignments(): Promise<Assignment[]> {
 }
 
 export async function replaceAssignments(assignments: Assignment[]): Promise<void> {
-  const { error } = await getDatabase().rpc("replace_assignments", {
+  const { error } = await getDatabase().rpc('replace_assignments', {
     p_assignments: assignments,
   });
   throwIfError(error);
@@ -258,9 +309,9 @@ export async function replaceAssignments(assignments: Assignment[]): Promise<voi
 
 export async function getSupportingActivities(): Promise<SupportingActivity[]> {
   const { data, error } = await getDatabase()
-    .from("supporting_activities")
-    .select("id, name, link, completed")
-    .order("position");
+    .from('supporting_activities')
+    .select('id, name, link, completed')
+    .order('position');
   throwIfError(error);
   return (data ?? []).map((activity) => ({
     id: activity.id,
@@ -271,7 +322,7 @@ export async function getSupportingActivities(): Promise<SupportingActivity[]> {
 }
 
 export async function replaceSupportingActivities(activities: SupportingActivity[]): Promise<void> {
-  const { error } = await getDatabase().rpc("replace_supporting_activities", {
+  const { error } = await getDatabase().rpc('replace_supporting_activities', {
     p_activities: activities,
   });
   throwIfError(error);
@@ -279,9 +330,9 @@ export async function replaceSupportingActivities(activities: SupportingActivity
 
 export async function getAnnouncements(): Promise<Announcement[]> {
   const { data, error } = await getDatabase()
-    .from("announcements")
-    .select("id, message, active")
-    .order("position");
+    .from('announcements')
+    .select('id, message, active')
+    .order('position');
   throwIfError(error);
   return (data ?? []).map((announcement) => ({
     id: announcement.id,
@@ -291,7 +342,7 @@ export async function getAnnouncements(): Promise<Announcement[]> {
 }
 
 export async function replaceAnnouncements(announcements: Announcement[]): Promise<void> {
-  const { error } = await getDatabase().rpc("replace_announcements", {
+  const { error } = await getDatabase().rpc('replace_announcements', {
     p_announcements: announcements,
   });
   throwIfError(error);
@@ -299,9 +350,9 @@ export async function replaceAnnouncements(announcements: Announcement[]): Promi
 
 export async function getHomepageSlides(): Promise<HomepageSlide[]> {
   const { data, error } = await getDatabase()
-    .from("homepage_slides")
-    .select("id, title, url, active")
-    .order("position");
+    .from('homepage_slides')
+    .select('id, title, url, active')
+    .order('position');
   throwIfError(error);
   return (data ?? []).map((slide) => ({
     id: slide.id,
@@ -312,14 +363,14 @@ export async function getHomepageSlides(): Promise<HomepageSlide[]> {
 }
 
 export async function replaceHomepageSlides(slides: HomepageSlide[]): Promise<void> {
-  const { error } = await getDatabase().rpc("replace_homepage_slides", {
+  const { error } = await getDatabase().rpc('replace_homepage_slides', {
     p_slides: slides,
   });
   throwIfError(error);
 }
 
 export async function getLessons(subjectId: string): Promise<Lesson[]> {
-  if (!(subjectId in subjectFiles)) throw new Error("المادة المحددة غير معروفة.");
+  if (!(subjectId in subjectFiles)) throw new Error('المادة المحددة غير معروفة.');
   const result = await loadLessons([subjectId]);
   return result[subjectId]?.lessons ?? [];
 }
@@ -328,32 +379,104 @@ export async function getAllLessons(): Promise<Record<string, { lessons: Lesson[
   return loadLessons(Object.keys(subjectFiles));
 }
 
+export type HomepageVideo = {
+  id: string;
+  title: string;
+  url: string;
+  lessonTitle: string;
+};
+
+export async function getLatestVideos(): Promise<HomepageVideo[]> {
+  const database = getDatabase();
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const [allLessons, recentVideosResult, latestVideosResult] = await Promise.all([
+    getAllLessons(),
+    database
+      .from('lesson_videos')
+      .select('subject_id, lesson_id, item_id, url, title, created_at')
+      .gte('created_at', weekAgo)
+      .order('created_at', { ascending: false }),
+    database
+      .from('lesson_videos')
+      .select('subject_id, lesson_id, item_id, url, title, created_at')
+      .order('created_at', { ascending: false })
+      .limit(3),
+  ]);
+  throwIfError(recentVideosResult.error);
+  throwIfError(latestVideosResult.error);
+
+  const lessonsByItem = new Map(
+    Object.entries(allLessons).flatMap(([subjectId, { lessons }]) =>
+      lessons.flatMap((lesson) =>
+        lesson.items.map(
+          (item) =>
+            [
+              JSON.stringify([subjectId, lesson.id, item.id]),
+              { lessonTitle: lesson.title, itemTitle: item.title },
+            ] as const
+        )
+      )
+    )
+  );
+  const videoRows = [
+    ...((recentVideosResult.data ?? []) as DatedVideoRow[]),
+    ...((latestVideosResult.data ?? []) as DatedVideoRow[]),
+  ];
+  const uniqueVideos = new Map(
+    videoRows.map((video) => [
+      JSON.stringify([video.subject_id, video.lesson_id, video.item_id, video.url]),
+      video,
+    ])
+  );
+
+  return [...uniqueVideos.values()]
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+    .map((video) => {
+      const lessonAndItem = lessonsByItem.get(
+        JSON.stringify([video.subject_id, video.lesson_id, video.item_id])
+      );
+      const itemTitle = lessonAndItem?.itemTitle ?? '';
+      const lessonTitle = lessonAndItem?.lessonTitle ?? '';
+
+      return {
+        id: JSON.stringify([video.subject_id, video.lesson_id, video.item_id, video.url]),
+        title: video.title || itemTitle || lessonTitle,
+        url: video.url,
+        lessonTitle: [lessonTitle, itemTitle].filter(Boolean).join(' • '),
+      };
+    });
+}
+
 export async function replaceLessons(subjectId: string, lessons: Lesson[]): Promise<void> {
-  if (!(subjectId in subjectFiles)) throw new Error("المادة المحددة غير معروفة.");
+  if (!(subjectId in subjectFiles)) throw new Error('المادة المحددة غير معروفة.');
 
   if (lessons.some((lesson) => lesson.items.some((item) => item.pdfs.length > 0))) {
     const { error: pdfTableError } = await getDatabase()
-      .from("lesson_pdfs")
-      .select("item_id")
+      .from('lesson_pdfs')
+      .select('item_id')
       .limit(0);
     if (isMissingPdfTable(pdfTableError)) throw new Error(pdfSchemaSetupMessage);
     throwIfError(pdfTableError);
   }
 
-  const { error } = await getDatabase().rpc("replace_lessons", {
+  const { error } = await getDatabase().rpc('replace_lessons', {
     p_subject_id: subjectId,
     p_lessons: lessons,
   });
   throwIfError(error);
 }
 
-export async function lessonItemExists(subjectId: string, lessonId: string, itemId: string): Promise<boolean> {
+export async function lessonItemExists(
+  subjectId: string,
+  lessonId: string,
+  itemId: string
+): Promise<boolean> {
   const { data, error } = await getDatabase()
-    .from("lesson_items")
-    .select("id")
-    .eq("subject_id", subjectId)
-    .eq("lesson_id", lessonId)
-    .eq("id", itemId)
+    .from('lesson_items')
+    .select('id')
+    .eq('subject_id', subjectId)
+    .eq('lesson_id', lessonId)
+    .eq('id', itemId)
     .maybeSingle();
   throwIfError(error);
   return data !== null;
@@ -362,16 +485,16 @@ export async function lessonItemExists(subjectId: string, lessonId: string, item
 export async function getLessonComments(
   subjectId: string,
   lessonId: string,
-  itemId: string,
+  itemId: string
 ): Promise<LessonComment[]> {
   const { data, error } = await getDatabase()
-    .from("lesson_comments")
-    .select("id, display_name, body, created_at")
-    .eq("subject_id", subjectId)
-    .eq("lesson_id", lessonId)
-    .eq("item_id", itemId)
-    .eq("status", "approved")
-    .order("created_at", { ascending: false })
+    .from('lesson_comments')
+    .select('id, display_name, body, created_at')
+    .eq('subject_id', subjectId)
+    .eq('lesson_id', lessonId)
+    .eq('item_id', itemId)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
     .limit(100);
   throwIfError(error);
 
@@ -388,10 +511,10 @@ export async function insertLessonComment(
   lessonId: string,
   itemId: string,
   displayName: string,
-  body: string,
+  body: string
 ): Promise<LessonComment> {
   const { data, error } = await getDatabase()
-    .from("lesson_comments")
+    .from('lesson_comments')
     .insert({
       subject_id: subjectId,
       lesson_id: lessonId,
@@ -399,10 +522,10 @@ export async function insertLessonComment(
       display_name: displayName,
       body,
     })
-    .select("id, display_name, body, created_at")
+    .select('id, display_name, body, created_at')
     .single();
   throwIfError(error);
-  if (!data) throw new Error("تعذر حفظ التعليق.");
+  if (!data) throw new Error('تعذر حفظ التعليق.');
 
   return {
     id: data.id,
@@ -416,35 +539,38 @@ export async function getLessonCommentsForAdmin(): Promise<ManagedLessonComment[
   const database = getDatabase();
   const [commentsResult, lessonsResult, itemsResult] = await Promise.all([
     database
-      .from("lesson_comments")
-      .select("id, subject_id, lesson_id, item_id, display_name, body, status, created_at")
-      .order("created_at", { ascending: false })
+      .from('lesson_comments')
+      .select('id, subject_id, lesson_id, item_id, display_name, body, status, created_at')
+      .order('created_at', { ascending: false })
       .limit(1000),
-    database.from("lessons").select("subject_id, id, title"),
-    database.from("lesson_items").select("subject_id, lesson_id, id, title"),
+    database.from('lessons').select('subject_id, id, title'),
+    database.from('lesson_items').select('subject_id, lesson_id, id, title'),
   ]);
   throwIfError(commentsResult.error);
   throwIfError(lessonsResult.error);
   throwIfError(itemsResult.error);
 
   const subjectTitles: Record<string, string> = {
-    "islamic-education": "التربية الإسلامية",
-    arabic: "اللغة العربية",
-    mathematics: "الرياضيات",
-    history: "التاريخ",
-    geography: "الجغرافيا",
-    "civic-education": "التربية المدنية",
-    science: "التربية العلمية",
-    memorization: "المحفوظات",
+    'islamic-education': 'التربية الإسلامية',
+    arabic: 'اللغة العربية',
+    mathematics: 'الرياضيات',
+    history: 'التاريخ',
+    geography: 'الجغرافيا',
+    'civic-education': 'التربية المدنية',
+    science: 'التربية العلمية',
+    memorization: 'المحفوظات',
   };
   const lessonTitles = new Map(
-    (lessonsResult.data ?? []).map((lesson) => [lessonKey(lesson.subject_id, lesson.id), lesson.title]),
+    (lessonsResult.data ?? []).map((lesson) => [
+      lessonKey(lesson.subject_id, lesson.id),
+      lesson.title,
+    ])
   );
   const itemTitles = new Map(
     (itemsResult.data ?? []).map((item) => [
       itemKey(item.subject_id, item.lesson_id, item.id),
       item.title,
-    ]),
+    ])
   );
 
   return (commentsResult.data ?? []).map((comment) => ({
@@ -455,30 +581,30 @@ export async function getLessonCommentsForAdmin(): Promise<ManagedLessonComment[
     subjectId: comment.subject_id,
     subjectTitle: subjectTitles[comment.subject_id] ?? comment.subject_id,
     lessonId: comment.lesson_id,
-    lessonTitle: lessonTitles.get(lessonKey(comment.subject_id, comment.lesson_id)) ?? comment.lesson_id,
+    lessonTitle:
+      lessonTitles.get(lessonKey(comment.subject_id, comment.lesson_id)) ?? comment.lesson_id,
     itemId: comment.item_id,
-    itemTitle: itemTitles.get(itemKey(comment.subject_id, comment.lesson_id, comment.item_id)) ?? comment.item_id,
-    status: comment.status as ManagedLessonComment["status"],
+    itemTitle:
+      itemTitles.get(itemKey(comment.subject_id, comment.lesson_id, comment.item_id)) ??
+      comment.item_id,
+    status: comment.status as ManagedLessonComment['status'],
   }));
 }
 
 export async function updateLessonComment(
   id: string,
   displayName: string,
-  body: string,
+  body: string
 ): Promise<void> {
   const { error } = await getDatabase()
-    .from("lesson_comments")
+    .from('lesson_comments')
     .update({ display_name: displayName, body })
-    .eq("id", id);
+    .eq('id', id);
   throwIfError(error);
 }
 
 export async function deleteLessonComment(id: string): Promise<void> {
-  const { error } = await getDatabase()
-    .from("lesson_comments")
-    .delete()
-    .eq("id", id);
+  const { error } = await getDatabase().from('lesson_comments').delete().eq('id', id);
   throwIfError(error);
 }
 
@@ -486,7 +612,7 @@ function mapHomepageComment(row: {
   id: string;
   display_name: string;
   body: string;
-  status: HomepageComment["status"];
+  status: HomepageComment['status'];
   created_at: string;
 }): HomepageComment {
   return {
@@ -500,10 +626,10 @@ function mapHomepageComment(row: {
 
 export async function getHomepageComments(): Promise<HomepageComment[]> {
   const { data, error } = await getDatabase()
-    .from("homepage_comments")
-    .select("id, display_name, body, status, created_at")
-    .eq("status", "approved")
-    .order("created_at", { ascending: false })
+    .from('homepage_comments')
+    .select('id, display_name, body, status, created_at')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
     .limit(100);
   throwIfError(error);
   return (data ?? []).map(mapHomepageComment);
@@ -511,9 +637,9 @@ export async function getHomepageComments(): Promise<HomepageComment[]> {
 
 export async function getHomepageCommentsForAdmin(): Promise<HomepageComment[]> {
   const { data, error } = await getDatabase()
-    .from("homepage_comments")
-    .select("id, display_name, body, status, created_at")
-    .order("created_at", { ascending: false })
+    .from('homepage_comments')
+    .select('id, display_name, body, status, created_at')
+    .order('created_at', { ascending: false })
     .limit(1000);
   throwIfError(error);
   return (data ?? []).map(mapHomepageComment);
@@ -521,34 +647,31 @@ export async function getHomepageCommentsForAdmin(): Promise<HomepageComment[]> 
 
 export async function insertHomepageComment(
   displayName: string,
-  body: string,
+  body: string
 ): Promise<HomepageComment> {
   const { data, error } = await getDatabase()
-    .from("homepage_comments")
+    .from('homepage_comments')
     .insert({ display_name: displayName, body })
-    .select("id, display_name, body, status, created_at")
+    .select('id, display_name, body, status, created_at')
     .single();
   throwIfError(error);
-  if (!data) throw new Error("تعذر حفظ التعليق.");
+  if (!data) throw new Error('تعذر حفظ التعليق.');
   return mapHomepageComment(data);
 }
 
 export async function updateHomepageComment(
   id: string,
   displayName: string,
-  body: string,
+  body: string
 ): Promise<void> {
   const { error } = await getDatabase()
-    .from("homepage_comments")
+    .from('homepage_comments')
     .update({ display_name: displayName, body })
-    .eq("id", id);
+    .eq('id', id);
   throwIfError(error);
 }
 
 export async function deleteHomepageComment(id: string): Promise<void> {
-  const { error } = await getDatabase()
-    .from("homepage_comments")
-    .delete()
-    .eq("id", id);
+  const { error } = await getDatabase().from('homepage_comments').delete().eq('id', id);
   throwIfError(error);
 }

@@ -84,9 +84,24 @@ create table if not exists public.lesson_videos (
   position integer not null,
   url text not null,
   title text not null default '',
+  created_at timestamptz not null default now(),
   foreign key (subject_id, lesson_id, item_id)
     references public.lesson_items (subject_id, lesson_id, id) on delete cascade
 );
+
+alter table public.lesson_videos
+  add column if not exists created_at timestamptz;
+
+update public.lesson_videos
+set created_at = now() - interval '30 days'
+where created_at is null;
+
+alter table public.lesson_videos
+  alter column created_at set default now(),
+  alter column created_at set not null;
+
+create index if not exists lesson_videos_created_at_idx
+  on public.lesson_videos (created_at desc);
 
 create table if not exists public.lesson_pdfs (
   subject_id text not null,
@@ -216,7 +231,19 @@ as $$
 declare
   lesson_row record;
   item_row record;
+  video_created_at jsonb;
 begin
+  select coalesce(
+    jsonb_object_agg(
+      jsonb_build_array(lesson_id, item_id, url)::text,
+      to_jsonb(created_at)
+    ),
+    '{}'::jsonb
+  )
+  into video_created_at
+  from public.lesson_videos
+  where subject_id = p_subject_id;
+
   delete from public.lesson_activities where subject_id = p_subject_id;
   delete from public.lesson_images where subject_id = p_subject_id;
   delete from public.lesson_videos where subject_id = p_subject_id;
@@ -264,9 +291,23 @@ begin
       from jsonb_array_elements(coalesce(item_row.entry->'images', '[]'::jsonb))
         with ordinality as payload(entry, ordinality);
 
-      insert into public.lesson_videos (subject_id, lesson_id, item_id, position, url, title)
+      insert into public.lesson_videos (
+        subject_id, lesson_id, item_id, position, url, title, created_at
+      )
       select p_subject_id, lesson_row.entry->>'id', item_row.entry->>'id',
-        (payload.ordinality - 1)::integer, payload.entry->>'url', coalesce(payload.entry->>'title', '')
+        (payload.ordinality - 1)::integer,
+        payload.entry->>'url',
+        coalesce(payload.entry->>'title', ''),
+        coalesce(
+          (
+            video_created_at ->> jsonb_build_array(
+              lesson_row.entry->>'id',
+              item_row.entry->>'id',
+              payload.entry->>'url'
+            )::text
+          )::timestamptz,
+          now()
+        )
       from jsonb_array_elements(coalesce(item_row.entry->'videos', '[]'::jsonb))
         with ordinality as payload(entry, ordinality);
 
