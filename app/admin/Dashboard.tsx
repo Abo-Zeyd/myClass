@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bell,
   BookOpen,
   Check,
   ChevronDown,
@@ -20,10 +21,13 @@ import { getAssignmentStatus } from "../assignment-status";
 import {
   loadAssignments,
   loadHomepageCommentsForAdmin,
+  loadUnreadHomepageCommentCount,
+  loadUnreadHomepageCommentsForAdmin,
   loadLessonCommentsForAdmin,
   loadLessons,
   loadSupportingActivities,
   logout,
+  markHomepageCommentsAsRead,
   removeHomepageComment,
   removeLessonComment,
   saveAssignments,
@@ -129,20 +133,26 @@ export default function Dashboard() {
   const [selectedItemId, setSelectedItemId] = useState("");
   const [busy, setBusy] = useState(true);
   const [notice, setNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [unreadHomepageCommentCount, setUnreadHomepageCommentCount] = useState(0);
+  const [homepageNotifications, setHomepageNotifications] = useState<HomepageComment[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsBusy, setNotificationsBusy] = useState(false);
+  const [selectedHomepageCommentId, setSelectedHomepageCommentId] = useState<string | null>(null);
 
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId);
 
   useEffect(() => {
     let active = true;
 
-    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic"), loadHomepageCommentsForAdmin(), loadLessonCommentsForAdmin()])
-      .then(([loadedAssignments, loadedActivities, loadedLessons, loadedComments, loadedLessonComments]) => {
+    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic"), loadHomepageCommentsForAdmin(), loadLessonCommentsForAdmin(), loadUnreadHomepageCommentCount()])
+      .then(([loadedAssignments, loadedActivities, loadedLessons, loadedComments, loadedLessonComments, unreadCount]) => {
         if (!active) return;
         setAssignments(loadedAssignments);
         setSupportingActivities(loadedActivities);
         setLessons(loadedLessons);
         setHomepageComments(loadedComments);
         setLessonComments(loadedLessonComments);
+        setUnreadHomepageCommentCount(unreadCount);
       })
       .catch((error: unknown) => {
         if (active) setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر تحميل البيانات." });
@@ -155,6 +165,64 @@ export default function Dashboard() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const refreshUnreadCount = async () => {
+      try {
+        const count = await loadUnreadHomepageCommentCount();
+        if (active) setUnreadHomepageCommentCount(count);
+      } catch (error) {
+        if (active) {
+          setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر تحديث تنبيهات التعليقات." });
+        }
+      }
+    };
+    const timer = window.setInterval(refreshUnreadCount, 30_000);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "homepageComments" || !selectedHomepageCommentId) return;
+    const frame = window.requestAnimationFrame(() => {
+      const comment = document.getElementById(`homepage-comment-${selectedHomepageCommentId}`);
+      comment?.scrollIntoView({ behavior: "smooth", block: "center" });
+      comment?.focus({ preventScroll: true });
+      setSelectedHomepageCommentId(null);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTab, selectedHomepageCommentId]);
+
+  async function toggleHomepageNotifications() {
+    if (notificationsOpen) {
+      setNotificationsOpen(false);
+      return;
+    }
+
+    setNotificationsBusy(true);
+    setNotice(null);
+    try {
+      const unreadComments = await loadUnreadHomepageCommentsForAdmin();
+      await markHomepageCommentsAsRead(unreadComments.map((comment) => comment.id));
+      setHomepageNotifications(unreadComments);
+      setUnreadHomepageCommentCount(await loadUnreadHomepageCommentCount());
+      setNotificationsOpen(true);
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر تحميل تنبيهات التعليقات." });
+    } finally {
+      setNotificationsBusy(false);
+    }
+  }
+
+  function openHomepageComment(commentId: string) {
+    setSelectedHomepageCommentId(commentId);
+    setActiveTab("homepageComments");
+    setNotificationsOpen(false);
+  }
 
   function updateAssignment(id: string, field: keyof Assignment, value: string) {
     setAssignments((current) => current.map((assignment) =>
@@ -361,6 +429,51 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-4">
           {busy && <span className="text-sm text-muted-foreground">جارٍ العمل...</span>}
+          <div className="relative">
+            <button
+              type="button"
+              aria-label={unreadHomepageCommentCount > 0 ? `تنبيهات التعليقات، ${unreadHomepageCommentCount} جديدة` : "تنبيهات التعليقات"}
+              aria-expanded={notificationsOpen}
+              aria-haspopup="true"
+              title="تنبيهات التعليقات الجديدة"
+              disabled={notificationsBusy}
+              onClick={() => void toggleHomepageNotifications()}
+              className="relative inline-flex size-11 items-center justify-center rounded-md border border-border bg-surface text-foreground transition-colors hover:bg-surface-muted disabled:cursor-wait disabled:opacity-60"
+            >
+              <Bell size={19} aria-hidden="true" />
+              {unreadHomepageCommentCount > 0 && (
+                <span className="absolute -right-2 -top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold leading-none text-white">
+                  {unreadHomepageCommentCount > 99 ? "99+" : unreadHomepageCommentCount}
+                </span>
+              )}
+            </button>
+            {notificationsOpen && (
+              <section
+                aria-label="التعليقات الجديدة"
+                className="absolute left-0 top-full z-30 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-surface shadow-lg"
+              >
+                <h2 className="border-b border-border px-4 py-3 text-sm font-bold text-foreground">التعليقات الجديدة</h2>
+                <div className="max-h-96 overflow-y-auto">
+                  {homepageNotifications.length > 0 ? homepageNotifications.map((comment) => (
+                    <button
+                      key={comment.id}
+                      type="button"
+                      onClick={() => openHomepageComment(comment.id)}
+                      className="block w-full border-b border-border px-4 py-3 text-right transition-colors last:border-b-0 hover:bg-surface-muted"
+                    >
+                      <span className="block truncate text-sm font-semibold text-foreground">{comment.displayName}</span>
+                      <span className="mt-1 block line-clamp-2 text-sm text-muted-foreground">{comment.body}</span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {new Intl.DateTimeFormat("ar-DZ", { dateStyle: "medium", timeStyle: "short" }).format(new Date(comment.createdAt))}
+                      </span>
+                    </button>
+                  )) : (
+                    <p className="px-4 py-6 text-center text-sm text-muted-foreground">لا توجد تعليقات جديدة.</p>
+                  )}
+                </div>
+              </section>
+            )}
+          </div>
           <form action={logout}>
             <button className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border px-4 text-sm font-semibold text-foreground hover:bg-surface-muted" type="submit">
               <LogOut size={17} aria-hidden="true" />
@@ -473,7 +586,7 @@ export default function Dashboard() {
                     </span>
                     <ChevronDown className={`size-5 shrink-0 text-primary transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
                   </button>
-                  <div id={detailsId} hidden={!isExpanded} className="grid gap-5 border-t border-border bg-surface-muted/25 p-5 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_1fr_1fr_minmax(14rem,2fr)_auto] lg:items-end">
+                  <div id={detailsId} hidden={!isExpanded} className="grid gap-5 border-t border-border bg-surface-muted/25 p-5 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_1fr_1fr_minmax(14rem,2fr)] lg:items-end">
                     <label className={labelClassName}>
                       اسم الواجب
                       <input className={inputClassName} value={assignment.name} onChange={(event) => updateAssignment(assignment.id, "name", event.target.value)} />
@@ -490,8 +603,8 @@ export default function Dashboard() {
                       رابط الواجب
                       <input type="url" className={inputClassName} value={assignment.link ?? ""} placeholder="https://..." onChange={(event) => updateAssignment(assignment.id, "link", event.target.value)} />
                     </label>
-                    <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
-                      <input type="checkbox" className="size-5 accent-green-700" checked={assignment.completed === true} onChange={(event) => updateAssignmentCompletion(assignment.id, event.target.checked)} />
+                    <label className="inline-flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:border-green-700/40 hover:bg-green-50/60 sm:col-span-2 lg:col-span-3">
+                      <input type="checkbox" className="size-5 shrink-0 accent-green-700" checked={assignment.completed === true} onChange={(event) => updateAssignmentCompletion(assignment.id, event.target.checked)} />
                       تم الإنجاز
                     </label>
                     <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
@@ -615,7 +728,12 @@ export default function Dashboard() {
           </header>
           <div className="max-h-168 divide-y divide-border overflow-y-auto overscroll-contain border-y border-border">
             {homepageComments.map((comment) => (
-              <article key={comment.id} className="grid gap-4 py-5 sm:grid-cols-[minmax(12rem,1fr)_minmax(16rem,2fr)_auto] sm:items-end">
+              <article
+                key={comment.id}
+                id={`homepage-comment-${comment.id}`}
+                tabIndex={-1}
+                className="scroll-mt-6 grid gap-4 py-5 focus-visible:rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:grid-cols-[minmax(12rem,1fr)_minmax(16rem,2fr)_auto] sm:items-end"
+              >
                 <label className={labelClassName}>
                   الاسم
                   <input

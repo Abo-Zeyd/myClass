@@ -13,9 +13,12 @@ import {
   getAnnouncements,
   getHomepageSlides,
   getHomepageCommentsForAdmin,
+  getUnreadHomepageCommentsForAdmin,
+  getUnreadHomepageCommentCount,
   getLessonCommentsForAdmin,
   getLessons,
   getSupportingActivities,
+  markHomepageCommentsAsRead as markHomepageCommentsAsReadRecord,
   replaceAssignments,
   replaceAnnouncements,
   replaceHomepageSlides,
@@ -289,6 +292,33 @@ export async function saveHomepageSlides(value: unknown) {
 export async function loadHomepageCommentsForAdmin() {
   await assertAdmin();
   return await getHomepageCommentsForAdmin();
+}
+
+export async function loadUnreadHomepageCommentCount() {
+  await assertAdmin();
+  return await getUnreadHomepageCommentCount();
+}
+
+export async function loadUnreadHomepageCommentsForAdmin() {
+  await assertAdmin();
+  return await getUnreadHomepageCommentsForAdmin();
+}
+
+export async function markHomepageCommentsAsRead(ids: unknown) {
+  await assertAdmin();
+  if (
+    !Array.isArray(ids) ||
+    ids.length > 1000 ||
+    !ids.every(
+      (id): id is string =>
+        typeof id === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id),
+    )
+  ) {
+    throw new Error("قائمة معرّفات التعليقات غير صالحة.");
+  }
+
+  await markHomepageCommentsAsReadRecord(ids);
 }
 
 export async function saveHomepageComment(id: unknown, displayNameValue: unknown, bodyValue: unknown) {

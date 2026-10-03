@@ -727,6 +727,37 @@ export async function getHomepageCommentsForAdmin(): Promise<HomepageComment[]> 
   return (data ?? []).map(mapHomepageComment);
 }
 
+export async function getUnreadHomepageCommentsForAdmin(): Promise<HomepageComment[]> {
+  const { data, error } = await getDatabase()
+    .from('homepage_comments')
+    .select('id, display_name, body, status, created_at')
+    .is('read_at', null)
+    .order('created_at', { ascending: false })
+    .limit(1000);
+  throwIfError(error);
+  return (data ?? []).map(mapHomepageComment);
+}
+
+export async function getUnreadHomepageCommentCount(): Promise<number> {
+  const { count, error } = await getDatabase()
+    .from('homepage_comments')
+    .select('id', { count: 'exact', head: true })
+    .is('read_at', null);
+  throwIfError(error);
+  return count ?? 0;
+}
+
+export async function markHomepageCommentsAsRead(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+
+  const { error } = await getDatabase()
+    .from('homepage_comments')
+    .update({ read_at: new Date().toISOString() })
+    .in('id', ids)
+    .is('read_at', null);
+  throwIfError(error);
+}
+
 export async function insertHomepageComment(
   displayName: string,
   body: string

@@ -13,6 +13,7 @@ import HomepageComments from './components/HomepageComments';
 import HomepageSlider from './components/HomepageSlider';
 import LatestMindMapsSlider from './components/LatestMindMapsSlider';
 import LatestVideosSlider from './components/LatestVideosSlider';
+import TomorrowAssignmentsTicker from './components/TomorrowAssignmentsTicker';
 
 function formatDate(date: string) {
   const value = new Date(`${date}T00:00:00`);
@@ -23,6 +24,21 @@ function formatDate(date: string) {
 
 function getCurrentTime() {
   return Date.now();
+}
+
+function getTomorrowInAlgiers() {
+  const dateParts = new Intl.DateTimeFormat('en', {
+    timeZone: 'Africa/Algiers',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date(getCurrentTime()));
+  const part = (type: 'year' | 'month' | 'day') =>
+    dateParts.find((value) => value.type === type)?.value ?? '';
+  const algiersToday = `${part('year')}-${part('month')}-${part('day')}`;
+  const tomorrow = new Date(`${algiersToday}T00:00:00Z`);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  return tomorrow.toISOString().slice(0, 10);
 }
 
 export const dynamic = 'force-dynamic';
@@ -52,6 +68,10 @@ export default async function Home() {
   });
   const today = new Date(getCurrentTime()).toISOString().slice(0, 10);
   const todayAt = Date.parse(`${today}T00:00:00Z`);
+  const tomorrowInAlgiers = getTomorrowInAlgiers();
+  const tomorrowAssignments = assignments.filter(
+    (assignment) => assignment.completed !== true && assignment.submissionDate === tomorrowInAlgiers,
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans" dir="rtl">
@@ -80,6 +100,8 @@ export default async function Home() {
         <AnnouncementTicker
           announcements={announcements.filter((announcement) => announcement.active)}
         />
+
+        <TomorrowAssignmentsTicker assignments={tomorrowAssignments} />
 
         <section
           className="overflow-hidden rounded-2xl border border-border bg-surface shadow-md"
