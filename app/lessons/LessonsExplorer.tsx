@@ -110,15 +110,15 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
 
   return (
     <div className="mx-auto max-w-6xl w-full max-w-full px-3 py-4 sm:px-6 sm:py-8 overflow-x-hidden">
-      <div className="flex flex-col items-start gap-5 md:flex-row w-full max-w-full min-w-0">
+      <div className="flex w-full min-w-0 max-w-full flex-col items-start gap-4 sm:gap-5 md:flex-row">
         <Sidebar
           selectedSubjectId={selectedSubjectId}
           onSelectSubject={selectSubject}
         />
 
-        <main className="min-h-[30rem] sm:min-h-[45rem] w-full min-w-0 flex-1 rounded-2xl border border-border bg-surface p-3.5 sm:p-8 shadow-md">
-          <header className="mb-8 border-b border-border pb-6">
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-3">
+        <main className="min-h-[24rem] w-full min-w-0 flex-1 rounded-2xl border border-border bg-surface p-3.5 shadow-md sm:min-h-[45rem] sm:p-8">
+          <header className="mb-5 border-b border-border pb-4 sm:mb-8 sm:pb-6">
+            <h1 className="flex items-center gap-2 text-xl font-black text-foreground sm:gap-3 sm:text-2xl">
               {selectedSubject ? (
                 <>
                   <span className="p-2 bg-primary/10 rounded-xl text-primary">

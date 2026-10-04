@@ -257,11 +257,11 @@ export default async function Home() {
           </header>
 
           {supportingActivities.length > 0 ? (
-            <ul className="content-list-scroll max-h-[42rem] overflow-y-auto overscroll-contain divide-y divide-border/60">
+            <ul className="content-list-scroll max-h-none overflow-y-auto overscroll-contain divide-y divide-border/60 sm:max-h-[42rem]">
               {supportingActivities.map((activity) => (
                 <li
                   key={activity.id}
-                  className="flex items-center gap-4 px-6 py-5 transition-colors hover:bg-surface-muted/5"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-surface-muted/5 sm:flex-nowrap sm:gap-4 sm:px-6 sm:py-5"
                 >
                   <ArrowRightCircle size={18} className="shrink-0 text-secondary/60" />
                   <span
@@ -269,7 +269,7 @@ export default async function Home() {
                   >
                     {activity.completed ? 'منجز' : 'للتدرب'}
                   </span>
-                  <p className="min-w-0 flex-1 font-bold text-lg leading-tight text-foreground">
+                  <p className="order-last w-full min-w-0 font-bold text-base leading-tight text-foreground sm:order-none sm:flex-1 sm:text-lg">
                     {activity.name}
                   </p>
                   {activity.link && (

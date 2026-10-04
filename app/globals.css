@@ -60,7 +60,6 @@ body {
   max-width: 100%;
   overflow-x: hidden !important;
   position: relative;
-  touch-action: pan-y;
   padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0)
     env(safe-area-inset-left, 0);
 }
@@ -219,7 +218,7 @@ a:hover {
    Assignment List Responsive Heights
    ========================================================================== */
 .assignment-list-scroll {
-  max-height: 70rem;
+  max-height: none;
 }
 
 @media (min-width: 640px) {

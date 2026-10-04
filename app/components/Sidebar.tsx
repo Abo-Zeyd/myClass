@@ -34,7 +34,7 @@ export default function Sidebar({ selectedSubjectId, onSelectSubject }: SidebarP
         <span className="w-1.5 h-6 bg-primary rounded-full"></span>
         مواد السنة الرابعة
       </h3>
-      <ul className="space-y-2">
+      <ul className="grid grid-cols-2 gap-2 md:grid-cols-1">
         {subjects.map((item) => {
           const Icon = item.icon;
           const isActive = selectedSubjectId === item.id;
@@ -44,7 +44,7 @@ export default function Sidebar({ selectedSubjectId, onSelectSubject }: SidebarP
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => onSelectSubject(item.id)}
-                className={`w-full flex items-center justify-between group px-4 py-3.5 rounded-xl text-sm font-bold transition-all text-right ${
+                className={`flex min-h-12 w-full items-center justify-between gap-2 rounded-xl px-3 py-3 text-right text-sm font-bold transition-all group sm:px-4 md:py-3.5 ${
                   isActive
                     ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]"
                     : "text-foreground hover:bg-surface-muted hover:text-primary"
