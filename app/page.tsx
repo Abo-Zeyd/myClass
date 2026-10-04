@@ -255,13 +255,6 @@ export default async function Home() {
               {supportingActivities.length} أنشطة
             </span>
           </header>
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full border border-secondary/20 bg-secondary/10 px-4 py-1.5 text-sm font-bold text-secondary">
-              {supportingActivities.length} أنشطة
-            </span>
-          </header>
 
           {supportingActivities.length > 0 ? (
             <ul className="content-list-scroll max-h-[42rem] overflow-y-auto overscroll-contain divide-y divide-border/60">
