@@ -84,18 +84,18 @@ export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlid
       aria-labelledby="latest-videos-title"
       className={
         isExpanded
-          ? 'fixed inset-0 z-50 flex h-dvh w-screen flex-col overflow-hidden bg-surface'
+          ? 'fixed inset-0 z-50 flex h-dvh w-full flex-col overflow-hidden bg-surface'
           : 'overflow-hidden rounded-2xl border border-border bg-surface shadow-md'
       }
     >
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border bg-surface-muted/30 px-6 py-5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-muted/30 px-4 py-4 sm:px-6 sm:py-5">
         <div>
-          <h2 id="latest-videos-title" className="text-xl font-bold text-foreground">
+          <h2 id="latest-videos-title" className="text-lg sm:text-xl font-bold text-foreground">
             أحدث الفيديوهات
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">آخر مقاطع الفيديو المنشورة في القسم</p>
+          <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">آخر مقاطع الفيديو المنشورة في القسم</p>
         </div>
-        <span className="rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 text-sm font-bold text-secondary">
+        <span className="rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 text-xs sm:text-sm font-bold text-secondary">
           {videos.length} فيديو
         </span>
       </header>
@@ -103,8 +103,8 @@ export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlid
       <div
         className={
           isExpanded
-            ? 'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-muted/30 p-3 sm:p-6'
-            : 'relative flex h-[min(70vh,44rem)] min-h-[320px] items-center justify-center overflow-hidden bg-surface-muted/30 p-6 sm:p-10'
+            ? 'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-muted/30 p-2 sm:p-6'
+            : 'relative flex h-[min(60vh,40rem)] min-h-[220px] sm:min-h-[320px] items-center justify-center overflow-hidden bg-surface-muted/30 p-3 sm:p-6 sm:p-10'
         }
       >
         <div className="relative size-full overflow-hidden rounded-lg border border-border/60 bg-background shadow-inner shadow-black/10">

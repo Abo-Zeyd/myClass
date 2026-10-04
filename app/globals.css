@@ -48,9 +48,25 @@
   color: white;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  position: relative;
+  touch-action: pan-y;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0)
+    env(safe-area-inset-left, 0);
+}
+
 html {
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
 }
 

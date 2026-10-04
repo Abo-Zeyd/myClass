@@ -10,9 +10,13 @@
     "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
     "migrate:supabase": "node scripts/migrate-sqlite-to-supabase.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "@supabase/supabase-js": "^2.117.2",
     "better-sqlite3": "^13.0.3",
     "lucide-react": "^1.48.0",
@@ -21,6 +25,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",

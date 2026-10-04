@@ -36,7 +36,7 @@ export default function TomorrowAssignmentsTicker({ assignments }: { assignments
   return (
     <section
       aria-label="واجبات الغد"
-      className="flex min-h-16 items-center gap-3 rounded-lg border border-secondary/25 bg-secondary/5 px-3 py-3 sm:gap-4 sm:px-5"
+      className="flex min-h-16 w-full max-w-full overflow-hidden items-center gap-3 rounded-lg border border-secondary/25 bg-secondary/5 px-3 py-3 sm:gap-4 sm:px-5"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

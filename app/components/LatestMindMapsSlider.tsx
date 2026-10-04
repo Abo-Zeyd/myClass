@@ -66,20 +66,20 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
       aria-labelledby="latest-mind-maps-title"
       className={
         isExpanded
-          ? 'fixed inset-0 z-50 flex h-dvh w-screen flex-col overflow-hidden bg-surface'
+          ? 'fixed inset-0 z-50 flex h-dvh w-full flex-col overflow-hidden bg-surface'
           : 'overflow-hidden rounded-2xl border border-border bg-surface shadow-md'
       }
     >
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border bg-surface-muted/30 px-6 py-5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-muted/30 px-4 py-4 sm:px-6 sm:py-5">
         <div>
-          <h2 id="latest-mind-maps-title" className="text-xl font-bold text-foreground">
+          <h2 id="latest-mind-maps-title" className="text-lg sm:text-xl font-bold text-foreground">
             الخرائط الذهنية
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
             أحدث الخرائط الذهنية المضافة إلى الدروس
           </p>
         </div>
-        <span className="rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 text-sm font-bold text-secondary">
+        <span className="rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 text-xs sm:text-sm font-bold text-secondary">
           {maps.length} خريطة
         </span>
       </header>
@@ -87,8 +87,8 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
       <div
         className={
           isExpanded
-            ? 'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-muted/30 p-3 sm:p-6'
-            : 'relative flex h-[min(70vh,48rem)] min-h-[350px] items-center justify-center overflow-hidden bg-surface-muted/30 p-6 sm:p-10'
+            ? 'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-muted/30 p-2 sm:p-6'
+            : 'relative flex h-[min(60vh,40rem)] min-h-[250px] sm:min-h-[350px] items-center justify-center overflow-hidden bg-surface-muted/30 p-3 sm:p-6 sm:p-10'
         }
       >
         <div className="relative size-full overflow-auto rounded-lg border border-border/60 bg-background shadow-inner shadow-black/10">
@@ -98,8 +98,8 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
               alt={slide.title}
               fill
               unoptimized
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-contain p-2"
+              sizes="100vw"
+              className="object-contain p-1 sm:p-2"
             />
           </div>
         </div>

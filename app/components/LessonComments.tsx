@@ -104,7 +104,7 @@ export default function LessonComments({ subjectId, lessonId, itemId }: LessonCo
             />
           </label>
         </div>
-        <label aria-hidden="true" className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
+        <label aria-hidden="true" className="sr-only">
           Website
           <input
             tabIndex={-1}

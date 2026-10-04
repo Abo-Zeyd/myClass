@@ -62,22 +62,22 @@ export default function HomepageComments() {
       className="overflow-hidden rounded-2xl border border-border bg-surface shadow-md"
       aria-labelledby="homepage-comments-title"
     >
-      <header className="flex items-center justify-between gap-4 border-b border-border bg-surface-muted/30 px-6 py-6">
-        <div className="flex items-center gap-4">
-          <span className="flex size-12 items-center justify-center rounded-xl bg-primary text-white" aria-hidden="true">
-            <MessageSquare size={23} />
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-muted/30 px-4 py-4 sm:px-6 sm:py-6">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <span className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-white" aria-hidden="true">
+            <MessageSquare size={21} />
           </span>
-          <div>
-            <h2 id="homepage-comments-title" className="text-xl font-bold text-foreground">تعليقات الزوار</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">شاركنا رأيك أو اترك كلمة طيبة.</p>
+          <div className="min-w-0">
+            <h2 id="homepage-comments-title" className="text-lg sm:text-xl font-bold text-foreground truncate">تعليقات الزوار</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground truncate">شاركنا رأيك أو اترك كلمة طيبة.</p>
           </div>
         </div>
-        <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary">
+        <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs sm:text-sm font-bold text-primary shrink-0">
           {comments.length} تعليق
         </span>
       </header>
 
-      <div className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+      <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <form onSubmit={handleSubmit} className="space-y-3">
           <label className="block text-sm font-medium text-foreground">
             الاسم
@@ -101,7 +101,7 @@ export default function HomepageComments() {
               className="mt-1 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
             />
           </label>
-          <label aria-hidden="true" className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
+          <label aria-hidden="true" className="sr-only">
             Website
             <input
               tabIndex={-1}

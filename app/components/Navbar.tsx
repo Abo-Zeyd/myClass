@@ -3,8 +3,8 @@ import { Home, BookOpen, GraduationCap } from "lucide-react";
 
 export default function Navbar() {
   return (
-    <header className="border-b border-border bg-surface/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+    <header className="border-b border-border bg-surface/90 backdrop-blur-md sticky top-0 z-50 shadow-sm w-full max-w-full overflow-x-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between min-w-0">
         {/* جهة اليمين: الشعار واسم الأستاذ */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner">

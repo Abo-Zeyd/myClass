@@ -31,6 +31,25 @@ The app reads and writes assignments, lessons, supporting activities, announceme
 
 The migration command reads `.env.local` automatically. Vercel deployments use the configured Supabase database as persistent storage.
 
+## Android app
+
+The Android app is a Capacitor shell named **قسمي** that opens the deployed website, so the web project remains the single source for the interface. It requires an internet connection; website updates appear in the app after deployment. The administration page is blocked inside the Android app and remains available on the website.
+
+To prepare the Android project:
+
+1. Install Android Studio and its Android SDK.
+2. In PowerShell, set `ANDROID_SITE_URL` to the full HTTPS URL of the deployed website. Include any required path prefix, but do not add a query string or fragment:
+
+   ```powershell
+   $env:ANDROID_SITE_URL = "https://my-class-eta.vercel.app/"
+   npm run android:sync
+   npm run android:open
+   ```
+
+3. In Android Studio, build and run the `android` project or generate a signed APK/AAB. Repeat `npm run android:sync` with the same URL after changing the Capacitor configuration.
+
+The Android project is kept in this repository; it does not replace or move the Next.js website. Never put server credentials in `ANDROID_SITE_URL`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
