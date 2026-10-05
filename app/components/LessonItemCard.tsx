@@ -383,32 +383,34 @@ export default function LessonItemCard({
                 </div>
               </div>
               <div
-                className="mt-3 flex gap-2 overflow-x-auto pb-2"
+                className="mt-3 overflow-x-auto pb-2"
                 role="group"
                 aria-label="مصغرات الصور"
               >
-                {item.images.map((image, index) => (
-                  <button
-                    key={`${anchorBaseId}-image-thumbnail-${index}`}
-                    type="button"
-                    aria-label={`عرض الصورة ${index + 1}: ${image.alt || `صورة توضيحية لدرس ${lessonTitle}`}`}
-                    aria-pressed={imageSliderIndex === index}
-                    onClick={() => setImageSliderIndex(index)}
-                    className={`shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
-                      imageSliderIndex === index
-                        ? "border-primary"
-                        : "border-border hover:border-primary/60"
-                    }`}
-                  >
-                    <Image
-                      src={getGoogleDriveImageUrl(image.src)}
-                      alt=""
-                      width={144}
-                      height={96}
-                      className="h-20 w-28 object-cover sm:h-24 sm:w-36"
-                    />
-                  </button>
-                ))}
+                <div className="mx-auto flex w-max min-w-full justify-center gap-2">
+                  {item.images.map((image, index) => (
+                    <button
+                      key={`${anchorBaseId}-image-thumbnail-${index}`}
+                      type="button"
+                      aria-label={`عرض الصورة ${index + 1}: ${image.alt || `صورة توضيحية لدرس ${lessonTitle}`}`}
+                      aria-pressed={imageSliderIndex === index}
+                      onClick={() => setImageSliderIndex(index)}
+                      className={`shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
+                        imageSliderIndex === index
+                          ? "border-primary"
+                          : "border-border hover:border-primary/60"
+                      }`}
+                    >
+                      <Image
+                        src={getGoogleDriveImageUrl(image.src)}
+                        alt=""
+                        width={144}
+                        height={96}
+                        className="h-20 w-28 object-cover sm:h-24 sm:w-36"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
