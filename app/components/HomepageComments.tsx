@@ -20,7 +20,6 @@ function formatCommentDate(value: string) {
 
 export default function HomepageComments() {
   const [comments, setComments] = useState<HomepageComment[]>([]);
-  const [displayName, setDisplayName] = useState("");
   const [body, setBody] = useState("");
   const [website, setWebsite] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,7 +43,7 @@ export default function HomepageComments() {
     event.preventDefault();
     setSubmitting(true);
     setMessage("");
-    const result = await submitHomepageComment({ displayName, body, website });
+    const result = await submitHomepageComment({ body, website });
 
     if (result.ok) {
       setComments((current) => [result.value, ...current].slice(0, 100));
@@ -79,17 +78,6 @@ export default function HomepageComments() {
 
       <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <form onSubmit={handleSubmit} className="space-y-3">
-          <label className="block text-sm font-medium text-foreground">
-            الاسم
-            <input
-              required
-              maxLength={60}
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              autoComplete="name"
-              className="mt-1 min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
-            />
-          </label>
           <label className="block text-sm font-medium text-foreground">
             التعليق
             <textarea
@@ -131,8 +119,7 @@ export default function HomepageComments() {
           ) : (
             comments.map((comment) => (
               <article key={comment.id} className="border-b border-border/70 pb-3 last:border-0">
-                <header className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <h3 className="text-sm font-semibold text-foreground">{comment.displayName}</h3>
+                <header className="mb-1 flex justify-end">
                   <time className="text-xs text-muted-foreground" dateTime={comment.createdAt}>
                     {formatCommentDate(comment.createdAt)}
                   </time>

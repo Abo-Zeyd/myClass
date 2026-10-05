@@ -65,17 +65,16 @@ export async function submitHomepageComment(input: unknown): Promise<ActionResul
     return { ok: false, error: "تعذر إرسال التعليق." };
   }
 
-  const displayName = normalizeText(values.displayName, 60);
   const body = normalizeText(values.body, 1000);
-  if (!displayName || !body) {
-    return { ok: false, error: "أدخل الاسم والتعليق ضمن الحد المسموح." };
+  if (!body) {
+    return { ok: false, error: "أدخل التعليق ضمن الحد المسموح." };
   }
   if (await isRateLimited()) {
     return { ok: false, error: "أرسلت تعليقات كثيرة. حاول مجدداً بعد دقيقة." };
   }
 
   try {
-    const comment = await insertHomepageComment(displayName, body);
+    const comment = await insertHomepageComment("زائر", body);
     return { ok: true, value: comment };
   } catch {
     return { ok: false, error: "تعذر إرسال التعليق حالياً." };
