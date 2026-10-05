@@ -26,7 +26,6 @@ function formatCommentDate(value: string) {
 
 export default function LessonComments({ subjectId, lessonId, itemId }: LessonCommentsProps) {
   const [comments, setComments] = useState<LessonComment[]>([]);
-  const [displayName, setDisplayName] = useState("");
   const [body, setBody] = useState("");
   const [website, setWebsite] = useState("");
   const [loading, setLoading] = useState(true);
@@ -55,7 +54,6 @@ export default function LessonComments({ subjectId, lessonId, itemId }: LessonCo
       subjectId,
       lessonId,
       itemId,
-      displayName,
       body,
       website,
     });
@@ -80,30 +78,17 @@ export default function LessonComments({ subjectId, lessonId, itemId }: LessonCo
       </h4>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_2fr]">
-          <label className="block text-sm font-medium text-foreground">
-            الاسم
-            <input
-              required
-              maxLength={60}
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              className="mt-1 min-h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
-              autoComplete="name"
-            />
-          </label>
-          <label className="block text-sm font-medium text-foreground">
-            التعليق
-            <textarea
-              required
-              maxLength={1000}
-              rows={2}
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-              className="mt-1 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-            />
-          </label>
-        </div>
+        <label className="block text-sm font-medium text-foreground">
+          التعليق
+          <textarea
+            required
+            maxLength={1000}
+            rows={2}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            className="mt-1 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </label>
         <label aria-hidden="true" className="sr-only">
           Website
           <input
@@ -134,8 +119,7 @@ export default function LessonComments({ subjectId, lessonId, itemId }: LessonCo
         ) : (
           comments.map((comment) => (
             <article key={comment.id} className="border-b border-border/70 pb-3 last:border-0">
-              <header className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                <h5 className="text-sm font-semibold text-foreground">{comment.displayName}</h5>
+              <header className="mb-1 flex justify-end">
                 <time className="text-xs text-muted-foreground" dateTime={comment.createdAt}>
                   {formatCommentDate(comment.createdAt)}
                 </time>

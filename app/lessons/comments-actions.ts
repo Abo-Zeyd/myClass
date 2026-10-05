@@ -75,14 +75,13 @@ export async function submitLessonComment(input: unknown): Promise<ActionResult<
   }
 
   const { subjectId, lessonId, itemId } = input;
-  const displayName = normalizeText(input.displayName, 60);
   const body = normalizeText(input.body, 1000);
 
   if (!validReference(subjectId) || !validReference(lessonId) || !validReference(itemId)) {
     return { ok: false, error: "بطاقة الدرس غير صالحة." };
   }
-  if (!displayName || !body) {
-    return { ok: false, error: "أدخل الاسم والتعليق." };
+  if (!body) {
+    return { ok: false, error: "أدخل التعليق." };
   }
   if (await isRateLimited()) {
     return { ok: false, error: "أرسلت تعليقات كثيرة. حاول مجدداً بعد دقيقة." };
@@ -96,7 +95,7 @@ export async function submitLessonComment(input: unknown): Promise<ActionResult<
       subjectId,
       lessonId,
       itemId,
-      displayName,
+      "زائر",
       body,
     );
     return { ok: true, value: comment };
