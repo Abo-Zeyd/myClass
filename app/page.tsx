@@ -89,7 +89,7 @@ export default async function Home() {
 
         <HomepageSlider slides={homepageSlides.filter((slide) => slide.active)} />
 
-        {latestVideos.length > 0 && <LatestVideosSlider videos={latestVideos} />}
+        {latestVideos.length > 0 && <LatestVideosSlider videos={latestVideos} showAllVideosLink />}
 
         {/* {latestMindMaps.length > 0 && <LatestMindMapsSlider maps={latestMindMaps} />} */}
 

@@ -1,6 +1,13 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, FileVideo, Maximize2, Minimize2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  FileVideo,
+  Maximize2,
+  Minimize2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -41,7 +48,19 @@ function getEmbedUrl(url: string) {
   }
 }
 
-export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlide[] }) {
+export default function LatestVideosSlider({
+  videos,
+  title = 'أحدث الفيديوهات',
+  description = 'آخر مقاطع الفيديو المنشورة في القسم',
+  headingId = 'latest-videos-title',
+  showAllVideosLink = false,
+}: {
+  videos: LatestVideoSlide[];
+  title?: string;
+  description?: string;
+  headingId?: string;
+  showAllVideosLink?: boolean;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -81,7 +100,7 @@ export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlid
     <section
       role={isExpanded ? 'dialog' : undefined}
       aria-modal={isExpanded || undefined}
-      aria-labelledby="latest-videos-title"
+      aria-labelledby={headingId}
       className={
         isExpanded
           ? 'fixed inset-0 z-50 flex h-dvh w-full flex-col overflow-hidden bg-surface'
@@ -90,10 +109,10 @@ export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlid
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-muted/30 px-4 py-4 sm:px-6 sm:py-5">
         <div>
-          <h2 id="latest-videos-title" className="text-lg sm:text-xl font-bold text-foreground">
-            أحدث الفيديوهات
+          <h2 id={headingId} className="text-lg sm:text-xl font-bold text-foreground">
+            {title}
           </h2>
-          <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">آخر مقاطع الفيديو المنشورة في القسم</p>
+          <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">{description}</p>
         </div>
         <span className="rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 text-xs sm:text-sm font-bold text-secondary">
           {videos.length} فيديو
@@ -101,89 +120,116 @@ export default function LatestVideosSlider({ videos }: { videos: LatestVideoSlid
       </header>
 
       <div
-        className={
-          isExpanded
-            ? 'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-muted/30 p-2 sm:p-6'
-            : 'relative flex h-[min(60vh,40rem)] min-h-[220px] sm:min-h-[320px] items-center justify-center overflow-hidden bg-surface-muted/30 p-3 sm:p-6 sm:p-10'
-        }
+        className={`flex min-h-0 flex-col items-center overflow-y-auto bg-surface-muted/30 p-3 sm:p-6 ${isExpanded ? 'flex-1 justify-center' : ''}`}
       >
-        <div className="relative size-full overflow-hidden rounded-lg border border-border/60 bg-background shadow-inner shadow-black/10">
-          {embedUrl ? (
-            <iframe
-              src={embedUrl}
-              title={slide.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              className="size-full"
-            />
-          ) : (
-            <div className="flex size-full items-center justify-center bg-surface-muted/20 px-6 text-center text-muted-foreground">
-              <div className="space-y-3">
-                <FileVideo size={48} className="mx-auto opacity-70" aria-hidden="true" />
-                <p className="font-medium">لا يمكن معاينة هذا الفيديو مباشرة.</p>
-                <a
-                  href={slide.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm font-semibold text-primary underline"
-                >
-                  فتح الفيديو في علامة جديدة
-                </a>
+        <article className="flex w-full max-w-4xl min-w-0 items-center gap-3 rounded-xl border border-border bg-surface px-3 py-3 shadow-sm sm:gap-4 sm:px-5">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+            <FileVideo size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-bold text-foreground">
+              <Link
+                href={`/lessons?subject=${encodeURIComponent(slide.subjectId)}&lesson=${encodeURIComponent(slide.lessonId)}`}
+                className="transition-colors hover:text-primary hover:underline"
+              >
+                {slide.title}
+              </Link>
+            </h3>
+            <p className="truncate text-xs text-muted-foreground">{slide.lessonTitle}</p>
+          </div>
+          {videos.length > 1 && (
+            <span
+              dir="ltr"
+              className="shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-bold text-muted-foreground"
+            >
+              {activeIndex + 1} / {videos.length}
+            </span>
+          )}
+        </article>
+
+        <div
+          className={`relative mt-3 w-full overflow-hidden rounded-lg border border-border/60 bg-background shadow-inner shadow-black/10 ${isExpanded ? 'min-h-0 max-w-full flex-1' : 'aspect-video max-w-4xl'}`}
+        >
+          <div className="absolute inset-0">
+            {embedUrl ? (
+              <iframe
+                src={embedUrl}
+                title={slide.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+                loading="lazy"
+                className="size-full"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center bg-surface-muted/20 px-6 text-center text-muted-foreground">
+                <div className="space-y-3">
+                  <FileVideo size={48} className="mx-auto opacity-70" aria-hidden="true" />
+                  <p className="font-medium">لا يمكن معاينة هذا الفيديو مباشرة.</p>
+                  <a
+                    href={slide.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-semibold text-primary underline"
+                  >
+                    فتح الفيديو في علامة جديدة
+                  </a>
+                </div>
               </div>
-            </div>
+            )}
+          </div>
+
+          {videos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => showSlide(activeIndex - 1)}
+                aria-label="الفيديو السابق"
+                title="الفيديو السابق"
+                className="absolute right-3 top-1/2 z-20 flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-primary shadow-xl transition-all hover:bg-primary hover:text-white active:scale-90"
+              >
+                <ChevronRight size={24} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => showSlide(activeIndex + 1)}
+                aria-label="الفيديو التالي"
+                title="الفيديو التالي"
+                className="absolute left-3 top-1/2 z-20 flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-primary shadow-xl transition-all hover:bg-primary hover:text-white active:scale-90"
+              >
+                <ChevronLeft size={24} aria-hidden="true" />
+              </button>
+            </>
           )}
         </div>
-
-        {videos.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={() => showSlide(activeIndex - 1)}
-              aria-label="الفيديو السابق"
-              title="الفيديو السابق"
-              className="absolute right-3 top-1/2 z-20 flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-primary shadow-xl transition-all hover:bg-primary hover:text-white active:scale-90"
-            >
-              <ChevronRight size={24} aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => showSlide(activeIndex + 1)}
-              aria-label="الفيديو التالي"
-              title="الفيديو التالي"
-              className="absolute left-3 top-1/2 z-20 flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-primary shadow-xl transition-all hover:bg-primary hover:text-white active:scale-90"
-            >
-              <ChevronLeft size={24} aria-hidden="true" />
-            </button>
-          </>
-        )}
       </div>
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-6">
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-foreground">
+      <footer className="flex min-h-14 items-center justify-end border-t border-border px-4 py-2 sm:px-6">
+        <div className="flex shrink-0 items-center gap-2">
+          {showAllVideosLink && (
             <Link
-              href={`/lessons?subject=${encodeURIComponent(slide.subjectId)}&lesson=${encodeURIComponent(slide.lessonId)}`}
-              className="transition-colors hover:text-primary hover:underline"
+              href="/videos"
+              aria-label="عرض جميع الفيديوهات حسب المادة"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-sm font-bold text-primary transition-colors hover:bg-primary/5"
             >
-              {slide.title}
+              <span>عرض الكل</span>
+              <ArrowLeft size={17} aria-hidden="true" />
             </Link>
-          </h3>
-          <p className="text-xs text-muted-foreground">{slide.lessonTitle}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsExpanded((expanded) => !expanded)}
-          aria-label={isExpanded ? 'تصغير الفيديو' : 'عرض الفيديو بملء الصفحة'}
-          title={isExpanded ? 'تصغير' : 'ملء الصفحة'}
-          className="flex size-10 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
-        >
-          {isExpanded ? (
-            <Minimize2 size={19} aria-hidden="true" />
-          ) : (
-            <Maximize2 size={19} aria-hidden="true" />
           )}
-        </button>
+          <button
+            type="button"
+            onClick={() => setIsExpanded((expanded) => !expanded)}
+            aria-label={isExpanded ? 'تصغير الفيديو' : 'عرض الفيديو بملء الصفحة'}
+            title={isExpanded ? 'تصغير' : 'ملء الصفحة'}
+            className="flex size-10 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+          >
+            {isExpanded ? (
+              <Minimize2 size={19} aria-hidden="true" />
+            ) : (
+              <Maximize2 size={19} aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </footer>
     </section>
   );

@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, Home } from 'lucide-react';
+import { BookOpen, FileVideo, GraduationCap, Home } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Navbar() {
@@ -19,14 +19,30 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <nav aria-label="روابط التنقل الرئيسية" className="flex w-full shrink-0 items-center justify-center gap-1 border-t border-border/60 pt-1 text-xs font-bold sm:w-auto sm:justify-start sm:gap-3 sm:border-0 sm:pt-0 sm:text-base">
-          <Link href="/" className="flex min-h-11 items-center gap-1 rounded-xl px-2 py-2 text-foreground transition-all hover:bg-primary/5 hover:text-primary active:scale-95 sm:gap-2 sm:px-4">
+        <nav
+          aria-label="روابط التنقل الرئيسية"
+          className="flex w-full shrink-0 items-center justify-center gap-1 border-t border-border/60 pt-1 text-xs font-bold sm:w-auto sm:justify-start sm:gap-3 sm:border-0 sm:pt-0 sm:text-base"
+        >
+          <Link
+            href="/"
+            className="flex min-h-11 items-center gap-1 rounded-xl px-2 py-2 text-foreground transition-all hover:bg-primary/5 hover:text-primary active:scale-95 sm:gap-2 sm:px-4"
+          >
             <Home size={18} className="text-primary/70 sm:size-5" />
             <span>الرئيسية</span>
           </Link>
-          <Link href="/lessons" className="flex min-h-11 items-center gap-1 rounded-xl px-2 py-2 text-foreground transition-all hover:bg-primary/5 hover:text-primary active:scale-95 sm:gap-2 sm:px-4">
+          <Link
+            href="/lessons"
+            className="flex min-h-11 items-center gap-1 rounded-xl px-2 py-2 text-foreground transition-all hover:bg-primary/5 hover:text-primary active:scale-95 sm:gap-2 sm:px-4"
+          >
             <BookOpen size={18} className="text-primary/70 sm:size-5" />
             <span>الدروس</span>
+          </Link>
+          <Link
+            href="/videos"
+            className="flex min-h-11 items-center gap-1 rounded-xl px-2 py-2 text-foreground transition-all hover:bg-primary/5 hover:text-primary active:scale-95 sm:gap-2 sm:px-4"
+          >
+            <FileVideo size={18} className="text-primary/70 sm:size-5" />
+            <span>فيديوهات</span>
           </Link>
         </nav>
       </div>
