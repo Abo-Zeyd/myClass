@@ -38,6 +38,7 @@ import {
   saveLessons,
   saveSupportingActivities,
 } from "./actions";
+import DatabaseBackupPanel from './DatabaseBackupPanel';
 import HomepageContentManager from "./HomepageContentManager";
 import type { HomepageComment, ManagedLessonComment } from "../../lib/content-db";
 
@@ -497,6 +498,7 @@ export default function Dashboard() {
           <p className="text-2xl font-extrabold text-foreground">{visitorCount.toLocaleString("ar-DZ")}</p>
         </div>
       </section>
+      <DatabaseBackupPanel />
       <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
       <nav className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-surface-muted/60 p-2 lg:sticky lg:top-4 lg:flex lg:flex-col lg:self-start" role="tablist" aria-label="أقسام لوحة التحكم">
         <button

@@ -31,6 +31,17 @@ The app reads and writes assignments, lessons, supporting activities, announceme
 
 The migration command reads `.env.local` automatically. Vercel deployments use the configured Supabase database as persistent storage.
 
+## Full database backups
+
+The admin dashboard can manually trigger a Supabase logical backup through a private GitHub Actions repository. The current application repository is public, so do not upload database artifacts or credentials to it.
+
+1. Create a separate **private** GitHub repository for backups and copy `.github/workflows/backup-database.yml` into its `.github/workflows/` folder.
+2. In the private backup repository, add the `SUPABASE_DB_URL` Actions secret using the **Session pooler** PostgreSQL connection string recommended for IPv4 runners. Use a direct connection only if the runner can reach your database over IPv6 or the project has the IPv4 add-on. Add the repository variable `BACKUP_REPOSITORY` with the exact `owner/repository` value of that private repository.
+3. Create a fine-grained GitHub token limited to the private backup repository, with **Actions: write** permission. Add it to the Vercel project as `GITHUB_BACKUP_TOKEN`. Also add `GITHUB_BACKUP_REPOSITORY` (`owner/repository`) and optionally `GITHUB_BACKUP_REF` (defaults to `main`) to Vercel Environment Variables, then redeploy.
+4. From the authenticated admin dashboard, choose **إنشاء نسخة احتياطية لقاعدة البيانات**. Follow the link to the private repository's Actions workflow and download the generated ZIP artifact; GitHub retains it for 30 days.
+
+The GitHub Actions artifact contains `roles.sql`, `schema.sql`, and `data.sql`. It is a logical backup of the database objects and data exposed to the Supabase CLI backup commands; it does not contain binary objects stored through the Supabase Storage API, project settings, or every Supabase-managed `auth`/`storage` object. Keep the destination repository private and do not commit backup files into the public application repository. Supabase documents the [CLI backup workflow](https://supabase.com/docs/guides/deployment/ci/backups) and [restore steps](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore).
+
 ## Android app
 
 The Android app is a Capacitor shell named **قسمي** that opens the deployed website, so the web project remains the single source for the interface. It requires an internet connection; website updates appear in the app after deployment. The administration page is blocked inside the Android app and remains available on the website.
