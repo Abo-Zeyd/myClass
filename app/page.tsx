@@ -12,6 +12,7 @@ import {
   getHomepageSlides,
   getLatestVideos,
   getSupportingActivities,
+  incrementVisitorCount,
 } from '../lib/content-db';
 import { getAssignmentStatus } from './assignment-status';
 import AnnouncementTicker from './components/AnnouncementTicker';
@@ -102,6 +103,12 @@ function SectionTitleCard({
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
+  try {
+    await incrementVisitorCount();
+  } catch (error) {
+    console.error('تعذر تسجيل زيارة الموقع:', error);
+  }
+
   const [
     allAssignments,
     supportingActivities,

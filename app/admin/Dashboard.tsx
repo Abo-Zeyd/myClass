@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ClipboardList,
   FileText,
+  Eye,
   ImagePlus,
   LogOut,
   Megaphone,
@@ -25,6 +26,7 @@ import {
   loadUnreadHomepageCommentsForAdmin,
   loadLessonCommentsForAdmin,
   loadLessons,
+  loadVisitorCount,
   loadSupportingActivities,
   logout,
   markHomepageCommentsAsRead,
@@ -134,6 +136,7 @@ export default function Dashboard() {
   const [busy, setBusy] = useState(true);
   const [notice, setNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [unreadHomepageCommentCount, setUnreadHomepageCommentCount] = useState(0);
+  const [visitorCount, setVisitorCount] = useState(0);
   const [homepageNotifications, setHomepageNotifications] = useState<HomepageComment[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsBusy, setNotificationsBusy] = useState(false);
@@ -144,8 +147,8 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
 
-    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic"), loadHomepageCommentsForAdmin(), loadLessonCommentsForAdmin(), loadUnreadHomepageCommentCount()])
-      .then(([loadedAssignments, loadedActivities, loadedLessons, loadedComments, loadedLessonComments, unreadCount]) => {
+    Promise.all([loadAssignments(), loadSupportingActivities(), loadLessons("arabic"), loadHomepageCommentsForAdmin(), loadLessonCommentsForAdmin(), loadUnreadHomepageCommentCount(), loadVisitorCount()])
+      .then(([loadedAssignments, loadedActivities, loadedLessons, loadedComments, loadedLessonComments, unreadCount, loadedVisitorCount]) => {
         if (!active) return;
         setAssignments(loadedAssignments);
         setSupportingActivities(loadedActivities);
@@ -153,6 +156,7 @@ export default function Dashboard() {
         setHomepageComments(loadedComments);
         setLessonComments(loadedLessonComments);
         setUnreadHomepageCommentCount(unreadCount);
+        setVisitorCount(loadedVisitorCount);
       })
       .catch((error: unknown) => {
         if (active) setNotice({ type: "error", text: error instanceof Error ? error.message : "تعذر تحميل البيانات." });
@@ -483,6 +487,16 @@ export default function Dashboard() {
         </div>
       </header>
 
+
+      <section className="mb-6 flex items-center gap-4 rounded-lg border border-border bg-surface p-5 shadow-sm" aria-label="إحصائيات الموقع">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Eye size={24} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-muted-foreground">إجمالي زيارات الموقع</p>
+          <p className="text-2xl font-extrabold text-foreground">{visitorCount.toLocaleString("ar-DZ")}</p>
+        </div>
+      </section>
       <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
       <nav className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-surface-muted/60 p-2 lg:sticky lg:top-4 lg:flex lg:flex-col lg:self-start" role="tablist" aria-label="أقسام لوحة التحكم">
         <button

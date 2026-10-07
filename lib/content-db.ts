@@ -788,3 +788,19 @@ export async function deleteHomepageComment(id: string): Promise<void> {
   const { error } = await getDatabase().from('homepage_comments').delete().eq('id', id);
   throwIfError(error);
 }
+
+export async function incrementVisitorCount(): Promise<number> {
+  const { data, error } = await getDatabase().rpc('increment_visitor_count');
+  throwIfError(error);
+  return Number(data ?? 0);
+}
+
+export async function getVisitorCount(): Promise<number> {
+  const { data, error } = await getDatabase()
+    .from('metadata')
+    .select('value')
+    .eq('key', 'visitor_count')
+    .maybeSingle();
+  throwIfError(error);
+  return Number(data?.value ?? 0);
+}

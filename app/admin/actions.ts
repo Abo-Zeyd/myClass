@@ -18,6 +18,7 @@ import {
   getLessonCommentsForAdmin,
   getLessons,
   getSupportingActivities,
+  getVisitorCount,
   markHomepageCommentsAsRead as markHomepageCommentsAsReadRecord,
   replaceAssignments,
   replaceAnnouncements,
@@ -370,6 +371,11 @@ export async function removeLessonComment(id: unknown) {
   }
   await deleteLessonCommentRecord(commentId);
   revalidatePath("/lessons");
+}
+
+export async function loadVisitorCount() {
+  await assertAdmin();
+  return await getVisitorCount();
 }
 
 export async function loadLessons(subjectId: string) {
