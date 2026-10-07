@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ChevronLeft, ChevronRight, ClipboardList, ExternalLink, Pause, Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, ClipboardList, ExternalLink, Pause, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 type Assignment = {
   id: string;
@@ -45,7 +45,11 @@ export default function TomorrowAssignmentsTicker({ assignments }: { assignments
         <span>واجبات الغد</span>
       </span>
       {assignment ? (
-        <div key={assignment.id} aria-live="polite" className="flex min-w-0 flex-1 items-center gap-2">
+        <div
+          key={assignment.id}
+          aria-live="polite"
+          className="flex min-w-0 flex-1 items-center gap-2"
+        >
           <p className="min-w-0 flex-1 text-sm font-semibold leading-7 text-foreground sm:text-base">
             {assignment.name}
           </p>
@@ -63,7 +67,10 @@ export default function TomorrowAssignmentsTicker({ assignments }: { assignments
           )}
         </div>
       ) : (
-        <p aria-live="polite" className="min-w-0 flex-1 text-sm font-semibold leading-7 text-muted-foreground sm:text-base">
+        <p
+          aria-live="polite"
+          className="min-w-0 flex-1 text-sm font-semibold leading-7 text-muted-foreground sm:text-base"
+        >
           لا توجد واجبات مطلوبة للغد.
         </p>
       )}
@@ -81,11 +88,17 @@ export default function TomorrowAssignmentsTicker({ assignments }: { assignments
           <button
             type="button"
             onClick={() => setIsPaused((paused) => !paused)}
-            aria-label={isPaused ? "تشغيل التنقل التلقائي للواجبات" : "إيقاف التنقل التلقائي للواجبات"}
-            title={isPaused ? "تشغيل" : "إيقاف مؤقت"}
+            aria-label={
+              isPaused ? 'تشغيل التنقل التلقائي للواجبات' : 'إيقاف التنقل التلقائي للواجبات'
+            }
+            title={isPaused ? 'تشغيل' : 'إيقاف مؤقت'}
             className="flex size-9 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
           >
-            {isPaused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
+            {isPaused ? (
+              <Play size={16} aria-hidden="true" />
+            ) : (
+              <Pause size={16} aria-hidden="true" />
+            )}
           </button>
           <button
             type="button"
