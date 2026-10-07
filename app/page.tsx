@@ -79,7 +79,11 @@ export default async function Home() {
 
         <TomorrowAssignmentsTicker assignments={tomorrowAssignments} />
 
-        <AssignmentsSection assignments={assignments} todayAt={todayAt} />
+        <AssignmentsSection
+          assignments={assignments}
+          todayAt={todayAt}
+          tomorrowDate={tomorrowInAlgiers}
+        />
 
         <SupportingActivitiesSection activities={supportingActivities} />
 

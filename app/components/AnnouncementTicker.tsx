@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { BellRing, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { BellRing, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 type Announcement = {
   id: string;
@@ -46,18 +46,44 @@ export default function AnnouncementTicker({ announcements }: { announcements: A
         <BellRing size={17} aria-hidden="true" />
         <span>تنبيه</span>
       </span>
-      <p key={announcement.id} aria-live="polite" className="min-w-0 flex-1 text-sm font-semibold leading-7 text-foreground sm:text-base">
+      <p
+        key={announcement.id}
+        aria-live="polite"
+        className="min-w-0 flex-1 text-sm font-semibold leading-7 text-foreground sm:text-base"
+      >
         {announcement.message}
       </p>
       {announcements.length > 1 && (
         <div className="flex shrink-0 items-center gap-1">
-          <button type="button" onClick={showPrevious} aria-label="التنبيه السابق" title="التنبيه السابق" className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10">
+          <button
+            type="button"
+            onClick={showPrevious}
+            aria-label="التنبيه السابق"
+            title="التنبيه السابق"
+            className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10"
+          >
             <ChevronRight size={19} aria-hidden="true" />
           </button>
-          <button type="button" onClick={() => setIsPaused((paused) => !paused)} aria-label={isPaused ? "تشغيل التنبيهات تلقائياً" : "إيقاف التنبيهات مؤقتاً"} title={isPaused ? "تشغيل" : "إيقاف مؤقت"} className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10">
-            {isPaused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
+          <button
+            type="button"
+            onClick={() => setIsPaused((paused) => !paused)}
+            aria-label={isPaused ? 'تشغيل التنبيهات تلقائياً' : 'إيقاف التنبيهات مؤقتاً'}
+            title={isPaused ? 'تشغيل' : 'إيقاف مؤقت'}
+            className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10"
+          >
+            {isPaused ? (
+              <Play size={16} aria-hidden="true" />
+            ) : (
+              <Pause size={16} aria-hidden="true" />
+            )}
           </button>
-          <button type="button" onClick={showNext} aria-label="التنبيه التالي" title="التنبيه التالي" className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10">
+          <button
+            type="button"
+            onClick={showNext}
+            aria-label="التنبيه التالي"
+            title="التنبيه التالي"
+            className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10"
+          >
             <ChevronLeft size={19} aria-hidden="true" />
           </button>
         </div>

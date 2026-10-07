@@ -24,9 +24,11 @@ function getSubmissionTime(date: string) {
 export default function AssignmentsSection({
   assignments,
   todayAt,
+  tomorrowDate,
 }: {
   assignments: Assignment[];
   todayAt: number;
+  tomorrowDate: string;
 }) {
   const sortedAssignments = [...assignments].sort(
     (a, b) => getSubmissionTime(a.submissionDate) - getSubmissionTime(b.submissionDate)
@@ -67,9 +69,17 @@ export default function AssignmentsSection({
               assignment.completed === true,
               assignment.submissionDate
             );
+            const submissionDateClasses =
+              status === 'completed'
+                ? 'border-green-300 bg-green-50 text-green-800 ring-1 ring-green-200/80'
+                : status === 'overdue'
+                  ? 'border-red-300 bg-red-50 text-red-800 ring-1 ring-red-200/80'
+                  : 'border-secondary/50 bg-secondary/10 text-primary ring-1 ring-secondary/20';
             const assignedAt = Date.parse(`${assignment.assignedDate}T00:00:00Z`);
             const assignmentAge = todayAt - assignedAt;
             const isNewAssignment = assignmentAge >= 0 && assignmentAge <= 24 * 60 * 60 * 1000;
+            const isDueTomorrow =
+              !assignment.completed && assignment.submissionDate === tomorrowDate;
 
             return (
               <li
@@ -129,7 +139,12 @@ export default function AssignmentsSection({
                   <span className="mb-0.5 block text-[10px] font-bold uppercase text-accent sm:hidden">
                     آخر أجل للتسليم
                   </span>
-                  <span className="font-medium">{formatDate(assignment.submissionDate)}</span>
+                  <time
+                    dateTime={assignment.submissionDate}
+                    className={`inline-flex max-w-full flex-wrap items-center justify-center rounded-xl border px-3 py-1.5 text-center text-[11px] font-bold leading-5 shadow-sm transition-colors sm:px-4 sm:text-xs ${submissionDateClasses} ${isDueTomorrow ? 'tomorrow-deadline-pulse' : ''}`}
+                  >
+                    {formatDate(assignment.submissionDate)}
+                  </time>
                 </div>
               </li>
             );

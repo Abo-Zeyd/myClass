@@ -214,7 +214,30 @@ a:hover {
   }
 }
 
-/* ==========================================================================
+@media (prefers-reduced-motion: no-preference) {
+  .tomorrow-deadline-pulse {
+    animation: tomorrow-deadline-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes tomorrow-deadline-pulse {
+  0%,
+  100% {
+    border-color: color-mix(in srgb, var(--secondary) 70%, var(--border));
+    background-color: color-mix(in srgb, var(--secondary) 10%, var(--surface));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--secondary) 18%, transparent);
+  }
+
+  50% {
+    border-color: var(--primary);
+    background-color: color-mix(in srgb, var(--secondary) 30%, var(--surface));
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--primary) 24%, transparent),
+      0 0 18px color-mix(in srgb, var(--secondary) 46%, transparent);
+  }
+}
+
+/* ========================================================================== 
    Assignment List Responsive Heights
    ========================================================================== */
 .assignment-list-scroll {
