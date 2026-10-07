@@ -303,7 +303,7 @@ export default async function Home() {
 
         {latestVideos.length > 0 && <LatestVideosSlider videos={latestVideos} />}
 
-        {latestMindMaps.length > 0 && <LatestMindMapsSlider maps={latestMindMaps} />}
+        {/* {latestMindMaps.length > 0 && <LatestMindMapsSlider maps={latestMindMaps} />} */}
 
         <HomepageComments />
       </main>

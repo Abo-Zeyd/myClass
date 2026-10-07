@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppRouteGuard>
           <div className="flex flex-col min-h-screen w-full max-w-full overflow-x-hidden relative">
             <Navbar />
-            <div className="flex-1 w-full max-w-full overflow-x-hidden">{children}</div>
+            <div className="flex-1 w-full max-w-full overflow-x-hidden pt-16 sm:pt-20">{children}</div>
           </div>
         </AppRouteGuard>
       </body>
