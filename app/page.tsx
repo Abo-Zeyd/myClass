@@ -10,7 +10,6 @@ import {
   getAnnouncements,
   getAssignments,
   getHomepageSlides,
-  getLatestMindMaps,
   getLatestVideos,
   getSupportingActivities,
 } from '../lib/content-db';
@@ -18,7 +17,6 @@ import { getAssignmentStatus } from './assignment-status';
 import AnnouncementTicker from './components/AnnouncementTicker';
 import HomepageComments from './components/HomepageComments';
 import HomepageSlider from './components/HomepageSlider';
-import LatestMindMapsSlider from './components/LatestMindMapsSlider';
 import LatestVideosSlider from './components/LatestVideosSlider';
 import TomorrowAssignmentsTicker from './components/TomorrowAssignmentsTicker';
 
@@ -110,14 +108,12 @@ export default async function Home() {
     announcements,
     homepageSlides,
     latestVideos,
-    latestMindMaps,
   ] = await Promise.all([
     getAssignments(),
     getSupportingActivities(),
     getAnnouncements(),
     getHomepageSlides(),
     getLatestVideos(),
-    getLatestMindMaps(),
   ]);
 
   const assignments = [...allAssignments].sort((a, b) => {
