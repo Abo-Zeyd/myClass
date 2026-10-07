@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { ChevronDown, BookOpen, Layers, Info } from "lucide-react";
-import LessonItemCard, { type LessonItem } from "../components/LessonItemCard";
-import Sidebar, { subjects } from "../components/Sidebar";
-
+import { BookOpen, ChevronDown, Info, Layers } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import LessonItemCard, { type LessonItem } from '../components/LessonItemCard';
+import Sidebar, { subjects } from '../components/Sidebar';
 
 type Lesson = {
   id: string;
@@ -16,7 +15,7 @@ type SubjectLessons = {
   lessons: Lesson[];
 };
 
-type SubjectId = (typeof subjects)[number]["id"];
+type SubjectId = (typeof subjects)[number]['id'];
 
 type LessonsExplorerProps = {
   lessonsBySubject: Record<SubjectId, SubjectLessons>;
@@ -31,14 +30,14 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
   useEffect(() => {
     function openSectionFromHash() {
       const params = new URLSearchParams(window.location.search);
-      const requestedSubjectId = params.get("subject");
-      const requestedLessonId = params.get("lesson");
+      const requestedSubjectId = params.get('subject');
+      const requestedLessonId = params.get('lesson');
 
       if (requestedSubjectId && requestedLessonId) {
         const subject = subjects.find((candidate) => candidate.id === requestedSubjectId);
         const lesson = subject
           ? lessonsBySubject[subject.id]?.lessons.find(
-              (candidate) => candidate.id === requestedLessonId,
+              (candidate) => candidate.id === requestedLessonId
             )
           : null;
 
@@ -79,10 +78,10 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
 
     openSectionFromHash();
     const initialFrame = window.requestAnimationFrame(openSectionFromHash);
-    window.addEventListener("hashchange", openSectionFromHash);
+    window.addEventListener('hashchange', openSectionFromHash);
     return () => {
       window.cancelAnimationFrame(initialFrame);
-      window.removeEventListener("hashchange", openSectionFromHash);
+      window.removeEventListener('hashchange', openSectionFromHash);
     };
   }, [lessonsBySubject]);
 
@@ -91,8 +90,8 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
 
     const frame = window.requestAnimationFrame(() => {
       document.getElementById(navigationTargetId)?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
+        behavior: 'smooth',
+        block: 'center',
       });
     });
 
@@ -111,27 +110,24 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
   return (
     <div className="mx-auto max-w-6xl w-full max-w-full px-3 py-4 sm:px-6 sm:py-8 overflow-x-hidden">
       <div className="flex w-full min-w-0 max-w-full flex-col items-start gap-4 sm:gap-5 md:flex-row">
-        <Sidebar
-          selectedSubjectId={selectedSubjectId}
-          onSelectSubject={selectSubject}
-        />
+        <Sidebar selectedSubjectId={selectedSubjectId} onSelectSubject={selectSubject} />
 
         <main className="min-h-[24rem] w-full min-w-0 flex-1 rounded-2xl border border-border bg-surface p-3.5 shadow-md sm:min-h-[45rem] sm:p-8">
-          <header className="mb-5 border-b border-border pb-4 sm:mb-8 sm:pb-6">
-            <h1 className="flex items-center gap-2 text-xl font-black text-foreground sm:gap-3 sm:text-2xl">
+          <header className="mb-5 rounded-2xl border border-border bg-background/70 p-4 shadow-sm sm:mb-8 sm:p-5">
+            <h1 className="flex min-w-0 items-center gap-2 text-xl font-black text-foreground sm:gap-3 sm:text-2xl">
               {selectedSubject ? (
                 <>
-                  <span className="p-2 bg-primary/10 rounded-xl text-primary">
-                    <BookOpen size={24} />
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
+                    <BookOpen size={23} />
                   </span>
-                  دروس {selectedSubject.name}
+                  <span className="truncate">دروس {selectedSubject.name}</span>
                 </>
               ) : (
                 <>
-                  <span className="p-2 bg-surface-muted rounded-xl text-muted-foreground">
-                    <Layers size={24} />
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-surface-muted text-muted-foreground shadow-inner">
+                    <Layers size={23} />
                   </span>
-                  استكشاف الدروس
+                  <span className="truncate">استكشاف الدروس</span>
                 </>
               )}
             </h1>
@@ -160,7 +156,11 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
                 const contentId = `${selectedSubject.id}-${lesson.id}-content`;
 
                 return (
-                  <section id={`lesson-${selectedSubject.id}-${lesson.id}`} key={lesson.id} className="overflow-hidden rounded-xl border border-border bg-background transition-all hover:shadow-sm">
+                  <section
+                    id={`lesson-${selectedSubject.id}-${lesson.id}`}
+                    key={lesson.id}
+                    className="overflow-hidden rounded-2xl border border-border bg-background transition-all hover:shadow-md"
+                  >
                     <h2>
                       <button
                         type="button"
@@ -171,29 +171,29 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
                           setExpandedCardId(null);
                           setNavigationTargetId(null);
                         }}
-                        className={`flex w-full items-center justify-between gap-4 px-5 py-4 text-right font-bold transition-colors ${
-                          isExpanded ? "bg-primary text-white" : "text-foreground hover:bg-surface-muted/50"
+                        className={`flex w-full items-center justify-between gap-4 px-4 py-4 text-right font-bold transition-colors sm:px-5 ${
+                          isExpanded
+                            ? 'bg-primary text-white'
+                            : 'bg-surface text-foreground hover:bg-surface-muted/50'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <span className={isExpanded ? "text-white/80" : "text-primary/60"}>
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${isExpanded ? 'bg-white/15 text-white' : 'bg-primary/10 text-primary'}`}
+                          >
                             <BookOpen size={18} />
                           </span>
-                          <span>{lesson.title}</span>
+                          <span className="truncate">{lesson.title}</span>
                         </div>
-                        <ChevronDown 
-                          size={20} 
-                          className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : "opacity-50"}`} 
+                        <ChevronDown
+                          size={20}
+                          className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'opacity-50'}`}
                         />
                       </button>
                     </h2>
 
-
                     {isExpanded && (
-                      <div
-                        id={contentId}
-                        className="space-y-3 px-3 pb-5 pt-2"
-                      >
+                      <div id={contentId} className="space-y-3 px-3 pb-5 pt-2">
                         {lesson.items.map((item) => (
                           <LessonItemCard
                             key={item.id}
@@ -207,14 +207,10 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
                             onClearNavigationTarget={() => setNavigationTargetId(null)}
                             isCollapsible={lesson.items.length > 1}
                             isExpanded={expandedCardId === item.id}
-                            onToggle={() =>
-                              {
-                                setExpandedCardId(
-                                  expandedCardId === item.id ? null : item.id,
-                                );
-                                setNavigationTargetId(null);
-                              }
-                            }
+                            onToggle={() => {
+                              setExpandedCardId(expandedCardId === item.id ? null : item.id);
+                              setNavigationTargetId(null);
+                            }}
                           />
                         ))}
 
