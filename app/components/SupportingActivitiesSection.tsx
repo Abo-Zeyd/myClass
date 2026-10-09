@@ -34,7 +34,7 @@ export default function SupportingActivitiesSection({
                 aria-hidden="true"
               />
               <span
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${activity.completed ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'}`}
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${activity.completed ? 'bg-success-light text-success' : 'bg-warning-light text-warning'}`}
               >
                 {activity.completed ? 'منجز' : 'للتدرب'}
               </span>

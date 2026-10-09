@@ -21,13 +21,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         <p className="mb-6 text-sm text-muted-foreground">إدارة الواجبات ومحتوى الدروس</p>
 
         {!configured ? (
-          <p role="alert" className="rounded-md border border-amber-700/25 bg-amber-50 p-4 text-sm text-amber-950">
+          <p role="alert" className="rounded-md border border-warning/25 bg-warning-light p-4 text-sm text-warning">
             أضف `ADMIN_PASSWORD` و`ADMIN_SESSION_SECRET` إلى متغيرات البيئة. كلمة المرور 12 حرفاً على الأقل، والسر 32 حرفاً على الأقل.
           </p>
         ) : (
           <form action={login} className="grid gap-4">
             {error === "invalid" && (
-              <p role="alert" className="rounded-md border border-red-700/25 bg-red-50 p-3 text-sm text-red-900">
+              <p role="alert" className="rounded-md border border-error/25 bg-error-light p-3 text-sm text-error">
                 كلمة المرور غير صحيحة.
               </p>
             )}

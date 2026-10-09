@@ -1,39 +1,39 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import {
   clearAdminSession,
   createAdminSession,
   hasAdminAuthConfig,
   isAdminAuthenticated,
-} from "../../lib/admin-auth";
+} from '../../lib/admin-auth';
 import {
-  getAssignments,
+  deleteHomepageComment as deleteHomepageCommentRecord,
+  deleteLessonComment as deleteLessonCommentRecord,
   getAnnouncements,
-  getHomepageSlides,
+  getAssignments,
   getHomepageCommentsForAdmin,
-  getUnreadHomepageCommentsForAdmin,
-  getUnreadHomepageCommentCount,
+  getHomepageSlides,
   getLessonCommentsForAdmin,
   getLessons,
   getSupportingActivities,
+  getUnreadHomepageCommentCount,
+  getUnreadHomepageCommentsForAdmin,
   getVisitorCount,
   markHomepageCommentsAsRead as markHomepageCommentsAsReadRecord,
-  replaceAssignments,
   replaceAnnouncements,
+  replaceAssignments,
   replaceHomepageSlides,
-  updateHomepageComment as updateHomepageCommentRecord,
-  deleteHomepageComment as deleteHomepageCommentRecord,
-  updateLessonComment as updateLessonCommentRecord,
-  deleteLessonComment as deleteLessonCommentRecord,
   replaceLessons,
   replaceSupportingActivities,
+  updateHomepageComment as updateHomepageCommentRecord,
+  updateLessonComment as updateLessonCommentRecord,
   type Announcement,
   type HomepageSlide,
   type SupportingActivity,
-} from "../../lib/content-db";
-import { getGoogleDriveFileId } from "../../lib/google-drive";
+} from '../../lib/content-db';
+import { getGoogleDriveFileId } from '../../lib/google-drive';
 
 type Assignment = {
   id: string;
@@ -62,16 +62,16 @@ type Lesson = {
 
 async function assertAdmin() {
   if (!(await isAdminAuthenticated())) {
-    throw new Error("انتهت جلسة الإدارة. سجّل الدخول مجدداً.");
+    throw new Error('انتهت جلسة الإدارة. سجّل الدخول مجدداً.');
   }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function requiredText(value: unknown, label: string, maxLength = 10000) {
-  if (typeof value !== "string" || value.length > maxLength) {
+  if (typeof value !== 'string' || value.length > maxLength) {
     throw new Error(`تحقق من حقل ${label}.`);
   }
 
@@ -81,33 +81,33 @@ function requiredText(value: unknown, label: string, maxLength = 10000) {
 function isValidWebUrl(value: string, allowHttp = false) {
   try {
     const url = new URL(value);
-    return url.protocol === "https:" || (allowHttp && url.protocol === "http:");
+    return url.protocol === 'https:' || (allowHttp && url.protocol === 'http:');
   } catch {
     return false;
   }
 }
 
 function normalizeAssignments(value: unknown): Assignment[] {
-  if (!Array.isArray(value)) throw new Error("قائمة الواجبات غير صالحة.");
+  if (!Array.isArray(value)) throw new Error('قائمة الواجبات غير صالحة.');
 
   return value.map((entry) => {
-    if (!isRecord(entry)) throw new Error("بيانات أحد الواجبات غير صالحة.");
+    if (!isRecord(entry)) throw new Error('بيانات أحد الواجبات غير صالحة.');
 
-    const id = requiredText(entry.id, "معرّف الواجب", 120);
-    const name = requiredText(entry.name, "اسم الواجب", 300);
-    const assignedDate = requiredText(entry.assignedDate, "تاريخ التكليف", 10);
-    const submissionDate = requiredText(entry.submissionDate, "تاريخ التقديم", 10);
-    const link = requiredText(entry.link ?? "", "الرابط", 2000);
+    const id = requiredText(entry.id, 'معرّف الواجب', 120);
+    const name = requiredText(entry.name, 'اسم الواجب', 300);
+    const assignedDate = requiredText(entry.assignedDate, 'تاريخ التكليف', 10);
+    const submissionDate = requiredText(entry.submissionDate, 'تاريخ التقديم', 10);
+    const link = requiredText(entry.link ?? '', 'الرابط', 2000);
 
-    if (!id || !name) throw new Error("يجب إدخال اسم لكل واجب.");
+    if (!id || !name) throw new Error('يجب إدخال اسم لكل واجب.');
     if (assignedDate && !/^\d{4}-\d{2}-\d{2}$/.test(assignedDate)) {
-      throw new Error("صيغة تاريخ التكليف غير صحيحة.");
+      throw new Error('صيغة تاريخ التكليف غير صحيحة.');
     }
     if (submissionDate && !/^\d{4}-\d{2}-\d{2}$/.test(submissionDate)) {
-      throw new Error("صيغة تاريخ التقديم غير صحيحة.");
+      throw new Error('صيغة تاريخ التقديم غير صحيحة.');
     }
     if (link && !isValidWebUrl(link, true)) {
-      throw new Error("رابط الواجب يجب أن يبدأ بـ http أو https.");
+      throw new Error('رابط الواجب يجب أن يبدأ بـ http أو https.');
     }
 
     return { id, name, assignedDate, submissionDate, link, completed: entry.completed === true };
@@ -115,17 +115,17 @@ function normalizeAssignments(value: unknown): Assignment[] {
 }
 
 function normalizeSupportingActivities(value: unknown): SupportingActivity[] {
-  if (!Array.isArray(value)) throw new Error("قائمة الأنشطة الداعمة غير صالحة.");
+  if (!Array.isArray(value)) throw new Error('قائمة الأنشطة الداعمة غير صالحة.');
 
   return value.map((entry) => {
-    if (!isRecord(entry)) throw new Error("بيانات أحد الأنشطة غير صالحة.");
+    if (!isRecord(entry)) throw new Error('بيانات أحد الأنشطة غير صالحة.');
 
-    const id = requiredText(entry.id, "معرّف النشاط", 120);
-    const name = requiredText(entry.name, "اسم النشاط", 300);
-    const link = requiredText(entry.link ?? "", "الرابط", 2000);
-    if (!id || !name) throw new Error("يجب إدخال اسم لكل نشاط.");
+    const id = requiredText(entry.id, 'معرّف النشاط', 120);
+    const name = requiredText(entry.name, 'اسم النشاط', 300);
+    const link = requiredText(entry.link ?? '', 'الرابط', 2000);
+    if (!id || !name) throw new Error('يجب إدخال اسم لكل نشاط.');
     if (link && !isValidWebUrl(link, true)) {
-      throw new Error("رابط النشاط يجب أن يبدأ بـ http أو https.");
+      throw new Error('رابط النشاط يجب أن يبدأ بـ http أو https.');
     }
 
     return { id, name, link, completed: entry.completed === true };
@@ -133,93 +133,105 @@ function normalizeSupportingActivities(value: unknown): SupportingActivity[] {
 }
 
 function normalizeAnnouncements(value: unknown): Announcement[] {
-  if (!Array.isArray(value)) throw new Error("قائمة التنبيهات غير صالحة.");
+  if (!Array.isArray(value)) throw new Error('قائمة التنبيهات غير صالحة.');
 
   return value.map((entry) => {
-    if (!isRecord(entry)) throw new Error("بيانات أحد التنبيهات غير صالحة.");
-    const id = requiredText(entry.id, "معرّف التنبيه", 120);
-    const message = requiredText(entry.message, "نص التنبيه", 1000);
-    if (!id || !message) throw new Error("يجب كتابة نص لكل تنبيه.");
+    if (!isRecord(entry)) throw new Error('بيانات أحد التنبيهات غير صالحة.');
+    const id = requiredText(entry.id, 'معرّف التنبيه', 120);
+    const message = requiredText(entry.message, 'نص التنبيه', 1000);
+    if (!id || !message) throw new Error('يجب كتابة نص لكل تنبيه.');
     return { id, message, active: entry.active === true };
   });
 }
 
 function normalizeHomepageSlides(value: unknown): HomepageSlide[] {
-  if (!Array.isArray(value)) throw new Error("قائمة صور الصفحة الرئيسية غير صالحة.");
+  if (!Array.isArray(value)) throw new Error('قائمة منشورات القسم غير صالحة.');
 
   return value.map((entry) => {
-    if (!isRecord(entry)) throw new Error("بيانات إحدى الصور غير صالحة.");
-    const id = requiredText(entry.id, "معرّف الصورة", 120);
-    const title = requiredText(entry.title, "عنوان الصورة", 300);
-    const url = requiredText(entry.url, "رابط Google Drive", 2000);
-    if (!id || !title || !url) throw new Error("أدخل عنواناً ورابطاً لكل صورة.");
-    if (!isValidWebUrl(url) || !getGoogleDriveFileId(url)) {
-      throw new Error("أدخل رابط مشاركة صالحاً لملف صورة على Google Drive.");
+    if (!isRecord(entry)) throw new Error('بيانات أحد المنشورات غير صالحة.');
+
+    const id = requiredText(entry.id, 'معرّف المنشور', 120);
+    const title = requiredText(entry.title, 'عنوان المنشور', 300);
+    const url = requiredText(entry.url ?? '', 'رابط الصورة', 2000);
+    const content = requiredText(entry.content ?? '', 'نص المنشور', 5000);
+
+    if (!id || !title) throw new Error('أدخل عنواناً لكل منشور.');
+    if (!url && !content) {
+      throw new Error('أدخل رابط صورة أو اكتب نصاً لكل منشور.');
     }
-    return { id, title, url, active: entry.active === true };
+    if (url && (!isValidWebUrl(url) || !getGoogleDriveFileId(url))) {
+      throw new Error('أدخل رابط مشاركة صالحاً لملف صورة على Google Drive.');
+    }
+
+    return { id, title, url, content, active: entry.active === true };
   });
 }
 
 function normalizeLessons(value: unknown): Lesson[] {
-  if (!Array.isArray(value)) throw new Error("قائمة الدروس غير صالحة.");
+  if (!Array.isArray(value)) throw new Error('قائمة الدروس غير صالحة.');
 
   return value.map((entry) => {
     if (!isRecord(entry) || !Array.isArray(entry.items)) {
-      throw new Error("بيانات أحد الدروس غير صالحة.");
+      throw new Error('بيانات أحد الدروس غير صالحة.');
     }
 
-    const id = requiredText(entry.id, "معرّف الدرس", 120);
-    const title = requiredText(entry.title, "عنوان الدرس", 300);
-    if (!id || !title) throw new Error("يجب إدخال عنوان لكل درس.");
+    const id = requiredText(entry.id, 'معرّف الدرس', 120);
+    const title = requiredText(entry.title, 'عنوان الدرس', 300);
+    if (!id || !title) throw new Error('يجب إدخال عنوان لكل درس.');
 
     const items = entry.items.map((item) => {
-      if (!isRecord(item)) throw new Error("بيانات محتوى الدرس غير صالحة.");
+      if (!isRecord(item)) throw new Error('بيانات محتوى الدرس غير صالحة.');
 
-      const itemId = requiredText(item.id, "معرّف المحتوى", 120);
-      const itemTitle = requiredText(item.title, "عنوان المحتوى", 300);
-      if (!itemId || !itemTitle) throw new Error("يجب إدخال عنوان لكل محتوى.");
+      const itemId = requiredText(item.id, 'معرّف المحتوى', 120);
+      const itemTitle = requiredText(item.title, 'عنوان المحتوى', 300);
+      if (!itemId || !itemTitle) throw new Error('يجب إدخال عنوان لكل محتوى.');
 
       const activitiesValue = item.activities ?? [];
       const imagesValue = item.images ?? [];
       const videosValue = item.videos ?? [];
       const pdfsValue = item.pdfs ?? [];
-      if (!Array.isArray(activitiesValue) || !Array.isArray(imagesValue) || !Array.isArray(videosValue) || !Array.isArray(pdfsValue)) {
-        throw new Error("تحقق من الأنشطة والصور والفيديوهات.");
+      if (
+        !Array.isArray(activitiesValue) ||
+        !Array.isArray(imagesValue) ||
+        !Array.isArray(videosValue) ||
+        !Array.isArray(pdfsValue)
+      ) {
+        throw new Error('تحقق من الأنشطة والصور والفيديوهات.');
       }
 
-      const activities = activitiesValue.map((activity) =>
-        requiredText(activity, "النشاط", 2000),
-      ).filter(Boolean);
+      const activities = activitiesValue
+        .map((activity) => requiredText(activity, 'النشاط', 2000))
+        .filter(Boolean);
       const images = imagesValue.map((image) => {
-        if (!isRecord(image)) throw new Error("بيانات الصورة غير صالحة.");
-        const src = requiredText(image.src, "مسار الصورة", 2000);
-        const alt = requiredText(image.alt ?? "", "وصف الصورة", 500);
-        const isLocalPath = src.startsWith("/") && !src.startsWith("//") && !src.includes("..");
+        if (!isRecord(image)) throw new Error('بيانات الصورة غير صالحة.');
+        const src = requiredText(image.src, 'مسار الصورة', 2000);
+        const alt = requiredText(image.alt ?? '', 'وصف الصورة', 500);
+        const isLocalPath = src.startsWith('/') && !src.startsWith('//') && !src.includes('..');
         if (!isLocalPath && !isValidWebUrl(src)) {
-          throw new Error("الصورة يجب أن تكون مسارًا محليًا أو رابط https.");
+          throw new Error('الصورة يجب أن تكون مسارًا محليًا أو رابط https.');
         }
         return { src, alt };
       });
       const videos = videosValue.map((video) => {
-        if (!isRecord(video)) throw new Error("بيانات الفيديو غير صالحة.");
-        const url = requiredText(video.url, "رابط الفيديو", 2000);
-        const videoTitle = requiredText(video.title ?? "", "عنوان الفيديو", 300);
-        if (!isValidWebUrl(url)) throw new Error("رابط الفيديو يجب أن يبدأ بـ https.");
+        if (!isRecord(video)) throw new Error('بيانات الفيديو غير صالحة.');
+        const url = requiredText(video.url, 'رابط الفيديو', 2000);
+        const videoTitle = requiredText(video.title ?? '', 'عنوان الفيديو', 300);
+        if (!isValidWebUrl(url)) throw new Error('رابط الفيديو يجب أن يبدأ بـ https.');
         return { url, title: videoTitle };
       });
       const pdfs = pdfsValue.flatMap((pdf) => {
-        if (!isRecord(pdf)) throw new Error("بيانات ملف PDF غير صالحة.");
-        const url = requiredText(pdf.url, "رابط PDF", 2000);
+        if (!isRecord(pdf)) throw new Error('بيانات ملف PDF غير صالحة.');
+        const url = requiredText(pdf.url, 'رابط PDF', 2000);
         if (!url) return [];
-        const pdfTitle = requiredText(pdf.title ?? "", "عنوان PDF", 300);
-        if (!isValidWebUrl(url)) throw new Error("رابط PDF يجب أن يبدأ بـ https.");
+        const pdfTitle = requiredText(pdf.title ?? '', 'عنوان PDF', 300);
+        if (!isValidWebUrl(url)) throw new Error('رابط PDF يجب أن يبدأ بـ https.');
         return [{ url, title: pdfTitle }];
       });
 
       return {
         id: itemId,
         title: itemTitle,
-        summary: requiredText(item.summary ?? "", "الخلاصة", 10000),
+        summary: requiredText(item.summary ?? '', 'الخلاصة', 10000),
         activities,
         images,
         videos,
@@ -232,14 +244,14 @@ function normalizeLessons(value: unknown): Lesson[] {
 }
 
 export async function login(formData: FormData) {
-  if (!hasAdminAuthConfig()) redirect("/admin?error=setup");
-  if (!(await createAdminSession(formData.get("password")))) redirect("/admin?error=invalid");
-  redirect("/admin");
+  if (!hasAdminAuthConfig()) redirect('/admin?error=setup');
+  if (!(await createAdminSession(formData.get('password')))) redirect('/admin?error=invalid');
+  redirect('/admin');
 }
 
 export async function logout() {
   await clearAdminSession();
-  redirect("/admin");
+  redirect('/admin');
 }
 
 export async function loadAssignments() {
@@ -251,7 +263,7 @@ export async function saveAssignments(value: unknown) {
   await assertAdmin();
   const assignments = normalizeAssignments(value);
   await replaceAssignments(assignments);
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function loadSupportingActivities() {
@@ -263,7 +275,7 @@ export async function saveSupportingActivities(value: unknown) {
   await assertAdmin();
   const activities = normalizeSupportingActivities(value);
   await replaceSupportingActivities(activities);
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function loadAnnouncements() {
@@ -275,7 +287,7 @@ export async function saveAnnouncements(value: unknown) {
   await assertAdmin();
   const announcements = normalizeAnnouncements(value);
   await replaceAnnouncements(announcements);
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function loadHomepageSlides() {
@@ -287,7 +299,7 @@ export async function saveHomepageSlides(value: unknown) {
   await assertAdmin();
   const slides = normalizeHomepageSlides(value);
   await replaceHomepageSlides(slides);
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function loadHomepageCommentsForAdmin() {
@@ -312,37 +324,41 @@ export async function markHomepageCommentsAsRead(ids: unknown) {
     ids.length > 1000 ||
     !ids.every(
       (id): id is string =>
-        typeof id === "string" &&
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id),
+        typeof id === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
     )
   ) {
-    throw new Error("قائمة معرّفات التعليقات غير صالحة.");
+    throw new Error('قائمة معرّفات التعليقات غير صالحة.');
   }
 
   await markHomepageCommentsAsReadRecord(ids);
 }
 
-export async function saveHomepageComment(id: unknown, displayNameValue: unknown, bodyValue: unknown) {
+export async function saveHomepageComment(
+  id: unknown,
+  displayNameValue: unknown,
+  bodyValue: unknown
+) {
   await assertAdmin();
-  const commentId = requiredText(id, "معرّف التعليق", 36);
-  const displayName = requiredText(displayNameValue, "الاسم", 60);
-  const body = requiredText(bodyValue, "التعليق", 1000);
+  const commentId = requiredText(id, 'معرّف التعليق', 36);
+  const displayName = requiredText(displayNameValue, 'الاسم', 60);
+  const body = requiredText(bodyValue, 'التعليق', 1000);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
-    throw new Error("معرّف التعليق غير صالح.");
+    throw new Error('معرّف التعليق غير صالح.');
   }
-  if (!displayName || !body) throw new Error("الاسم والتعليق مطلوبان.");
+  if (!displayName || !body) throw new Error('الاسم والتعليق مطلوبان.');
   await updateHomepageCommentRecord(commentId, displayName, body);
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function removeHomepageComment(id: unknown) {
   await assertAdmin();
-  const commentId = requiredText(id, "معرّف التعليق", 36);
+  const commentId = requiredText(id, 'معرّف التعليق', 36);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
-    throw new Error("معرّف التعليق غير صالح.");
+    throw new Error('معرّف التعليق غير صالح.');
   }
   await deleteHomepageCommentRecord(commentId);
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function loadLessonCommentsForAdmin() {
@@ -350,27 +366,31 @@ export async function loadLessonCommentsForAdmin() {
   return await getLessonCommentsForAdmin();
 }
 
-export async function saveLessonComment(id: unknown, displayNameValue: unknown, bodyValue: unknown) {
+export async function saveLessonComment(
+  id: unknown,
+  displayNameValue: unknown,
+  bodyValue: unknown
+) {
   await assertAdmin();
-  const commentId = requiredText(id, "معرّف التعليق", 36);
-  const displayName = requiredText(displayNameValue, "الاسم", 60);
-  const body = requiredText(bodyValue, "التعليق", 1000);
+  const commentId = requiredText(id, 'معرّف التعليق', 36);
+  const displayName = requiredText(displayNameValue, 'الاسم', 60);
+  const body = requiredText(bodyValue, 'التعليق', 1000);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
-    throw new Error("معرّف التعليق غير صالح.");
+    throw new Error('معرّف التعليق غير صالح.');
   }
-  if (!displayName || !body) throw new Error("الاسم والتعليق مطلوبان.");
+  if (!displayName || !body) throw new Error('الاسم والتعليق مطلوبان.');
   await updateLessonCommentRecord(commentId, displayName, body);
-  revalidatePath("/lessons");
+  revalidatePath('/lessons');
 }
 
 export async function removeLessonComment(id: unknown) {
   await assertAdmin();
-  const commentId = requiredText(id, "معرّف التعليق", 36);
+  const commentId = requiredText(id, 'معرّف التعليق', 36);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commentId)) {
-    throw new Error("معرّف التعليق غير صالح.");
+    throw new Error('معرّف التعليق غير صالح.');
   }
   await deleteLessonCommentRecord(commentId);
-  revalidatePath("/lessons");
+  revalidatePath('/lessons');
 }
 
 export async function loadVisitorCount() {
@@ -387,5 +407,5 @@ export async function saveLessons(subjectId: string, value: unknown) {
   await assertAdmin();
   const lessons = normalizeLessons(value);
   await replaceLessons(subjectId, lessons);
-  revalidatePath("/lessons");
+  revalidatePath('/lessons');
 }

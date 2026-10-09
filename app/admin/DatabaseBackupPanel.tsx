@@ -80,7 +80,7 @@ export default function DatabaseBackupPanel() {
       </div>
       {notice && (
         <p
-          className={`mt-4 rounded-md border px-4 py-3 text-sm ${notice.type === 'success' ? 'border-green-700/25 bg-green-50 text-green-900' : 'border-red-700/25 bg-red-50 text-red-900'}`}
+          className={`mt-4 rounded-md border px-4 py-3 text-sm ${notice.type === 'success' ? 'border-success/25 bg-success-light text-success' : 'border-error/25 bg-error-light text-error'}`}
           role={notice.type === 'error' ? 'alert' : 'status'}
         >
           {notice.message}

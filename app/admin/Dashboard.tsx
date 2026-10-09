@@ -423,7 +423,7 @@ export default function Dashboard() {
 
   const controlButton = "inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-border bg-surface text-foreground transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButton = "inline-flex size-11 shrink-0 items-center justify-center rounded-md bg-primary text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
-  const dangerButton = "inline-flex size-11 shrink-0 items-center justify-center rounded-md text-red-800 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50";
+  const dangerButton = "inline-flex size-11 shrink-0 items-center justify-center rounded-md text-error transition-colors hover:bg-error-light disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <main className="admin-dashboard mx-auto w-full max-w-6xl px-4 py-8 text-base leading-relaxed sm:px-6" dir="rtl">
@@ -447,7 +447,7 @@ export default function Dashboard() {
             >
               <Bell size={19} aria-hidden="true" />
               {unreadHomepageCommentCount > 0 && (
-                <span className="absolute -right-2 -top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold leading-none text-white">
+                <span className="absolute -right-2 -top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[11px] font-bold leading-none text-white">
                   {unreadHomepageCommentCount > 99 ? "99+" : unreadHomepageCommentCount}
                 </span>
               )}
@@ -561,7 +561,7 @@ export default function Dashboard() {
       {notice && (
         <p
           role="status"
-          className={`mb-6 rounded-md border px-5 py-4 text-base ${notice.type === "success" ? "border-green-700/25 bg-green-50 text-green-900" : "border-red-700/25 bg-red-50 text-red-900"}`}
+          className={`mb-6 rounded-md border px-5 py-4 text-base ${notice.type === "success" ? "border-success/25 bg-success-light text-success" : "border-error/25 bg-error-light text-error"}`}
         >
           {notice.text}
         </p>
@@ -597,7 +597,7 @@ export default function Dashboard() {
                     className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-4 text-right text-lg font-semibold text-foreground transition-colors hover:bg-surface-muted/40"
                   >
                     <span className="min-w-0 flex-1 truncate">{assignment.name || "واجب جديد"}</span>
-                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${status === "completed" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${status === "completed" ? "bg-success-light text-success" : "bg-error-light text-error"}`}>
                       {status === "completed" ? "تم الإنجاز" : status === "overdue" ? "لم يتم - متأخر" : "لم يتم"}
                     </span>
                     <ChevronDown className={`size-5 shrink-0 text-primary transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
@@ -619,8 +619,8 @@ export default function Dashboard() {
                       رابط الواجب
                       <input type="url" className={inputClassName} value={assignment.link ?? ""} placeholder="https://..." onChange={(event) => updateAssignment(assignment.id, "link", event.target.value)} />
                     </label>
-                    <label className="inline-flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:border-green-700/40 hover:bg-green-50/60 sm:col-span-2 lg:col-span-3">
-                      <input type="checkbox" className="size-5 shrink-0 accent-green-700" checked={assignment.completed === true} onChange={(event) => updateAssignmentCompletion(assignment.id, event.target.checked)} />
+                    <label className="inline-flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:border-success/40 hover:bg-success-light/60 sm:col-span-2 lg:col-span-3">
+                      <input type="checkbox" className="size-5 shrink-0 accent-success" checked={assignment.completed === true} onChange={(event) => updateAssignmentCompletion(assignment.id, event.target.checked)} />
                       تم الإنجاز
                     </label>
                     <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
@@ -683,7 +683,7 @@ export default function Dashboard() {
                     className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-4 text-right text-lg font-semibold text-foreground transition-colors hover:bg-surface-muted/40"
                   >
                     <span className="min-w-0 flex-1 truncate">{activity.name || "نشاط جديد"}</span>
-                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${activity.completed ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-900"}`}>
+                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${activity.completed ? "bg-success-light text-success" : "bg-warning-light text-warning"}`}>
                       {activity.completed ? "تم الإنجاز" : "للتدرب"}
                     </span>
                     <ChevronDown className={`size-5 shrink-0 text-primary transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />

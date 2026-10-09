@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from 'next';
-import { Noto_Naskh_Arabic, Noto_Sans_Arabic } from 'next/font/google';
+import { Cairo, Tajawal } from 'next/font/google';
 import AppRouteGuard from './components/AppRouteGuard';
 import Navbar from './components/Navbar';
 import './globals.css';
 
-// استخدام خط واضح ومناسب للنصوص العربية
-const notoSansArabic = Noto_Sans_Arabic({
+// خط Tajawal للنصوص العامة - عصري وواضح ومناسب للأطفال
+const tajawal = Tajawal({
   subsets: ['arabic'],
-  weight: ['400', '500', '700'],
-  variable: '--font-noto-sans-arabic',
+  weight: ['400', '500', '700', '800'],
+  variable: '--font-tajawal',
 });
-const notoNaskhArabic = Noto_Naskh_Arabic({
+
+// خط Cairo للعناوين - متوازن وحديث
+const cairo = Cairo({
   subsets: ['arabic'],
-  weight: ['400', '500', '700'],
-  variable: '--font-noto-naskh-arabic',
+  weight: ['600', '700', '800', '900'],
+  variable: '--font-cairo',
 });
 
 export const metadata: Metadata = {
@@ -32,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="ar"
       dir="rtl"
-      className={`${notoSansArabic.variable} ${notoNaskhArabic.variable} h-full antialiased overflow-x-hidden`}
+      className={`${tajawal.variable} ${cairo.variable} h-full antialiased overflow-x-hidden`}
     >
       <body className="min-h-full w-full max-w-full flex flex-col font-sans bg-background text-foreground overflow-x-hidden relative">
         <AppRouteGuard>

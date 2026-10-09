@@ -27,7 +27,10 @@ export type Announcement = {
 export type HomepageSlide = {
   id: string;
   title: string;
+  /** رابط صورة Google Drive (اختياري عند وجود نص فقط) */
   url: string;
+  /** نص المنشور المنسق (اختياري عند وجود صورة فقط) */
+  content: string;
   active: boolean;
 };
 
@@ -355,13 +358,14 @@ export async function replaceAnnouncements(announcements: Announcement[]): Promi
 export async function getHomepageSlides(): Promise<HomepageSlide[]> {
   const { data, error } = await getDatabase()
     .from('homepage_slides')
-    .select('id, title, url, active')
+    .select('id, title, url, content, active')
     .order('position');
   throwIfError(error);
   return (data ?? []).map((slide) => ({
     id: slide.id,
     title: slide.title,
-    url: slide.url,
+    url: slide.url ?? '',
+    content: slide.content ?? '',
     active: slide.active === true,
   }));
 }

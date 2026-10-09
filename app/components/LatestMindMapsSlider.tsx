@@ -154,7 +154,7 @@ export default function LatestMindMapsSlider({ maps }: { maps: LatestMindMapSlid
           )}
         </button>
         {fullscreenError && (
-          <p role="alert" className="w-full text-sm text-red-600">
+          <p role="alert" className="w-full text-sm text-error">
             {fullscreenError}
           </p>
         )}

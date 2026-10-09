@@ -71,9 +71,9 @@ export default function AssignmentsSection({
             );
             const submissionDateClasses =
               status === 'completed'
-                ? 'border-green-300 bg-green-50 text-green-800 ring-1 ring-green-200/80'
+                ? 'border-success/30 bg-success-light text-success ring-1 ring-success/20'
                 : status === 'overdue'
-                  ? 'border-red-300 bg-red-50 text-red-800 ring-1 ring-red-200/80'
+                  ? 'border-error/30 bg-error-light text-error ring-1 ring-error/20'
                   : 'border-secondary/50 bg-secondary/10 text-primary ring-1 ring-secondary/20';
             const assignedAt = Date.parse(`${assignment.assignedDate}T00:00:00Z`);
             const assignmentAge = todayAt - assignedAt;
@@ -93,7 +93,7 @@ export default function AssignmentsSection({
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-2">
                       <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${status === 'completed' ? 'border border-green-200 bg-green-100 text-green-700' : 'border border-red-200 bg-red-100 text-red-700'}`}
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${status === 'completed' ? 'border border-success/30 bg-success-light text-success' : 'border border-error/30 bg-error-light text-error'}`}
                       >
                         {status === 'completed'
                           ? 'منتهي'
@@ -107,7 +107,7 @@ export default function AssignmentsSection({
                         </span>
                       )}
                     </div>
-                    <p className="truncate text-base font-bold leading-tight text-foreground transition-colors group-hover:text-primary sm:text-lg">
+                    <p className="break-words text-base font-bold leading-tight text-foreground transition-colors group-hover:text-primary sm:text-lg">
                       {assignment.name}
                     </p>
                   </div>

@@ -15,6 +15,7 @@ import HomepageSlider from './components/HomepageSlider';
 import LatestVideosSlider from './components/LatestVideosSlider';
 import SupportingActivitiesSection from './components/SupportingActivitiesSection';
 import TomorrowAssignmentsTicker from './components/TomorrowAssignmentsTicker';
+import WeeklyTimetable from './components/WeeklyTimetable';
 
 function getCurrentTime() {
   return Date.now();
@@ -86,6 +87,18 @@ export default async function Home() {
         />
 
         <SupportingActivitiesSection activities={supportingActivities} />
+
+        <section aria-labelledby="timetable-title" className="flex flex-col gap-4">
+          <div>
+            <h2 id="timetable-title" className="text-xl font-bold text-foreground">
+              التوزيع الزمني
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              جدول الحصص الأسبوعي للفترة الصباحية والمسائية
+            </p>
+          </div>
+          <WeeklyTimetable />
+        </section>
 
         <HomepageSlider slides={homepageSlides.filter((slide) => slide.active)} />
 

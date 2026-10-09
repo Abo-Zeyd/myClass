@@ -1,36 +1,22 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, FileImage, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Megaphone, MoveDiagonal2 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getGoogleDriveImageUrl } from '../../lib/google-drive';
+import FullscreenImageViewer from './FullscreenImageViewer';
+import RichText from './RichText';
 
 export type HomepageSlide = {
   id: string;
   title: string;
   url: string;
+  content: string;
 };
 
 export default function HomepageSlider({ slides }: { slides: HomepageSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  useEffect(() => {
-    if (!isExpanded) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setIsExpanded(false);
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isExpanded]);
+  const [viewerSlide, setViewerSlide] = useState<HomepageSlide | null>(null);
 
   if (slides.length === 0) {
     return (
@@ -42,11 +28,14 @@ export default function HomepageSlider({ slides }: { slides: HomepageSlide[] }) 
           <h2 id="homepage-slider-title" className="text-xl font-bold text-foreground">
             منشورات القسم
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">التوزيع الزمني والإعلانات المصورة</p>
+          <p className="mt-1 text-sm text-muted-foreground">الإعلانات والمستندات المصورة</p>
         </header>
         <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 py-12 text-center">
-          <FileImage size={40} className="text-muted-foreground/50" aria-hidden="true" />
-          <p className="font-medium text-muted-foreground">لا توجد صور منشورة حالياً.</p>
+          <Megaphone size={40} className="text-muted-foreground/50" aria-hidden="true" />
+          <p className="text-lg font-bold text-muted-foreground">
+            يعرض هذا القسم منشورات القسم: معلومات، تنبيهات، إعلانات، وصور تعليمية من الأستاذ
+            ومستندات مصورة
+          </p>
         </div>
       </section>
     );
@@ -55,51 +44,81 @@ export default function HomepageSlider({ slides }: { slides: HomepageSlide[] }) 
   const slide = slides[activeIndex % slides.length];
   if (!slide) return null;
 
+  const hasImage = Boolean(slide.url.trim());
+  const hasContent = Boolean(slide.content.trim());
+
   function showSlide(nextIndex: number) {
     setActiveIndex((nextIndex + slides.length) % slides.length);
   }
 
   return (
     <section
-      role={isExpanded ? 'dialog' : undefined}
-      aria-modal={isExpanded || undefined}
       aria-labelledby="homepage-slider-title"
-      className={
-        isExpanded
-          ? 'fixed inset-0 z-50 flex h-dvh w-full flex-col overflow-hidden bg-surface'
-          : 'overflow-hidden rounded-2xl border border-border bg-surface shadow-md'
-      }
+      className="overflow-hidden rounded-2xl border border-border bg-surface shadow-md"
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-muted/30 px-4 py-4 sm:px-6 sm:py-5">
-        <div>
-          <h2 id="homepage-slider-title" className="text-lg sm:text-xl font-bold text-foreground">
-            منشورات القسم
-          </h2>
-          <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">التوزيع الزمني والإعلانات المصورة</p>
-        </div>
-        <span className="rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 text-xs sm:text-sm font-bold text-secondary">
+      <header className="border-b border-border bg-surface-muted/30 px-4 py-4 text-center sm:px-6 sm:py-5">
+        <h2 id="homepage-slider-title" className="text-lg font-bold text-foreground sm:text-xl">
+          منشورات القسم
+        </h2>
+        <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+          الإعلانات والمستندات المصورة
+        </p>
+        <h3 className="mx-auto mt-3 max-w-3xl break-words text-xl font-black leading-tight text-primary sm:text-2xl lg:text-3xl">
+          {slide.title}
+        </h3>
+        <span className="mt-3 inline-block rounded-full border border-secondary/20 bg-secondary/10 px-4 py-1 text-sm font-bold text-secondary">
           {activeIndex + 1} / {slides.length}
         </span>
       </header>
 
       <div
-        className={
-          isExpanded
-            ? 'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-muted/30 p-2 sm:p-6'
-            : 'relative flex h-[min(60vh,40rem)] min-h-[250px] sm:min-h-[350px] items-center justify-center overflow-hidden bg-surface-muted/30 p-3 sm:p-6 sm:p-10'
-        }
+        className={`relative flex items-center justify-center overflow-hidden bg-surface-muted/30 ${
+          hasImage && hasContent
+            ? 'h-[min(88vh,52rem)] min-h-[28rem] p-2 sm:p-5'
+            : hasContent
+              ? 'h-[min(60vh,40rem)] min-h-[250px] p-3 sm:p-6'
+              : 'h-[min(60vh,40rem)] min-h-[250px] p-3 sm:min-h-[350px] sm:p-6 sm:p-10'
+        }`}
       >
-        <div className="homepage-slide-scrollport relative size-full overflow-auto rounded-lg border border-border/60 bg-background shadow-inner shadow-black/10">
-          <div className="relative size-full">
-            <Image
-              src={getGoogleDriveImageUrl(slide.url)}
-              alt={slide.title}
-              fill
-              unoptimized
-              sizes="100vw"
-              className="object-contain p-1 sm:p-2"
-            />
-          </div>
+        <div
+          className={`relative size-full overflow-hidden rounded-lg border border-border/60 bg-background shadow-inner shadow-black/10 ${
+            hasContent ? 'homepage-slide-scrollport overflow-auto' : ''
+          }`}
+        >
+          {hasContent ? (
+            <div className="p-4 sm:p-6">
+              <RichText
+                content={slide.content}
+                imageUrl={hasImage ? getGoogleDriveImageUrl(slide.url) : undefined}
+                imageAlt={slide.title}
+                onImageClick={hasImage ? () => setViewerSlide(slide) : undefined}
+              />
+            </div>
+          ) : (
+            <div className="relative size-full">
+              <Image
+                src={getGoogleDriveImageUrl(slide.url)}
+                alt={slide.title}
+                fill
+                unoptimized
+                sizes="100vw"
+                className="object-contain p-2 sm:p-4"
+              />
+            </div>
+          )}
+
+          {/* زر تكبير المنشور بملء الصفحة — يظهر دائماً في حالة الصور فقط */}
+          {!hasContent && (
+            <button
+              type="button"
+              onClick={() => setViewerSlide(slide)}
+              aria-label="تكبير المنشور بملء الصفحة"
+              title="تكبير بملء الصفحة"
+              className="absolute left-3 top-3 z-20 flex size-9 items-center justify-center rounded-full border border-border bg-white/95 text-primary shadow-xl transition-all hover:bg-primary hover:text-white active:scale-90 sm:size-10"
+            >
+              <MoveDiagonal2 size={19} aria-hidden="true" />
+            </button>
+          )}
         </div>
         {slides.length > 1 && (
           <>
@@ -124,26 +143,19 @@ export default function HomepageSlider({ slides }: { slides: HomepageSlide[] }) 
           </>
         )}
         <span className="sr-only" aria-live="polite">
-          {slide.title}
+          {slides.map((item) => item.title).join(' • ')}
         </span>
       </div>
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-6">
-        <h3 className="min-w-0 flex-1 truncate font-semibold text-foreground">{slide.title}</h3>
-        <button
-          type="button"
-          onClick={() => setIsExpanded((expanded) => !expanded)}
-          aria-label={isExpanded ? 'تصغير عرض الصورة' : 'تكبير الصورة لملء الصفحة'}
-          title={isExpanded ? 'تصغير' : 'ملء الصفحة'}
-          className="flex size-10 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
-        >
-          {isExpanded ? (
-            <Minimize2 size={19} aria-hidden="true" />
-          ) : (
-            <Maximize2 size={19} aria-hidden="true" />
-          )}
-        </button>
-      </footer>
+      {/* عارض الصورة بملء الشاشة — يعمل في الحالتين: صورة فقط أو نص وصورة */}
+      <FullscreenImageViewer
+        key={viewerSlide?.id ?? 'closed'}
+        src={viewerSlide ? getGoogleDriveImageUrl(viewerSlide.url) : ''}
+        alt={viewerSlide?.title ?? ''}
+        shareUrl={viewerSlide?.url}
+        isOpen={viewerSlide !== null}
+        onClose={() => setViewerSlide(null)}
+      />
     </section>
   );
 }
