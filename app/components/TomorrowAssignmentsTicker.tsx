@@ -40,81 +40,82 @@ export default function TomorrowAssignmentsTicker({ assignments }: { assignments
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* الصف الأول على الجوال: الشارة والعنوان — ويبقى صفاً مستقلاً على الكمبيوتر */}
-      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-        <span className="inline-flex shrink-0 items-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-bold text-white">
-          <ClipboardList size={17} aria-hidden="true" />
-          <span>واجبات الغد</span>
-        </span>
+      {/* الصف ١: الشارة — صف كامل في الأعلى على الجوال، ومدمجة مع العنوان على الكمبيوتر */}
+      <span className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-bold text-white sm:w-auto sm:justify-start">
+        <ClipboardList size={17} aria-hidden="true" />
+        <span>واجبات الغد</span>
+      </span>
 
+      {/* الصف ٢: عنوان الواجب — بدون أي أزرار جانبية */}
+      <div
+        key={assignment?.id}
+        aria-live="polite"
+        className="min-w-0 border-secondary/25 pb-2 sm:flex-1 sm:border-0 sm:pb-0"
+      >
         {assignment ? (
-          <div
-            key={assignment.id}
-            aria-live="polite"
-            className="flex min-w-0 flex-1 items-center gap-2"
-          >
-            <p className="min-w-0 flex-1 text-sm font-semibold leading-7 text-foreground sm:text-base">
-              {assignment.name}
-            </p>
-            {assignment.link && (
-              <a
-                href={assignment.link}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`فتح رابط الواجب: ${assignment.name}`}
-                title="عرض الواجب"
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
-              >
-                <ExternalLink size={17} aria-hidden="true" />
-              </a>
-            )}
-          </div>
+          <p className="min-w-0 text-center text-sm font-semibold leading-7 text-foreground sm:text-start sm:text-base">
+            {assignment.name}
+          </p>
         ) : (
-          <p
-            aria-live="polite"
-            className="min-w-0 flex-1 text-sm font-semibold leading-7 text-muted-foreground sm:text-base"
-          >
+          <p className="min-w-0 text-center text-sm font-semibold leading-7 text-muted-foreground sm:text-start sm:text-base">
             لا توجد واجبات مطلوبة للغد.
           </p>
         )}
       </div>
 
-      {/* الصف الثاني على الجوال — ومنتصف الارتفاع على الكمبيوتر */}
-      {assignments.length > 1 && (
-        <div className="flex shrink-0 items-center gap-1 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={showPrevious}
-            aria-label="الواجب السابق"
-            title="الواجب السابق"
-            className="flex size-9 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
-          >
-            <ChevronRight size={19} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPaused((paused) => !paused)}
-            aria-label={
-              isPaused ? 'تشغيل التنقل التلقائي للواجبات' : 'إيقاف التنقل التلقائي للواجبات'
-            }
-            title={isPaused ? 'تشغيل' : 'إيقاف مؤقت'}
-            className="flex size-9 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
-          >
-            {isPaused ? (
-              <Play size={16} aria-hidden="true" />
-            ) : (
-              <Pause size={16} aria-hidden="true" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={showNext}
-            aria-label="الواجب التالي"
-            title="الواجب التالي"
-            className="flex size-9 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
-          >
-            <ChevronLeft size={19} aria-hidden="true" />
-          </button>
+      {/* الصف ٣: أزرار التنقل وزر فتح الرابط — صف موحّد أسفل البطاقة */}
+      {(assignments.length > 1 || Boolean(assignment?.link)) && (
+        <div className="flex shrink-0 items-center justify-center gap-1 border-t border-secondary/25 pt-2 sm:border-0 sm:pt-0">
+          {assignments.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={showPrevious}
+                aria-label="الواجب السابق"
+                title="الواجب السابق"
+                className="flex size-10 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
+              >
+                <ChevronRight size={19} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPaused((paused) => !paused)}
+                aria-label={
+                  isPaused ? 'تشغيل التنقل التلقائي للواجبات' : 'إيقاف التنقل التلقائي للواجبات'
+                }
+                title={isPaused ? 'تشغيل' : 'إيقاف مؤقت'}
+                className="flex size-10 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
+              >
+                {isPaused ? (
+                  <Play size={16} aria-hidden="true" />
+                ) : (
+                  <Pause size={16} aria-hidden="true" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={showNext}
+                aria-label="الواجب التالي"
+                title="الواجب التالي"
+                className="flex size-10 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
+              >
+                <ChevronLeft size={19} aria-hidden="true" />
+              </button>
+            </>
+          )}
+
+          {assignment?.link && (
+            <a
+              href={assignment.link}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`فتح رابط الواجب: ${assignment.name}`}
+              title="عرض الواجب"
+              className="flex size-10 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
+            >
+              <ExternalLink size={18} aria-hidden="true" />
+            </a>
+          )}
         </div>
       )}
     </section>
