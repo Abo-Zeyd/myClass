@@ -36,46 +36,52 @@ export default function TomorrowAssignmentsTicker({ assignments }: { assignments
   return (
     <section
       aria-label="واجبات الغد"
-      className="flex min-h-16 w-full max-w-full overflow-hidden items-center gap-3 rounded-lg border border-secondary/25 bg-secondary/5 px-3 py-3 sm:gap-4 sm:px-5"
+      className="flex w-full max-w-full flex-col gap-2 overflow-hidden rounded-lg border border-secondary/25 bg-secondary/5 px-3 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-5"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <span className="inline-flex shrink-0 items-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-bold text-white">
-        <ClipboardList size={17} aria-hidden="true" />
-        <span>واجبات الغد</span>
-      </span>
-      {assignment ? (
-        <div
-          key={assignment.id}
-          aria-live="polite"
-          className="flex min-w-0 flex-1 items-center gap-2"
-        >
-          <p className="min-w-0 flex-1 text-sm font-semibold leading-7 text-foreground sm:text-base">
-            {assignment.name}
+      {/* الصف الأول على الجوال: الشارة والعنوان — ويبقى صفاً مستقلاً على الكمبيوتر */}
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <span className="inline-flex shrink-0 items-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-bold text-white">
+          <ClipboardList size={17} aria-hidden="true" />
+          <span>واجبات الغد</span>
+        </span>
+
+        {assignment ? (
+          <div
+            key={assignment.id}
+            aria-live="polite"
+            className="flex min-w-0 flex-1 items-center gap-2"
+          >
+            <p className="min-w-0 flex-1 text-sm font-semibold leading-7 text-foreground sm:text-base">
+              {assignment.name}
+            </p>
+            {assignment.link && (
+              <a
+                href={assignment.link}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`فتح رابط الواجب: ${assignment.name}`}
+                title="عرض الواجب"
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
+              >
+                <ExternalLink size={17} aria-hidden="true" />
+              </a>
+            )}
+          </div>
+        ) : (
+          <p
+            aria-live="polite"
+            className="min-w-0 flex-1 text-sm font-semibold leading-7 text-muted-foreground sm:text-base"
+          >
+            لا توجد واجبات مطلوبة للغد.
           </p>
-          {assignment.link && (
-            <a
-              href={assignment.link}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`فتح رابط الواجب: ${assignment.name}`}
-              title="عرض الواجب"
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-secondary transition-colors hover:bg-secondary/10"
-            >
-              <ExternalLink size={17} aria-hidden="true" />
-            </a>
-          )}
-        </div>
-      ) : (
-        <p
-          aria-live="polite"
-          className="min-w-0 flex-1 text-sm font-semibold leading-7 text-muted-foreground sm:text-base"
-        >
-          لا توجد واجبات مطلوبة للغد.
-        </p>
-      )}
+        )}
+      </div>
+
+      {/* الصف الثاني على الجوال — ومنتصف الارتفاع على الكمبيوتر */}
       {assignments.length > 1 && (
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1 self-start sm:self-auto">
           <button
             type="button"
             onClick={showPrevious}

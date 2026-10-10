@@ -808,3 +808,150 @@ export async function getVisitorCount(): Promise<number> {
   throwIfError(error);
   return Number(data?.value ?? 0);
 }
+
+/* ============================================================================
+   بلاغات الأخطاء
+   ========================================================================== */
+
+export type BugReportStatus = 'pending' | 'reviewing' | 'resolved' | 'ignored';
+
+export type BugReport = {
+  id: string;
+  displayName: string;
+  category: string;
+  body: string;
+  pageUrl: string;
+  status: BugReportStatus;
+  adminNote: string;
+  createdAt: string;
+};
+
+type BugReportRow = {
+  id: string;
+  display_name: string | null;
+  category: string | null;
+  body: string;
+  page_url: string | null;
+  status: BugReportStatus;
+  admin_note: string | null;
+  created_at: string;
+};
+
+function mapBugReport(row: BugReportRow): BugReport {
+  return {
+    id: row.id,
+    displayName: row.display_name ?? '',
+    category: row.category ?? 'other',
+    body: row.body,
+    pageUrl: row.page_url ?? '',
+    status: row.status,
+    adminNote: row.admin_note ?? '',
+    createdAt: row.created_at,
+  };
+}
+
+export async function getBugReports(): Promise<BugReport[]> {
+  const { data, error } = await getDatabase()
+    .from('bug_reports')
+    .select('id, display_name, category, body, page_url, status, admin_note, created_at')
+    .order('created_at', { ascending: false })
+    .limit(500);
+  throwIfError(error);
+  return ((data ?? []) as BugReportRow[]).map(mapBugReport);
+}
+
+export async function insertBugReport(input: {
+  displayName: string;
+  category: string;
+  body: string;
+  pageUrl: string;
+}): Promise<BugReport> {
+  const { data, error } = await getDatabase()
+    .from('bug_reports')
+    .insert({
+      display_name: input.displayName,
+      category: input.category,
+      body: input.body,
+      page_url: input.pageUrl,
+    })
+    .select('id, display_name, category, body, page_url, status, admin_note, created_at')
+    .single();
+  throwIfError(error);
+  if (!data) throw new Error('تعذر حفظ البلاغ.');
+  return mapBugReport(data as BugReportRow);
+}
+
+export async function updateBugReport(
+  id: string,
+  status: BugReportStatus,
+  adminNote: string
+): Promise<void> {
+  const { error } = await getDatabase().rpc('update_bug_report', {
+    p_id: id,
+    p_status: status,
+    p_admin_note: adminNote,
+  });
+  throwIfError(error);
+}
+
+export async function deleteBugReport(id: string): Promise<void> {
+  const { error } = await getDatabase().rpc('delete_bug_report', { p_id: id });
+  throwIfError(error);
+}
+
+/* ============================================================================
+   التنبيهات الموحّدة (تعليقات رئيسية + دروس + بلاغات)
+   ========================================================================== */
+
+export type AdminNotificationSource = 'homepage_comment' | 'lesson_comment' | 'bug_report';
+
+export type AdminNotification = {
+  id: number;
+  sourceType: AdminNotificationSource;
+  sourceId: string;
+  title: string;
+  body: string;
+  readAt: string | null;
+  createdAt: string;
+};
+
+type AdminNotificationRow = {
+  id: number;
+  source_type: AdminNotificationSource;
+  source_id: string;
+  title: string;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+};
+
+/** آخر التنبيهات — تبقى في القائمة بعد قراءتها ولا تُحذف */
+export async function listAdminNotifications(limit = 10): Promise<AdminNotification[]> {
+  const { data, error } = await getDatabase().rpc('list_admin_notifications', {
+    p_limit: limit,
+  });
+  throwIfError(error);
+  return ((data ?? []) as AdminNotificationRow[]).map((row) => ({
+    id: row.id,
+    sourceType: row.source_type,
+    sourceId: row.source_id,
+    title: row.title,
+    body: row.body,
+    readAt: row.read_at,
+    createdAt: row.created_at,
+  }));
+}
+
+/** عدد التنبيهات غير المقروءة — لشارة الجرس */
+export async function countUnreadAdminNotifications(): Promise<number> {
+  const { data, error } = await getDatabase().rpc('count_unread_admin_notifications');
+  throwIfError(error);
+  return Number(data ?? 0);
+}
+
+/** تعليم كمقروء — التنبيه يبقى في القائمة */
+export async function markAdminNotificationsRead(ids: number[]): Promise<void> {
+  if (ids.length === 0) return;
+  const { error } = await getDatabase().rpc('mark_admin_notifications_read', { p_ids: ids });
+  throwIfError(error);
+}

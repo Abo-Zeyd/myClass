@@ -1,4 +1,4 @@
-import { BookOpen, FileVideo, GraduationCap, Home } from 'lucide-react';
+import { BookOpen, Bug, FileVideo, GraduationCap, Home } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Navbar() {
@@ -43,6 +43,13 @@ export default function Navbar() {
           >
             <FileVideo size={18} className="text-primary/70 sm:size-5" />
             <span>فيديوهات</span>
+          </Link>
+          <Link
+            href="/reports"
+            className="flex min-h-11 items-center gap-1 rounded-xl bg-error px-3 py-2 text-white shadow-sm transition-all hover:brightness-110 active:scale-95 sm:gap-2 sm:px-4"
+          >
+            <Bug size={18} className="shrink-0 sm:size-5" aria-hidden="true" />
+            <span>تبليغ</span>
           </Link>
         </nav>
       </div>

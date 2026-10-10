@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @source "./admin";
 
 /* ==========================================================================
@@ -36,7 +36,7 @@
   /* Fonts */
   --font-arabic: var(--font-tajawal), system-ui, -apple-system, sans-serif;
   --font-arabic-heading: var(--font-cairo), system-ui, -apple-system, sans-serif;
-  --font-geist-mono: "Geist Mono", monospace;
+  --font-geist-mono: 'Geist Mono', monospace;
 }
 
 /* ==========================================================================
@@ -107,123 +107,229 @@
 }
 
 /* Dynamic utility classes for subject colors */
-@utility bg-emerald-50 { background-color: var(--color-emerald-50); }
-@utility bg-emerald-200 { background-color: var(--color-emerald-200); }
-@utility text-emerald-800 { color: var(--color-emerald-800); }
-@utility border-emerald-200 { border-color: var(--color-emerald-200); }
-@utility bg-sky-50 { background-color: var(--color-sky-50); }
-@utility bg-sky-200 { background-color: var(--color-sky-200); }
-@utility text-sky-800 { color: var(--color-sky-800); }
-@utility border-sky-200 { border-color: var(--color-sky-200); }
-@utility bg-violet-50 { background-color: var(--color-violet-50); }
-@utility bg-violet-200 { background-color: var(--color-violet-200); }
-@utility text-violet-800 { color: var(--color-violet-800); }
-@utility border-violet-200 { border-color: var(--color-violet-200); }
-@utility bg-rose-50 { background-color: var(--color-rose-50); }
-@utility bg-rose-200 { background-color: var(--color-rose-200); }
-@utility text-rose-800 { color: var(--color-rose-800); }
-@utility border-rose-200 { border-color: var(--color-rose-200); }
-@utility bg-indigo-50 { background-color: var(--color-indigo-50); }
-@utility bg-indigo-200 { background-color: var(--color-indigo-200); }
-@utility text-indigo-800 { color: var(--color-indigo-800); }
-@utility border-indigo-200 { border-color: var(--color-indigo-200); }
-@utility bg-teal-50 { background-color: var(--color-teal-50); }
-@utility bg-teal-200 { background-color: var(--color-teal-200); }
-@utility text-teal-800 { color: var(--color-teal-800); }
-@utility border-teal-200 { border-color: var(--color-teal-200); }
-@utility bg-amber-50 { background-color: var(--color-amber-50); }
-@utility bg-amber-200 { background-color: var(--color-amber-200); }
-@utility text-amber-800 { color: var(--color-amber-800); }
-@utility border-amber-200 { border-color: var(--color-amber-200); }
-@utility bg-cyan-50 { background-color: var(--color-cyan-50); }
-@utility bg-cyan-200 { background-color: var(--color-cyan-200); }
-@utility text-cyan-800 { color: var(--color-cyan-800); }
-@utility border-cyan-200 { border-color: var(--color-cyan-200); }
-@utility bg-orange-50 { background-color: var(--color-orange-50); }
-@utility bg-orange-200 { background-color: var(--color-orange-200); }
-@utility text-orange-800 { color: var(--color-orange-800); }
-@utility border-orange-200 { border-color: var(--color-orange-200); }
-@utility bg-pink-50 { background-color: var(--color-pink-50); }
-@utility bg-pink-200 { background-color: var(--color-pink-200); }
-@utility text-pink-800 { color: var(--color-pink-800); }
-@utility border-pink-200 { border-color: var(--color-pink-200); }
-@utility bg-lime-50 { background-color: var(--color-lime-50); }
-@utility bg-lime-200 { background-color: var(--color-lime-200); }
-@utility text-lime-800 { color: var(--color-lime-800); }
-@utility border-lime-200 { border-color: var(--color-lime-200); }
-@utility bg-slate-50 { background-color: var(--color-slate-50); }
-@utility bg-slate-200 { background-color: var(--color-slate-200); }
-@utility text-slate-700 { color: var(--color-slate-700); }
-@utility border-slate-200 { border-color: var(--color-slate-200); }
+@utility bg-emerald-50 {
+  background-color: var(--color-emerald-50);
+}
+@utility bg-emerald-200 {
+  background-color: var(--color-emerald-200);
+}
+@utility text-emerald-800 {
+  color: var(--color-emerald-800);
+}
+@utility border-emerald-200 {
+  border-color: var(--color-emerald-200);
+}
+@utility bg-sky-50 {
+  background-color: var(--color-sky-50);
+}
+@utility bg-sky-200 {
+  background-color: var(--color-sky-200);
+}
+@utility text-sky-800 {
+  color: var(--color-sky-800);
+}
+@utility border-sky-200 {
+  border-color: var(--color-sky-200);
+}
+@utility bg-violet-50 {
+  background-color: var(--color-violet-50);
+}
+@utility bg-violet-200 {
+  background-color: var(--color-violet-200);
+}
+@utility text-violet-800 {
+  color: var(--color-violet-800);
+}
+@utility border-violet-200 {
+  border-color: var(--color-violet-200);
+}
+@utility bg-rose-50 {
+  background-color: var(--color-rose-50);
+}
+@utility bg-rose-200 {
+  background-color: var(--color-rose-200);
+}
+@utility text-rose-800 {
+  color: var(--color-rose-800);
+}
+@utility border-rose-200 {
+  border-color: var(--color-rose-200);
+}
+@utility bg-indigo-50 {
+  background-color: var(--color-indigo-50);
+}
+@utility bg-indigo-200 {
+  background-color: var(--color-indigo-200);
+}
+@utility text-indigo-800 {
+  color: var(--color-indigo-800);
+}
+@utility border-indigo-200 {
+  border-color: var(--color-indigo-200);
+}
+@utility bg-teal-50 {
+  background-color: var(--color-teal-50);
+}
+@utility bg-teal-200 {
+  background-color: var(--color-teal-200);
+}
+@utility text-teal-800 {
+  color: var(--color-teal-800);
+}
+@utility border-teal-200 {
+  border-color: var(--color-teal-200);
+}
+@utility bg-amber-50 {
+  background-color: var(--color-amber-50);
+}
+@utility bg-amber-200 {
+  background-color: var(--color-amber-200);
+}
+@utility text-amber-800 {
+  color: var(--color-amber-800);
+}
+@utility border-amber-200 {
+  border-color: var(--color-amber-200);
+}
+@utility bg-cyan-50 {
+  background-color: var(--color-cyan-50);
+}
+@utility bg-cyan-200 {
+  background-color: var(--color-cyan-200);
+}
+@utility text-cyan-800 {
+  color: var(--color-cyan-800);
+}
+@utility border-cyan-200 {
+  border-color: var(--color-cyan-200);
+}
+@utility bg-orange-50 {
+  background-color: var(--color-orange-50);
+}
+@utility bg-orange-200 {
+  background-color: var(--color-orange-200);
+}
+@utility text-orange-800 {
+  color: var(--color-orange-800);
+}
+@utility border-orange-200 {
+  border-color: var(--color-orange-200);
+}
+@utility bg-pink-50 {
+  background-color: var(--color-pink-50);
+}
+@utility bg-pink-200 {
+  background-color: var(--color-pink-200);
+}
+@utility text-pink-800 {
+  color: var(--color-pink-800);
+}
+@utility border-pink-200 {
+  border-color: var(--color-pink-200);
+}
+@utility bg-lime-50 {
+  background-color: var(--color-lime-50);
+}
+@utility bg-lime-200 {
+  background-color: var(--color-lime-200);
+}
+@utility text-lime-800 {
+  color: var(--color-lime-800);
+}
+@utility border-lime-200 {
+  border-color: var(--color-lime-200);
+}
+@utility bg-slate-50 {
+  background-color: var(--color-slate-50);
+}
+@utility bg-slate-200 {
+  background-color: var(--color-slate-200);
+}
+@utility text-slate-700 {
+  color: var(--color-slate-700);
+}
+@utility border-slate-200 {
+  border-color: var(--color-slate-200);
+}
 
 /* ==========================================================================
    Global Styles & Reset
+   ==========================================================================
+   كلها داخل @layer base حتى لا تتغلب على أدوات Tailwind الإضافية.
    ========================================================================== */
-::selection {
-  background-color: var(--primary);
-  color: white;
-}
+@layer base {
+  ::selection {
+    background-color: var(--primary);
+    color: white;
+  }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden !important;
-  position: relative;
-  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0)
-    env(safe-area-inset-left, 0);
-}
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    position: relative;
+    padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+      env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-arabic);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-arabic);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-/* ==========================================================================
-   Focus Styles - Accessibility
-   ========================================================================== */
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
+  /* ========================================================================
+     Focus Styles - Accessibility
+     ====================================================================== */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
-:focus:not(:focus-visible) {
-  outline: none;
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 /* ==========================================================================
    Link Styles
+   ==========================================================================
+   ملاحظة مهمة: يجب أن تكون هذه القواعد داخل @layer base، وإلا تغلب على
+   أدوات Tailwind في @layer utilities (الأنماط خارج الطبقات لها أولوية).
+   بدون ذلك يفرض لون primary على كل الروابط ويُلغي أدوات text-* .
    ========================================================================== */
-a {
-  color: var(--primary);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
+@layer base {
+  a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
 
-a:hover {
-  color: var(--accent);
-}
+  a:hover {
+    color: var(--accent);
+  }
 
-.pdf-download-link,
-.pdf-download-link:hover {
-  color: white;
+  .pdf-download-link,
+  .pdf-download-link:hover {
+    color: white;
+  }
 }
 
 /* ==========================================================================
@@ -451,17 +557,19 @@ a:hover {
 /* ==========================================================================
    Form Elements
    ========================================================================== */
-input,
-textarea,
-select {
-  font-family: inherit;
-  font-size: inherit;
-}
+@layer base {
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+    font-size: inherit;
+  }
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--muted-foreground);
-  opacity: 0.6;
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 0.6;
+  }
 }
 
 /* ==========================================================================
@@ -486,7 +594,7 @@ textarea::placeholder {
   }
 
   a[href]::after {
-    content: " (" attr(href) ")";
+    content: ' (' attr(href) ')';
     font-size: 0.8em;
     opacity: 0.7;
   }
@@ -495,14 +603,16 @@ textarea::placeholder {
 /* ==========================================================================
    Smooth Transitions for Interactive Elements
    ========================================================================== */
-button,
-a,
-input,
-textarea,
-select {
-  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-duration: 0.2s;
-  transition-timing-function: ease-out;
+@layer base {
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+  }
 }
 
 /* ==========================================================================

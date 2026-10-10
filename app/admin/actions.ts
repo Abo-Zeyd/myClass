@@ -9,10 +9,13 @@ import {
   isAdminAuthenticated,
 } from '../../lib/admin-auth';
 import {
+  countUnreadAdminNotifications,
+  deleteBugReport as deleteBugReportRecord,
   deleteHomepageComment as deleteHomepageCommentRecord,
   deleteLessonComment as deleteLessonCommentRecord,
   getAnnouncements,
   getAssignments,
+  getBugReports,
   getHomepageCommentsForAdmin,
   getHomepageSlides,
   getLessonCommentsForAdmin,
@@ -21,15 +24,19 @@ import {
   getUnreadHomepageCommentCount,
   getUnreadHomepageCommentsForAdmin,
   getVisitorCount,
+  listAdminNotifications,
   markHomepageCommentsAsRead as markHomepageCommentsAsReadRecord,
+  markAdminNotificationsRead as markNotificationsReadRecord,
   replaceAnnouncements,
   replaceAssignments,
   replaceHomepageSlides,
   replaceLessons,
   replaceSupportingActivities,
+  updateBugReport as updateBugReportRecord,
   updateHomepageComment as updateHomepageCommentRecord,
   updateLessonComment as updateLessonCommentRecord,
   type Announcement,
+  type BugReportStatus,
   type HomepageSlide,
   type SupportingActivity,
 } from '../../lib/content-db';
@@ -396,6 +403,69 @@ export async function removeLessonComment(id: unknown) {
 export async function loadVisitorCount() {
   await assertAdmin();
   return await getVisitorCount();
+}
+
+/* ============================================================================
+   بلاغات الأخطاء
+   ========================================================================== */
+
+export async function loadBugReports() {
+  await assertAdmin();
+  return await getBugReports();
+}
+
+export async function saveBugReport(id: unknown, status: unknown, adminNote: unknown) {
+  await assertAdmin();
+
+  const reportId = requiredText(id, 'معرّف البلاغ', 36);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId)) {
+    throw new Error('معرّف البلاغ غير صالح.');
+  }
+
+  const allowedStatuses: BugReportStatus[] = ['pending', 'reviewing', 'resolved', 'ignored'];
+  const nextStatus = requiredText(status, 'الحالة', 20);
+  if (!allowedStatuses.includes(nextStatus as BugReportStatus)) {
+    throw new Error('حالة البلاغ غير صالحة.');
+  }
+
+  const note = requiredText(adminNote ?? '', 'ملاحظة', 2000);
+  await updateBugReportRecord(reportId, nextStatus as BugReportStatus, note);
+  revalidatePath('/admin');
+}
+
+export async function removeBugReport(id: unknown) {
+  await assertAdmin();
+  const reportId = requiredText(id, 'معرّف البلاغ', 36);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId)) {
+    throw new Error('معرّف البلاغ غير صالح.');
+  }
+  await deleteBugReportRecord(reportId);
+  revalidatePath('/admin');
+}
+
+/* ============================================================================
+   التنبيهات الموحّدة
+   ========================================================================== */
+
+export async function loadAdminNotifications() {
+  await assertAdmin();
+  return await listAdminNotifications(10);
+}
+
+export async function loadUnreadNotificationCount() {
+  await assertAdmin();
+  return await countUnreadAdminNotifications();
+}
+
+export async function markNotificationsRead(ids: unknown) {
+  await assertAdmin();
+  if (!Array.isArray(ids) || ids.length > 100) {
+    throw new Error('قائمة معرّفات التنبيهات غير صالحة.');
+  }
+  if (!ids.every((id): id is number => typeof id === 'number' && Number.isInteger(id))) {
+    throw new Error('قائمة معرّفات التنبيهات غير صالحة.');
+  }
+  await markNotificationsReadRecord(ids);
 }
 
 export async function loadLessons(subjectId: string) {
