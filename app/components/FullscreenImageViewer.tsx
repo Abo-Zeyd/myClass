@@ -17,7 +17,7 @@ const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
 const ZOOM_STEP = 0.25;
 
-type Area = { width: number; height: number };
+type Size = { width: number; height: number };
 
 export default function FullscreenImageViewer({
   src,
@@ -27,7 +27,8 @@ export default function FullscreenImageViewer({
   onClose,
 }: FullscreenImageViewerProps) {
   const [zoom, setZoom] = useState(ZOOM_MIN);
-  const [area, setArea] = useState<Area>({ width: 0, height: 0 });
+  const [area, setArea] = useState<Size>({ width: 0, height: 0 });
+  const [natural, setNatural] = useState<Size>({ width: 0, height: 0 });
   const areaRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -75,15 +76,23 @@ export default function FullscreenImageViewer({
 
   const isZoomed = zoom > ZOOM_MIN;
   const hasArea = area.width > 0 && area.height > 0;
+  const hasNatural = natural.width > 0 && natural.height > 0;
 
-  // عند التكبير نصغّر الإطار نفسه، فتبقى الصورة كاملة الظهور داخل منطقة العرض
-  const frameStyle: React.CSSProperties | undefined = hasArea
-    ? {
-        width: area.width / zoom,
-        height: area.height / zoom,
-        transition: 'width 0.2s ease, height 0.2s ease',
-      }
-    : undefined;
+  /**
+   * حجم الصورة المعروض:
+   *  - الحد الأدنى = المساحة المتاحة (لتلائم 항상)
+   *  - الحد الأعلى = الحجم الطبيعي × التكبير (لا نضخّم فوق الأصل إلا بطلب صريح)
+   */
+  const frameStyle: React.CSSProperties | undefined =
+    hasArea && hasNatural
+      ? {
+          width: Math.min(area.width, natural.width * zoom),
+          height: Math.min(area.height, natural.height * zoom),
+          transition: 'width 0.2s ease, height 0.2s ease',
+        }
+      : hasArea
+        ? { width: area.width, height: area.height }
+        : undefined;
 
   return (
     <div
@@ -195,7 +204,16 @@ export default function FullscreenImageViewer({
               unoptimized
               priority
               sizes="100vw"
-              // object-contain ضمن إطار بأبعاد محسوبة = احتواء كامل بلا قص
+              onLoad={(event) => {
+                const image = event.currentTarget;
+                if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+                  setNatural({
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                  });
+                }
+              }}
+              // object-contain داخل إطار بأبعاد محسوبة = احتواء كامل بلا قص
               className="object-contain"
             />
           )}

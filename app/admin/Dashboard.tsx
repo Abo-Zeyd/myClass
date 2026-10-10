@@ -49,6 +49,7 @@ import {
 import BugReportsSection from './BugReportsSection';
 import DatabaseBackupPanel from './DatabaseBackupPanel';
 import HomepageContentManager from './HomepageContentManager';
+import LessonItemRichEditor from './LessonItemRichEditor';
 
 type Assignment = {
   id: string;
@@ -1488,34 +1489,23 @@ export default function Dashboard() {
                                           }
                                         />
                                       </label>
-                                      <label className={labelClassName}>
-                                        الخلاصة
-                                        <textarea
-                                          rows={4}
-                                          className={inputClassName}
-                                          value={item.summary ?? ''}
-                                          onChange={(event) =>
-                                            updateSelectedItem((current) => ({
-                                              ...current,
-                                              summary: event.target.value,
-                                            }))
-                                          }
-                                        />
-                                      </label>
-                                      <label className={labelClassName}>
-                                        أنشطة وتمارين، نشاط في كل سطر
-                                        <textarea
-                                          rows={5}
-                                          className={inputClassName}
-                                          value={item.activities.join('\n')}
-                                          onChange={(event) =>
-                                            updateSelectedItem((current) => ({
-                                              ...current,
-                                              activities: event.target.value.split('\n'),
-                                            }))
-                                          }
-                                        />
-                                      </label>
+                                      <LessonItemRichEditor
+                                        itemId={item.id}
+                                        summary={item.summary ?? ''}
+                                        activities={item.activities}
+                                        onSummaryChange={(value) =>
+                                          updateSelectedItem((current) => ({
+                                            ...current,
+                                            summary: value,
+                                          }))
+                                        }
+                                        onActivitiesChange={(value) =>
+                                          updateSelectedItem((current) => ({
+                                            ...current,
+                                            activities: value,
+                                          }))
+                                        }
+                                      />
 
                                       <section className="space-y-3 rounded-md border border-border bg-surface p-4 sm:p-5">
                                         <div className="flex items-center justify-between gap-4">

@@ -1,9 +1,21 @@
-import Image from "next/image";
-import { Check, CircleAlert, ChevronLeft, ChevronRight, Download, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
-import { getGoogleDriveImageUrl } from "../../lib/google-drive";
-import LessonComments from "./LessonComments";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  Download,
+  FileText,
+  Link2,
+  Maximize2,
+  Minimize2,
+} from 'lucide-react';
+import Image from 'next/image';
+import { getGoogleDriveImageUrl } from '../../lib/google-drive';
+import FullscreenImageViewer from './FullscreenImageViewer';
+import LessonComments from './LessonComments';
+import RichText from './RichText';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 type LessonImage = {
   src: string;
@@ -20,21 +32,21 @@ type LessonPdf = {
   title?: string;
 };
 
-export type LessonItem =
-  {
-    id: string;
-    title: string;
-    summary?: string;
-    activities?: string[];
-    images?: LessonImage[];
-    videos?: LessonVideo[];
-    pdfs?: LessonPdf[];
-  };
+export type LessonItem = {
+  id: string;
+  title: string;
+  summary?: string;
+  activities?: string[];
+  images?: LessonImage[];
+  videos?: LessonVideo[];
+  pdfs?: LessonPdf[];
+};
 
 type LessonItemCardProps = {
   item: LessonItem;
   lessonTitle: string;
   subjectId: string;
+  subjectTitle?: string;
   lessonId: string;
   contentId: string;
   anchorBaseId: string;
@@ -48,17 +60,16 @@ type LessonItemCardProps = {
 function getVideoDetails(videoUrl: string) {
   try {
     const url = new URL(videoUrl);
-    if (url.protocol !== "https:") return null;
+    if (url.protocol !== 'https:') return null;
 
-    const hostname = url.hostname.replace(/^www\./, "");
+    const hostname = url.hostname.replace(/^www\./, '');
     let videoId: string | undefined;
 
-    if (hostname === "youtu.be") {
-      videoId = url.pathname.slice(1).split("/")[0];
-    } else if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+    if (hostname === 'youtu.be') {
+      videoId = url.pathname.slice(1).split('/')[0];
+    } else if (hostname === 'youtube.com' || hostname === 'm.youtube.com') {
       videoId =
-        url.searchParams.get("v") ??
-        url.pathname.match(/^\/(?:embed|shorts)\/([^/]+)/)?.[1];
+        url.searchParams.get('v') ?? url.pathname.match(/^\/(?:embed|shorts)\/([^/]+)/)?.[1];
     }
 
     return videoId
@@ -72,13 +83,11 @@ function getVideoDetails(videoUrl: string) {
 function getPdfUrls(pdfUrl: string) {
   try {
     const url = new URL(pdfUrl);
-    if (url.hostname !== "drive.google.com" && url.hostname !== "www.drive.google.com") {
+    if (url.hostname !== 'drive.google.com' && url.hostname !== 'www.drive.google.com') {
       return { previewUrl: pdfUrl, downloadUrl: pdfUrl };
     }
 
-    const fileId =
-      url.pathname.match(/^\/file\/d\/([^/]+)/)?.[1] ??
-      url.searchParams.get("id");
+    const fileId = url.pathname.match(/^\/file\/d\/([^/]+)/)?.[1] ?? url.searchParams.get('id');
 
     return fileId
       ? {
@@ -95,6 +104,7 @@ export default function LessonItemCard({
   item,
   lessonTitle,
   subjectId,
+  subjectTitle,
   lessonId,
   contentId,
   anchorBaseId,
@@ -105,10 +115,12 @@ export default function LessonItemCard({
   onToggle,
 }: LessonItemCardProps) {
   const [fullscreenMediaId, setFullscreenMediaId] = useState<string | null>(null);
+  // الصورة المضمّنة داخل النص المفتوحة في العارض
+  const [inlineImage, setInlineImage] = useState<{ src: string; alt: string } | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
   const [copyStatus, setCopyStatus] = useState<{
     anchorId: string;
-    status: "copied" | "failed";
+    status: 'copied' | 'failed';
   } | null>(null);
   const [imageSliderIndex, setImageSliderIndex] = useState(0);
   const [videoSliderIndex, setVideoSliderIndex] = useState(0);
@@ -121,13 +133,11 @@ export default function LessonItemCard({
 
   useEffect(() => {
     function updateFullscreenMedia() {
-      setFullscreenMediaId(
-        document.fullscreenElement?.getAttribute("data-media-id") ?? null,
-      );
+      setFullscreenMediaId(document.fullscreenElement?.getAttribute('data-media-id') ?? null);
     }
 
-    document.addEventListener("fullscreenchange", updateFullscreenMedia);
-    return () => document.removeEventListener("fullscreenchange", updateFullscreenMedia);
+    document.addEventListener('fullscreenchange', updateFullscreenMedia);
+    return () => document.removeEventListener('fullscreenchange', updateFullscreenMedia);
   }, []);
 
   async function copySectionLink(anchorId: string) {
@@ -136,9 +146,9 @@ export default function LessonItemCard({
 
     try {
       await navigator.clipboard.writeText(link.toString());
-      setCopyStatus({ anchorId, status: "copied" });
+      setCopyStatus({ anchorId, status: 'copied' });
     } catch {
-      setCopyStatus({ anchorId, status: "failed" });
+      setCopyStatus({ anchorId, status: 'failed' });
     }
   }
 
@@ -148,14 +158,17 @@ export default function LessonItemCard({
     setCollapsedSections((current) =>
       current.includes(sectionId)
         ? current.filter((id) => id !== sectionId)
-        : [...current, sectionId],
+        : [...current, sectionId]
     );
   }
 
+  /** فتح صورة مضمّنة داخل النص في العارض بملء الشاشة */
+  function openInlineImage(src: string, alt: string) {
+    setInlineImage({ src, alt });
+  }
+
   function toggleFullscreen(mediaId: string) {
-    const mediaElement = document.querySelector<HTMLElement>(
-      `[data-media-id="${mediaId}"]`,
-    );
+    const mediaElement = document.querySelector<HTMLElement>(`[data-media-id="${mediaId}"]`);
 
     if (!mediaElement) return;
 
@@ -182,7 +195,7 @@ export default function LessonItemCard({
               aria-hidden="true"
               className="flex size-7 shrink-0 items-center justify-center rounded-md bg-surface-muted text-lg text-primary"
             >
-              {isExpanded ? "−" : "+"}
+              {isExpanded ? '−' : '+'}
             </span>
           </button>
         </h3>
@@ -210,38 +223,37 @@ export default function LessonItemCard({
               >
                 <h4 className="text-sm font-semibold text-foreground">الخلاصة</h4>
                 <span aria-hidden="true" className="text-lg text-primary">
-                  {isSummaryCollapsed ? "+" : "−"}
+                  {isSummaryCollapsed ? '+' : '−'}
                 </span>
               </button>
               <button
                 type="button"
                 aria-label={
-                  copyStatus?.anchorId === summaryAnchorId && copyStatus.status === "copied"
-                    ? "تم نسخ رابط الخلاصة"
+                  copyStatus?.anchorId === summaryAnchorId && copyStatus.status === 'copied'
+                    ? 'تم نسخ رابط الخلاصة'
                     : copyStatus?.anchorId === summaryAnchorId
-                      ? "تعذر نسخ رابط الخلاصة"
-                      : "نسخ رابط الخلاصة"
+                      ? 'تعذر نسخ رابط الخلاصة'
+                      : 'نسخ رابط الخلاصة'
                 }
                 title="نسخ رابط الخلاصة"
                 onClick={() => void copySectionLink(summaryAnchorId)}
-                                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
               >
-                {copyStatus?.anchorId === summaryAnchorId
-                  ? copyStatus.status === "copied"
-                    ? <Check aria-hidden="true" size={18} />
-                    : <CircleAlert aria-hidden="true" size={18} />
-                  : <Link2 aria-hidden="true" size={18} />}
+                {copyStatus?.anchorId === summaryAnchorId ? (
+                  copyStatus.status === 'copied' ? (
+                    <Check aria-hidden="true" size={18} />
+                  ) : (
+                    <CircleAlert aria-hidden="true" size={18} />
+                  )
+                ) : (
+                  <Link2 aria-hidden="true" size={18} />
+                )}
               </button>
-
             </div>
-            <div
-              id={`${summaryAnchorId}-content`}
-              hidden={isSummaryCollapsed}
-              className="pt-2"
-            >
-              <p className="whitespace-pre-line rounded-md border border-secondary/60 bg-surface px-4 py-3 font-naskh text-lg font-medium leading-9 text-foreground shadow-sm">
-                {item.summary}
-              </p>
+            <div id={`${summaryAnchorId}-content`} hidden={isSummaryCollapsed} className="pt-2">
+              <div className="rounded-md border border-secondary/60 bg-surface px-4 py-3 font-naskh text-lg font-medium leading-9 text-foreground shadow-sm">
+                <RichText content={item.summary} onInlineImageClick={openInlineImage} />
+              </div>
             </div>
           </section>
         )}
@@ -261,40 +273,43 @@ export default function LessonItemCard({
               >
                 <h4 className="text-sm font-semibold text-foreground">أنشطة وتمارين</h4>
                 <span aria-hidden="true" className="text-lg text-primary">
-                  {areActivitiesCollapsed ? "+" : "−"}
+                  {areActivitiesCollapsed ? '+' : '−'}
                 </span>
               </button>
               <button
                 type="button"
                 aria-label={
-                  copyStatus?.anchorId === activitiesAnchorId && copyStatus.status === "copied"
-                    ? "تم نسخ رابط الأنشطة"
+                  copyStatus?.anchorId === activitiesAnchorId && copyStatus.status === 'copied'
+                    ? 'تم نسخ رابط الأنشطة'
                     : copyStatus?.anchorId === activitiesAnchorId
-                      ? "تعذر نسخ رابط الأنشطة"
-                      : "نسخ رابط الأنشطة"
+                      ? 'تعذر نسخ رابط الأنشطة'
+                      : 'نسخ رابط الأنشطة'
                 }
                 title="نسخ رابط الأنشطة"
                 onClick={() => void copySectionLink(activitiesAnchorId)}
-                                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
+                className="flex size-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
               >
-                {copyStatus?.anchorId === activitiesAnchorId
-                  ? copyStatus.status === "copied"
-                    ? <Check aria-hidden="true" size={18} />
-                    : <CircleAlert aria-hidden="true" size={18} />
-                  : <Link2 aria-hidden="true" size={18} />}
+                {copyStatus?.anchorId === activitiesAnchorId ? (
+                  copyStatus.status === 'copied' ? (
+                    <Check aria-hidden="true" size={18} />
+                  ) : (
+                    <CircleAlert aria-hidden="true" size={18} />
+                  )
+                ) : (
+                  <Link2 aria-hidden="true" size={18} />
+                )}
               </button>
-
             </div>
             <div
               id={`${activitiesAnchorId}-content`}
               hidden={areActivitiesCollapsed}
               className="pt-2"
             >
-              <ol className="list-inside list-decimal space-y-2 text-base font-medium leading-8 text-foreground">
-                {item.activities.map((activity, index) => (
-                  <li key={`${item.id}-activity-${index}`}>{activity}</li>
-                ))}
-              </ol>
+              <RichText
+                content={item.activities.join('\n')}
+                className="[&_ol]:list-inside [&_ol]:list-decimal [&_ol]:space-y-2 [&_li]:marker:text-primary"
+                onInlineImageClick={openInlineImage}
+              />
             </div>
           </section>
         )}
@@ -306,14 +321,21 @@ export default function LessonItemCard({
               <button
                 type="button"
                 disabled={item.images.length < 2}
-                onClick={() => setImageSliderIndex((prev) => (prev - 1 + item.images!.length) % item.images!.length)}
+                onClick={() =>
+                  setImageSliderIndex(
+                    (prev) => (prev - 1 + item.images!.length) % item.images!.length
+                  )
+                }
                 aria-label="الصورة السابقة"
                 title="الصورة السابقة"
                 className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronRight size={20} />
               </button>
-              <span className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tabular-nums text-foreground" aria-live="polite">
+              <span
+                className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tabular-nums text-foreground"
+                aria-live="polite"
+              >
                 {imageSliderIndex + 1} / {item.images.length}
               </span>
               <button
@@ -355,8 +377,8 @@ export default function LessonItemCard({
                           <div className="absolute right-2 top-2 flex flex-col gap-2 z-10 fullscreen-controls">
                             <button
                               type="button"
-                              aria-label={isFullscreen ? "تصغير الصورة" : "عرض الصورة بملء الشاشة"}
-                              title={isFullscreen ? "تصغير الصورة" : "ملء الشاشة"}
+                              aria-label={isFullscreen ? 'تصغير الصورة' : 'عرض الصورة بملء الشاشة'}
+                              title={isFullscreen ? 'تصغير الصورة' : 'ملء الشاشة'}
                               onClick={() => toggleFullscreen(imageId)}
                               className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
                             >
@@ -369,7 +391,8 @@ export default function LessonItemCard({
                               onClick={() => void copySectionLink(imageId)}
                               className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
                             >
-                              {copyStatus?.anchorId === imageId && copyStatus.status === "copied" ? (
+                              {copyStatus?.anchorId === imageId &&
+                              copyStatus.status === 'copied' ? (
                                 <Check size={18} />
                               ) : (
                                 <Link2 size={18} />
@@ -382,11 +405,7 @@ export default function LessonItemCard({
                   })}
                 </div>
               </div>
-              <div
-                className="mt-3 overflow-x-auto pb-2"
-                role="group"
-                aria-label="مصغرات الصور"
-              >
+              <div className="mt-3 overflow-x-auto pb-2" role="group" aria-label="مصغرات الصور">
                 <div className="mx-auto flex w-max min-w-full justify-center gap-2">
                   {item.images.map((image, index) => (
                     <button
@@ -397,8 +416,8 @@ export default function LessonItemCard({
                       onClick={() => setImageSliderIndex(index)}
                       className={`shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
                         imageSliderIndex === index
-                          ? "border-primary"
-                          : "border-border hover:border-primary/60"
+                          ? 'border-primary'
+                          : 'border-border hover:border-primary/60'
                       }`}
                     >
                       <Image
@@ -423,14 +442,21 @@ export default function LessonItemCard({
               <button
                 type="button"
                 disabled={item.videos.length < 2}
-                onClick={() => setVideoSliderIndex((prev) => (prev - 1 + item.videos!.length) % item.videos!.length)}
+                onClick={() =>
+                  setVideoSliderIndex(
+                    (prev) => (prev - 1 + item.videos!.length) % item.videos!.length
+                  )
+                }
                 aria-label="الفيديو السابق"
                 title="الفيديو السابق"
                 className="flex size-9 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronRight size={20} />
               </button>
-              <span className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tabular-nums text-foreground" aria-live="polite">
+              <span
+                className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tabular-nums text-foreground"
+                aria-live="polite"
+              >
                 {videoSliderIndex + 1} / {item.videos.length}
               </span>
               <button
@@ -476,8 +502,10 @@ export default function LessonItemCard({
                             <div className="absolute right-2 top-2 z-10 flex flex-col gap-2 fullscreen-controls opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               <button
                                 type="button"
-                                aria-label={isFullscreen ? "تصغير الفيديو" : "عرض الفيديو بملء الشاشة"}
-                                title={isFullscreen ? "تصغير الفيديو" : "ملء الشاشة"}
+                                aria-label={
+                                  isFullscreen ? 'تصغير الفيديو' : 'عرض الفيديو بملء الشاشة'
+                                }
+                                title={isFullscreen ? 'تصغير الفيديو' : 'ملء الشاشة'}
                                 onClick={() => toggleFullscreen(videoId)}
                                 className="flex size-9 items-center justify-center rounded-xl bg-surface/90 text-primary shadow-sm hover:bg-surface transition-all active:scale-90"
                               >
@@ -492,7 +520,7 @@ export default function LessonItemCard({
                             rel="noreferrer"
                             className="inline-flex px-4 py-3 text-sm font-semibold text-primary underline"
                           >
-                            مشاهدة الفيديو: {videoItem.title || "فتح الرابط"}
+                            مشاهدة الفيديو: {videoItem.title || 'فتح الرابط'}
                           </a>
                         )}
                         {videoItem.title && (
@@ -525,27 +553,33 @@ export default function LessonItemCard({
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
                       <h5 className="inline-flex min-w-0 items-center gap-2 font-semibold text-foreground">
                         <FileText size={18} className="shrink-0 text-primary" aria-hidden="true" />
-                        <span className="wrap-break-word">{pdf.title || `ملف PDF ${index + 1}`}</span>
+                        <span className="wrap-break-word">
+                          {pdf.title || `ملف PDF ${index + 1}`}
+                        </span>
                       </h5>
                       <div className="inline-flex shrink-0 items-center gap-2">
                         <button
                           type="button"
                           aria-label={
-                            copyStatus?.anchorId === pdfId && copyStatus.status === "copied"
-                              ? "تم نسخ رابط ملف PDF"
+                            copyStatus?.anchorId === pdfId && copyStatus.status === 'copied'
+                              ? 'تم نسخ رابط ملف PDF'
                               : copyStatus?.anchorId === pdfId
-                                ? "تعذر نسخ رابط ملف PDF"
-                                : "نسخ رابط ملف PDF"
+                                ? 'تعذر نسخ رابط ملف PDF'
+                                : 'نسخ رابط ملف PDF'
                           }
                           title="نسخ رابط ملف PDF"
                           onClick={() => void copySectionLink(pdfId)}
                           className="flex size-10 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-muted"
                         >
-                          {copyStatus?.anchorId === pdfId
-                            ? copyStatus.status === "copied"
-                              ? <Check aria-hidden="true" size={18} />
-                              : <CircleAlert aria-hidden="true" size={18} />
-                            : <Link2 aria-hidden="true" size={18} />}
+                          {copyStatus?.anchorId === pdfId ? (
+                            copyStatus.status === 'copied' ? (
+                              <Check aria-hidden="true" size={18} />
+                            ) : (
+                              <CircleAlert aria-hidden="true" size={18} />
+                            )
+                          ) : (
+                            <Link2 aria-hidden="true" size={18} />
+                          )}
                         </button>
                         <a
                           href={urls.downloadUrl}
@@ -571,8 +605,23 @@ export default function LessonItemCard({
           </section>
         )}
 
-        <LessonComments subjectId={subjectId} lessonId={lessonId} itemId={item.id} />
+        <LessonComments
+          subjectId={subjectId}
+          subjectTitle={subjectTitle ?? subjectId}
+          lessonId={lessonId}
+          lessonTitle={lessonTitle}
+          itemId={item.id}
+        />
       </div>
+
+      {/* عارض الصور المضمّنة داخل النص */}
+      <FullscreenImageViewer
+        key={inlineImage?.src ?? 'closed'}
+        src={inlineImage?.src ?? ''}
+        alt={inlineImage?.alt ?? ''}
+        isOpen={inlineImage !== null}
+        onClose={() => setInlineImage(null)}
+      />
     </article>
   );
 }

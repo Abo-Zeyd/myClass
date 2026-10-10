@@ -200,6 +200,7 @@ export default function LessonsExplorer({ lessonsBySubject }: LessonsExplorerPro
                             item={item}
                             lessonTitle={lesson.title}
                             subjectId={selectedSubject.id}
+                            subjectTitle={selectedSubject.name}
                             lessonId={lesson.id}
                             contentId={`${selectedSubject.id}-${lesson.id}-${item.id}-content`}
                             anchorBaseId={`${selectedSubject.id}-${lesson.id}-${item.id}`}

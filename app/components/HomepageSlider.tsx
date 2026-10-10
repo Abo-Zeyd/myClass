@@ -1,10 +1,10 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Megaphone, MoveDiagonal2 } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
 import { getGoogleDriveImageUrl } from '../../lib/google-drive';
 import FullscreenImageViewer from './FullscreenImageViewer';
+import NaturalImage from './NaturalImage';
 import RichText from './RichText';
 
 export type HomepageSlide = {
@@ -95,16 +95,13 @@ export default function HomepageSlider({ slides }: { slides: HomepageSlide[] }) 
               />
             </div>
           ) : (
-            <div className="relative size-full">
-              <Image
-                src={getGoogleDriveImageUrl(slide.url)}
-                alt={slide.title}
-                fill
-                unoptimized
-                sizes="100vw"
-                className="object-contain p-2 sm:p-4"
-              />
-            </div>
+            <NaturalImage
+              key={slide.id}
+              src={getGoogleDriveImageUrl(slide.url)}
+              alt={slide.title}
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="p-2 sm:p-4"
+            />
           )}
 
           {/* زر تكبير المنشور بملء الصفحة — يظهر دائماً في حالة الصور فقط */}
